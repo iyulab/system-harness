@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>SystemHarness</RootNamespace>
+    <Description>Computer-use primitives for .NET — interfaces and models for programmatic computer control.</Description>
+    <PackageTags>computer-use;automation;desktop;screen-capture;input-simulation</PackageTags>
+    <Version>0.26.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

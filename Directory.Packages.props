@@ -1,0 +1,62 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Windows P/Invoke (source generator) -->
+    <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.269" />
+
+    <!-- DXGI / Direct3D11 -->
+    <PackageVersion Include="Vortice.Direct3D11" Version="3.8.2" />
+    <PackageVersion Include="Vortice.DXGI" Version="3.8.2" />
+
+    <!-- Image processing -->
+    <PackageVersion Include="SkiaSharp" Version="3.119.2" />
+
+    <!-- Input hooks (cross-platform) -->
+    <PackageVersion Include="SharpHook" Version="7.1.1" />
+
+    <!-- DI -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+
+    <!-- SourceLink -->
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.103" />
+
+    <!-- Benchmarking -->
+    <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
+
+    <!-- UI Automation -->
+    <!-- FlaUI.Core: transitive pin to ensure version consistency with FlaUI.UIA3 -->
+    <PackageVersion Include="FlaUI.Core" Version="5.0.0" />
+    <PackageVersion Include="FlaUI.UIA3" Version="5.0.0" />
+    <!-- System.Drawing.Common: pin to safe version (FlaUI transitive dep, CVE in < 8.0.10) -->
+    <PackageVersion Include="System.Drawing.Common" Version="8.0.10" />
+
+    <!-- Browser -->
+    <PackageVersion Include="Microsoft.Playwright" Version="1.58.0" />
+
+    <!-- Email -->
+    <PackageVersion Include="MailKit" Version="4.14.1" />
+
+    <!-- Office -->
+    <PackageVersion Include="DocumentFormat.OpenXml" Version="3.4.1" />
+
+    <!-- MCP -->
+    <PackageVersion Include="ModelContextProtocol" Version="0.8.0-preview.1" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.3" />
+
+    <!-- AI Integration (demo) -->
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.3.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.3.0" />
+    <PackageVersion Include="OpenAI" Version="2.8.0" />
+
+    <!-- Testing -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageVersion Include="ChildProcessGuard" Version="1.0.4" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "system-harness": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": ["run", "--project", "D:/data/system-harness/src/SystemHarness.Mcp"]
+    }
+  }
+}

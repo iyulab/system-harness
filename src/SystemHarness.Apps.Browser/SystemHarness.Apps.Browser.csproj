@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>SystemHarness.Apps.Browser</RootNamespace>
+    <Description>Browser automation — Playwright-based web interaction and testing.</Description>
+    <PackageTags>computer-use;automation;browser;playwright;web</PackageTags>
+    <Version>0.26.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SystemHarness.Core\SystemHarness.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Playwright" />
+  </ItemGroup>
+
+</Project>

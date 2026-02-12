@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <RootNamespace>SystemHarness.Mcp</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <Description>MCP server exposing SystemHarness computer-use primitives as AI-callable tools.</Description>
+    <PackageTags>computer-use;automation;mcp;model-context-protocol;ai-tools</PackageTags>
+    <Version>0.26.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SystemHarness.Core\SystemHarness.Core.csproj" />
+    <ProjectReference Include="..\SystemHarness.Windows\SystemHarness.Windows.csproj" />
+    <ProjectReference Include="..\SystemHarness.Apps.Office\SystemHarness.Apps.Office.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+</Project>

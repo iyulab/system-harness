@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>SystemHarness.Apps.Office</RootNamespace>
+    <Description>Office and HWP document automation — read/write Word, Excel, PowerPoint via OpenXML, and HWPX (Korean HWP) via OWPML. Text extraction, markdown conversion, find/replace. No Office or HWP installation required.</Description>
+    <PackageTags>computer-use;automation;office;word;excel;powerpoint;openxml;hwp;hwpx;owpml;hangul;document</PackageTags>
+    <Version>0.26.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SystemHarness.Core\SystemHarness.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+    <PackageReference Include="DocumentFormat.OpenXml" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+</Project>

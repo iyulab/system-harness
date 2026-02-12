@@ -1,0 +1,105 @@
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = crlf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{csproj,props,targets,xml}]
+indent_size = 2
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.cs]
+# Organize usings
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# this. preferences
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+# Language keywords vs BCL types
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+dotnet_style_predefined_type_for_member_access = true:suggestion
+
+# var preferences
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+
+# Expression-bodied members
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_constructors = false:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+csharp_style_expression_bodied_accessors = true:suggestion
+
+# Pattern matching
+csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
+csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
+
+# Null checking
+csharp_style_throw_expression = true:suggestion
+csharp_style_conditional_delegate_call = true:suggestion
+
+# Braces
+csharp_prefer_braces = true:suggestion
+
+# Using
+csharp_prefer_simple_using_statement = true:suggestion
+
+# File-scoped namespaces
+csharp_style_namespace_declarations = file_scoped:warning
+
+# New line preferences
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+
+# Indentation
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+
+# Spacing
+csharp_space_after_cast = false
+csharp_space_after_keywords_in_control_flow_statements = true
+
+# Naming conventions
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_style.underscore_camel_case.capitalization = camel_case
+dotnet_naming_style.underscore_camel_case.required_prefix = _
+
+dotnet_naming_style.interface_style.capitalization = pascal_case
+dotnet_naming_style.interface_style.required_prefix = I
+
+# Public members = PascalCase
+dotnet_naming_symbols.public_members.applicable_kinds = class,struct,interface,enum,delegate,method,property,event,namespace
+dotnet_naming_symbols.public_members.applicable_accessibilities = public,internal,protected,protected_internal
+dotnet_naming_rule.public_members_pascal.symbols = public_members
+dotnet_naming_rule.public_members_pascal.style = pascal_case
+dotnet_naming_rule.public_members_pascal.severity = warning
+
+# Private fields = _camelCase
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private,private_protected
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel_case
+dotnet_naming_rule.private_fields_underscore.severity = warning
+
+# Interfaces = IPascalCase
+dotnet_naming_symbols.interfaces.applicable_kinds = interface
+dotnet_naming_symbols.interfaces.applicable_accessibilities = *
+dotnet_naming_rule.interfaces_prefix.symbols = interfaces
+dotnet_naming_rule.interfaces_prefix.style = interface_style
+dotnet_naming_rule.interfaces_prefix.severity = warning
