@@ -50,8 +50,8 @@ jobs:
         run: |
           $changed = git diff --name-only HEAD~1 HEAD | Select-String -Pattern '^Directory\.Build\.props$'
           if ($changed) {
-            [xml]$props = Get-Content Directory.Build.props
-            $version = ($props.Project.PropertyGroup | ForEach-Object { $_.Version } | Where-Object { $_ })[0]
+            $content = Get-Content Directory.Build.props -Raw
+            $version = [regex]::Match($content, '<Version>([^<]+)</Version>').Groups[1].Value
             echo "version=$version" >> $env:GITHUB_OUTPUT
             echo "changed=true" >> $env:GITHUB_OUTPUT
           } else {
