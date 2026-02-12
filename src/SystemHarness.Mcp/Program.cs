@@ -45,7 +45,7 @@ builder.Services
         options.ServerInfo = new()
         {
             Name = "system-harness",
-            Version = "0.26.0"
+            Version = "0.27.0"
         };
         options.ServerInstructions = """
             SystemHarness MCP server — 174 commands for programmatic computer control.
