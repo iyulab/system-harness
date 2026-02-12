@@ -27,7 +27,7 @@ public class McpToolConventionTests
         typeof(VisionTools), typeof(ReportTools), typeof(CoordTools),
         typeof(AppTools), typeof(OfficeTools), typeof(SafetyTools),
         typeof(MonitorTools), typeof(SessionTools), typeof(DesktopTools),
-        typeof(ObserverTools), typeof(RecorderTools),
+        typeof(ObserverTools), typeof(RecorderTools), typeof(UpdateTools),
     ];
 
     private static IEnumerable<(Type Type, MethodInfo Method, string ToolName)> AllTools()
@@ -115,14 +115,14 @@ public class McpToolConventionTests
         // Exact guard: tracks total command count across all tool types.
         // If you add or remove a tool, update this count AND classify in ReadOnlyTools/MutationTools.
         var count = AllTools().Count();
-        Assert.Equal(172, count);
+        Assert.Equal(174, count);
     }
 
     [Fact]
     public void ToolTypeCount_IsExact()
     {
         // Exact guard: tracks number of tool implementation classes.
-        Assert.Equal(23, ToolTypes.Length);
+        Assert.Equal(24, ToolTypes.Length);
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public class McpToolConventionTests
             .Select(t => CommandRegistrar.ToDotNotation(t.ToolName).Split('.')[0])
             .Distinct()
             .ToList();
-        Assert.Equal(24, categories.Count);
+        Assert.Equal(25, categories.Count);
     }
 
     // ── Existing Convention Tests (still valid — test underlying tool methods) ──
@@ -420,6 +420,7 @@ public class McpToolConventionTests
             [typeof(DesktopTools)] = 4,
             [typeof(ObserverTools)] = 1,
             [typeof(RecorderTools)] = 4,
+            [typeof(UpdateTools)] = 2,
         };
 
         foreach (var (type, count) in expected)
@@ -480,6 +481,8 @@ public class McpToolConventionTests
         "observe_window",
         // Recorder reads
         "record_get_actions",
+        // Update reads
+        "update_check",
     ];
 
     private static readonly HashSet<string> MutationTools =
@@ -523,6 +526,8 @@ public class McpToolConventionTests
         "office_replace_word", "office_replace_hwpx",
         // Recorder mutations
         "record_start", "record_stop", "record_replay",
+        // Update mutations
+        "update_apply",
     ];
 
     [Fact]
@@ -750,7 +755,7 @@ public class McpToolConventionTests
             "invalid_parameter", "invalid_timeout",
             "menu_item_not_found", "missing_window", "monitor_not_found",
             "not_found", "not_set", "occurrence_out_of_range", "process_not_found",
-            "text_not_found", "window_not_found", "wrong_verb",
+            "text_not_found", "update_failed", "window_not_found", "wrong_verb",
         };
 
         var toolsDir = FindToolsDirectory();
@@ -792,7 +797,7 @@ public class McpToolConventionTests
 
         Assert.True(unknownCodes.Count == 0,
             $"Unknown error codes (add to knownCodes or use existing ones):\n{string.Join("\n", unknownCodes)}");
-        Assert.Equal(21, knownCodes.Count);
+        Assert.Equal(22, knownCodes.Count);
     }
 
     [Fact]

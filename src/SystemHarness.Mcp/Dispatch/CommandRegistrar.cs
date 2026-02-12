@@ -57,6 +57,8 @@ public static class CommandRegistrar
         "office_replace_word", "office_replace_hwpx",
         // Recorder mutations
         "record_start", "record_stop", "record_replay",
+        // Update mutations
+        "update_apply",
     ];
 
     /// <summary>

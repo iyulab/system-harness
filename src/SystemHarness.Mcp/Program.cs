@@ -7,7 +7,11 @@ using SystemHarness.Apps.Office;
 using SystemHarness.Mcp;
 using SystemHarness.Mcp.Dispatch;
 using SystemHarness.Mcp.Tools;
+using SystemHarness.Mcp.Update;
 using SystemHarness.Windows;
+
+// Apply pending update before anything else (rename .update → exe)
+AutoUpdater.ApplyPendingUpdate();
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -27,6 +31,9 @@ builder.Services.AddOfficeReaders();
 builder.Services.AddSingleton<EmergencyStop>();
 builder.Services.AddSingleton<MonitorManager>();
 
+// Register auto-updater
+builder.Services.AddSingleton<AutoUpdater>();
+
 // Register command dispatch infrastructure
 builder.Services.AddSingleton<CommandRegistry>();
 CommandRegistrar.RegisterToolTypes(builder.Services);
@@ -41,11 +48,11 @@ builder.Services
             Version = "0.26.0"
         };
         options.ServerInstructions = """
-            SystemHarness MCP server — 172 commands for programmatic computer control.
+            SystemHarness MCP server — 174 commands for programmatic computer control.
 
             ## 3 Tools: help, do, get
 
-            This server uses a command dispatch pattern. Instead of 172 separate tools,
+            This server uses a command dispatch pattern. Instead of 174 separate tools,
             all commands are accessed through 3 tools:
 
             - **help(topic?)** — Discover commands. No args = categories. Category name = commands. Command name = parameters.
@@ -78,5 +85,13 @@ var app = builder.Build();
 // Build command registry from all tool classes
 var registry = app.Services.GetRequiredService<CommandRegistry>();
 CommandRegistrar.RegisterAll(registry, app.Services);
+
+// Fire background update check (non-blocking)
+var autoUpdate = !args.Contains("--auto-update=false");
+if (autoUpdate)
+{
+    var updater = app.Services.GetRequiredService<AutoUpdater>();
+    _ = updater.BackgroundCheckAsync(app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping);
+}
 
 await app.RunAsync();

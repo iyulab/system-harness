@@ -76,7 +76,7 @@ await harness.UIAutomation.TypeIntoAsync("Notepad", "Edit", "Hello from automati
 
 ## MCP Server (AI Tool Integration)
 
-system-harness includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server with **172 commands** across 24 categories, accessed through 3 MCP tools using a command dispatch pattern.
+system-harness includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server with **174 commands** across 25 categories, accessed through 3 MCP tools using a command dispatch pattern.
 
 ```json
 {
@@ -126,6 +126,7 @@ Instead of 172 individual tool definitions (which consume ~12,000 tokens per API
 | **session** | 5 | `session.save`, `session.compare`, `session.bookmark` |
 | **observe** | 1 | `observe.window` (hybrid screenshot + accessibility + OCR) |
 | **record** | 4 | `record.start`, `record.stop`, `record.get_actions`, `record.replay` |
+| **update** | 2 | `update.check`, `update.apply` (auto-update from GitHub Releases) |
 
 ### Compound Facades (reduce multiple tool calls to one)
 

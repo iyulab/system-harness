@@ -27,14 +27,6 @@ jobs:
       - name: Test (CI only)
         run: dotnet test tests/SystemHarness.Tests --no-build --nologo --filter "Category=CI" --logger "trx;LogFileName=results.trx"
 
-      - name: Pack
-        run: |
-          dotnet pack src/SystemHarness.Core --no-build --nologo
-          dotnet pack src/SystemHarness.Windows --no-build --nologo
-          dotnet pack src/SystemHarness.Apps.Office --no-build --nologo
-          dotnet pack src/SystemHarness.Apps.Email --no-build --nologo
-          dotnet pack src/SystemHarness.Apps.Browser --no-build --nologo
-
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -42,8 +34,57 @@ jobs:
           name: test-results
           path: tests/SystemHarness.Tests/TestResults/results.trx
 
-      - name: Upload packages
-        uses: actions/upload-artifact@v4
+  release:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
         with:
-          name: nupkg
-          path: src/**/bin/Release/*.nupkg
+          fetch-depth: 2
+
+      - name: Check if Directory.Build.props changed
+        id: check
+        run: |
+          $changed = git diff --name-only HEAD~1 HEAD | Select-String -Pattern '^Directory\.Build\.props$'
+          if ($changed) {
+            [xml]$props = Get-Content Directory.Build.props
+            $version = ($props.Project.PropertyGroup | ForEach-Object { $_.Version } | Where-Object { $_ })[0]
+            echo "version=$version" >> $env:GITHUB_OUTPUT
+            echo "changed=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "changed=false" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Setup .NET
+        if: steps.check.outputs.changed == 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          dotnet-quality: 'preview'
+
+      - name: Publish MCP server
+        if: steps.check.outputs.changed == 'true'
+        run: >
+          dotnet publish src/SystemHarness.Mcp
+          -c Release
+          -r win-x64
+          --self-contained
+          -p:PublishSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -o publish/
+
+      - name: Create release archive
+        if: steps.check.outputs.changed == 'true'
+        run: Compress-Archive -Path publish/* -DestinationPath system-harness-mcp-win-x64.zip
+
+      - name: GitHub Release
+        if: steps.check.outputs.changed == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.check.outputs.version }}
+          name: v${{ steps.check.outputs.version }}
+          files: system-harness-mcp-win-x64.zip
+          generate_release_notes: true
