@@ -65,6 +65,22 @@ jobs:
           dotnet-version: '10.0.x'
           dotnet-quality: 'preview'
 
+      - name: Pack NuGet packages
+        if: steps.check.outputs.changed == 'true'
+        run: >
+          dotnet pack
+          -c Release
+          --nologo
+          -o nupkgs/
+
+      - name: Push to NuGet.org
+        if: steps.check.outputs.changed == 'true'
+        run: >
+          dotnet nuget push nupkgs/*.nupkg
+          --api-key ${{ secrets.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate
+
       - name: Publish MCP server
         if: steps.check.outputs.changed == 'true'
         run: >

@@ -3,10 +3,16 @@
   <PropertyGroup>
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <RootNamespace>SystemHarness.Windows</RootNamespace>
+    <IsPackable>true</IsPackable>
     <Description>Windows implementation of SystemHarness — Win32, DXGI, SendInput primitives.</Description>
     <PackageTags>computer-use;automation;windows;win32;dxgi;sendinput</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="SystemHarness.Tests" />

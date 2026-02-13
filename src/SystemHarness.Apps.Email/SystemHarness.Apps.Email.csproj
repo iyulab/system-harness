@@ -3,9 +3,15 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>SystemHarness.Apps.Email</RootNamespace>
+    <IsPackable>true</IsPackable>
     <Description>Email automation — IMAP/SMTP send and receive via MailKit.</Description>
     <PackageTags>computer-use;automation;email;imap;smtp;mailkit</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SystemHarness.Core\SystemHarness.Core.csproj" />

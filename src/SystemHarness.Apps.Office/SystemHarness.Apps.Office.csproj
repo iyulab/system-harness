@@ -3,9 +3,15 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>SystemHarness.Apps.Office</RootNamespace>
+    <IsPackable>true</IsPackable>
     <Description>Office and HWP document automation — read/write Word, Excel, PowerPoint via OpenXML, and HWPX (Korean HWP) via OWPML. Text extraction, markdown conversion, find/replace. No Office or HWP installation required.</Description>
     <PackageTags>computer-use;automation;office;word;excel;powerpoint;openxml;hwp;hwpx;owpml;hangul;document</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SystemHarness.Core\SystemHarness.Core.csproj" />

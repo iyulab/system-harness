@@ -3,8 +3,14 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>SystemHarness</RootNamespace>
+    <IsPackable>true</IsPackable>
     <Description>Computer-use primitives for .NET — interfaces and models for programmatic computer control.</Description>
     <PackageTags>computer-use;automation;desktop;screen-capture;input-simulation</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>

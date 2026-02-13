@@ -1,5 +1,9 @@
 # system-harness
 
+[![NuGet](https://img.shields.io/nuget/v/SystemHarness.Core?label=NuGet)](https://www.nuget.org/packages/SystemHarness.Core)
+[![CI](https://github.com/iyulab/system-harness/actions/workflows/ci.yml/badge.svg)](https://github.com/iyulab/system-harness/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **A computer-use primitives library for .NET — eyes, hands, and shell in one harness.**
 
 system-harness provides a unified interface for programmatic and interactive computer control. It wraps shell execution, process management, filesystem operations, screen capture, OCR, input simulation, UI automation, and document processing into a single coherent API.
@@ -74,9 +78,39 @@ var tree = await harness.UIAutomation.GetTreeAsync("Notepad");
 await harness.UIAutomation.TypeIntoAsync("Notepad", "Edit", "Hello from automation");
 ```
 
+## NuGet Packages
+
+| Package | Description |
+|---------|-------------|
+| [SystemHarness.Core](https://www.nuget.org/packages/SystemHarness.Core) | Interfaces + models (zero platform dependencies) |
+| [SystemHarness.Windows](https://www.nuget.org/packages/SystemHarness.Windows) | Windows implementation (Win32, DXGI, SendInput, FlaUI) |
+| [SystemHarness.Apps.Office](https://www.nuget.org/packages/SystemHarness.Apps.Office) | Office/HWP document processing (OpenXML, OWPML) |
+| [SystemHarness.Apps.Email](https://www.nuget.org/packages/SystemHarness.Apps.Email) | Email automation (IMAP/SMTP via MailKit) |
+| [SystemHarness.Apps.Browser](https://www.nuget.org/packages/SystemHarness.Apps.Browser) | Browser automation (Playwright) |
+
 ## MCP Server (AI Tool Integration)
 
 system-harness includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server with **174 commands** across 25 categories, accessed through 3 MCP tools using a command dispatch pattern.
+
+### Installation
+
+Download the latest release from [GitHub Releases](https://github.com/iyulab/system-harness/releases) and extract it to a directory of your choice.
+
+### Configuration
+
+**Claude Desktop / Claude Code** (`claude_desktop_config.json` or `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "system-harness": {
+      "command": "C:/path/to/SystemHarness.Mcp.exe"
+    }
+  }
+}
+```
+
+**From source** (development):
 
 ```json
 {
@@ -91,7 +125,7 @@ system-harness includes a built-in [Model Context Protocol](https://modelcontext
 
 ### 3 MCP Tools
 
-Instead of 172 individual tool definitions (which consume ~12,000 tokens per API call), commands are accessed through 3 dispatch tools:
+Instead of 174 individual tool definitions (which consume ~12,000 tokens per API call), commands are accessed through 3 dispatch tools:
 
 | Tool | Purpose | Example |
 |------|---------|---------|
@@ -244,7 +278,7 @@ SystemHarness.Core              Interfaces + models (zero platform dependencies)
   +-- SystemHarness.Apps.Email  IMAP/SMTP via MailKit
   +-- SystemHarness.Apps.Browser Playwright-based web automation
   |
-  +-- SystemHarness.Mcp         MCP server (3 tools, 172 commands)
+  +-- SystemHarness.Mcp         MCP server (3 tools, 174 commands)
 ```
 
 ### IHarness Services (15 interfaces)
@@ -306,7 +340,7 @@ SystemHarness.Core              Interfaces + models (zero platform dependencies)
 - [x] Background monitors: file, process, window, clipboard, screen, dialog
 - [x] Safety: EmergencyStop, safe zones, rate limiting, confirmation gates
 - [x] Session management: save, compare, bookmark
-- [x] MCP server with 172 commands (3-tool dispatch architecture)
+- [x] MCP server with 174 commands (3-tool dispatch architecture)
 - [x] Office document processing (Word, Excel, PowerPoint, HWP)
 - [x] DPI-aware coordinates, Unicode support, cursor overlay
 - [x] NuGet packaging with SourceLink

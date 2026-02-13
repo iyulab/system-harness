@@ -17,6 +17,8 @@
   <PropertyGroup>
     <Authors>iyulab</Authors>
     <Company>iyulab</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/iyulab/system-harness</PackageProjectUrl>
     <RepositoryUrl>https://github.com/iyulab/system-harness</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>

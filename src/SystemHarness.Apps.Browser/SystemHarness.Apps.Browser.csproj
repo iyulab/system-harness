@@ -3,9 +3,15 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>SystemHarness.Apps.Browser</RootNamespace>
+    <IsPackable>true</IsPackable>
     <Description>Browser automation — Playwright-based web interaction and testing.</Description>
     <PackageTags>computer-use;automation;browser;playwright;web</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SystemHarness.Core\SystemHarness.Core.csproj" />
