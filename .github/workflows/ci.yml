@@ -53,18 +53,24 @@ jobs:
 
       - name: Check if release needed
         id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $content = Get-Content Directory.Build.props -Raw
           $version = [regex]::Match($content, '<Version>([^<]+)</Version>').Groups[1].Value
           echo "version=$version" >> $env:GITHUB_OUTPUT
           $manual = '${{ github.event.inputs.release }}'
           if ($manual -eq 'true') {
+            echo "Release: manual dispatch"
             echo "changed=true" >> $env:GITHUB_OUTPUT
           } else {
-            $changed = git diff --name-only HEAD~1 HEAD | Select-String -Pattern '^Directory\.Build\.props$'
-            if ($changed) {
+            # Release if no GitHub Release exists for this version
+            $existing = gh release view "v$version" 2>&1
+            if ($LASTEXITCODE -ne 0) {
+              echo "Release: v$version not found, will release"
               echo "changed=true" >> $env:GITHUB_OUTPUT
             } else {
+              echo "Release: v$version already exists, skipping"
               echo "changed=false" >> $env:GITHUB_OUTPUT
             }
           }
