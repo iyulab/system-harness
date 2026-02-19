@@ -57,7 +57,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          version=$(grep -oP '<Version>\K[^<]+' Directory.Build.props)
+          version=$(grep -o '<Version>[^<]*' Directory.Build.props | sed 's/<Version>//')
           echo "version=$version" >> $GITHUB_OUTPUT
           manual="${{ github.event.inputs.release }}"
           if [ "$manual" == "true" ]; then
