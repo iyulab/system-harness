@@ -32,4 +32,4 @@ public class DesktopInteractionFixture : IAsyncLifetime
 /// Tests in this collection run sequentially to avoid focus/input conflicts.
 /// </summary>
 [CollectionDefinition("DesktopInteraction", DisableParallelization = true)]
-public class DesktopInteractionCollection : ICollectionFixture<DesktopInteractionFixture>;
+public class DesktopInteractionDefinition : ICollectionFixture<DesktopInteractionFixture>;

@@ -10,7 +10,7 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
         "Get the history of recent tool actions. " +
         "Returns timestamps, tool names, parameters, duration, and success status. " +
         "Useful for reviewing what actions have been performed and debugging automation issues.")]
-    public Task<string> ActionHistoryAsync(
+    public static Task<string> ActionHistoryAsync(
         [Description("Number of recent actions to return (1-200).")] int count = 50, CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
@@ -27,7 +27,7 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
 
     [McpServerTool(Name = "safety_clear_history"), Description(
         "Clear the action history log.")]
-    public Task<string> ClearHistoryAsync(CancellationToken ct = default)
+    public static Task<string> ClearHistoryAsync(CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
         var previous = ActionLog.Count;
@@ -80,7 +80,7 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
         "Set titleOrHandle to limit actions to that window. " +
         "Optionally set region coordinates (x, y, width, height) for finer control. " +
         "Pass titleOrHandle as null/empty to clear the safe zone.")]
-    public Task<string> SetZoneAsync(
+    public static Task<string> SetZoneAsync(
         [Description("Window to restrict actions to (title substring or handle). Pass null/empty to clear.")] string? titleOrHandle = null,
         [Description("Optional region X within the window.")] int? regionX = null,
         [Description("Optional region Y within the window.")] int? regionY = null,
@@ -113,7 +113,7 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
 
     [McpServerTool(Name = "safety_get_zone"), Description(
         "Get the current safe zone restriction (if any).")]
-    public Task<string> GetZoneAsync(CancellationToken ct = default)
+    public static Task<string> GetZoneAsync(CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
         var zone = SafeZone.Current;
@@ -129,7 +129,7 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
         "Set the maximum number of actions per second (rate limit). " +
         "Pass 0 to disable rate limiting. " +
         "When active, actions exceeding the rate will be flagged in safety_status.")]
-    public Task<string> SetRateLimitAsync(
+    public static Task<string> SetRateLimitAsync(
         [Description("Maximum actions per second. Pass 0 to disable.")] int maxPerSecond, CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
@@ -165,7 +165,7 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
         "Returns the confirmation ID and file path. " +
         "Use safety_check_confirmation to poll for the response, " +
         "or safety_approve / safety_deny to resolve programmatically.")]
-    public Task<string> ConfirmBeforeAsync(
+    public static Task<string> ConfirmBeforeAsync(
         [Description("Description of the action requiring confirmation.")] string action,
         [Description("Reason why confirmation is needed.")] string reason,
         CancellationToken ct = default)
@@ -196,7 +196,7 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
         "Check the status of a pending confirmation request. " +
         "Returns the current status: pending, approved, or denied. " +
         "The status can change when the JSON file is edited externally.")]
-    public Task<string> CheckConfirmationAsync(
+    public static Task<string> CheckConfirmationAsync(
         [Description("Confirmation request ID returned by safety_confirm_before.")] string confirmationId,
         CancellationToken ct = default)
     {
@@ -219,7 +219,7 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
 
     [McpServerTool(Name = "safety_approve"), Description(
         "Approve a pending confirmation request, allowing the action to proceed.")]
-    public Task<string> ApproveAsync(
+    public static Task<string> ApproveAsync(
         [Description("Confirmation request ID to approve.")] string confirmationId,
         CancellationToken ct = default)
     {
@@ -241,7 +241,7 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
 
     [McpServerTool(Name = "safety_deny"), Description(
         "Deny a pending confirmation request, blocking the action.")]
-    public Task<string> DenyAsync(
+    public static Task<string> DenyAsync(
         [Description("Confirmation request ID to deny.")] string confirmationId,
         CancellationToken ct = default)
     {

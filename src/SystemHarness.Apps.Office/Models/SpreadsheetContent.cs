@@ -100,7 +100,7 @@ public enum CellValueType
     /// <summary>
     /// String/text value.
     /// </summary>
-    String,
+    Text,
 
     /// <summary>
     /// Numeric value.

@@ -4,7 +4,7 @@ namespace SystemHarness.Tests.Workflow;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
-public class ConvenienceHelpersTests : IAsyncLifetime
+public sealed class ConvenienceHelpersTests : IAsyncLifetime, IDisposable
 {
     private WindowsHarness _harness = null!;
 
@@ -17,6 +17,8 @@ public class ConvenienceHelpersTests : IAsyncLifetime
         });
         return Task.CompletedTask;
     }
+
+    public void Dispose() => _harness?.Dispose();
 
     public Task DisposeAsync()
     {

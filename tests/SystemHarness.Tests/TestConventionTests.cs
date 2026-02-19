@@ -14,7 +14,7 @@ public class TestConventionTests
     private static IEnumerable<Type> AllTestClasses()
     {
         return TestAssembly.GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && t.Name.EndsWith("Tests"))
+            .Where(t => t.IsClass && !t.IsAbstract && t.Name.EndsWith("Tests", StringComparison.Ordinal))
             .Where(t => t.GetMethods().Any(m =>
                 m.GetCustomAttribute<FactAttribute>() is not null ||
                 m.GetCustomAttribute<TheoryAttribute>() is not null));
@@ -79,6 +79,6 @@ public class TestConventionTests
         // Guard: catches untracked additions of test classes
         // Update this count when adding new test classes
         var count = AllTestClasses().Count();
-        Assert.Equal(67, count); // 66 existing + 1 for this class
+        Assert.Equal(70, count); // 66 existing + 1 for this class + 3 new (CommandRegistry, RateLimiter, SafeZone)
     }
 }

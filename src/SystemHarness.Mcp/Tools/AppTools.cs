@@ -1,3 +1,4 @@
+using System.Globalization;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -42,7 +43,7 @@ public sealed class AppTools(IHarness harness)
                     process = new { proc.Pid, proc.Name },
                     window = new
                     {
-                        handle = win.Handle.ToString(),
+                        handle = win.Handle.ToString(CultureInfo.InvariantCulture),
                         win.Title,
                         bounds = new { win.Bounds.X, win.Bounds.Y, win.Bounds.Width, win.Bounds.Height },
                     },
@@ -149,7 +150,7 @@ public sealed class AppTools(IHarness harness)
             focused = verified,
             window = target is not null ? new
             {
-                handle = target.Handle.ToString(),
+                handle = target.Handle.ToString(CultureInfo.InvariantCulture),
                 target.Title,
                 target.ProcessId,
                 bounds = new { target.Bounds.X, target.Bounds.Y, target.Bounds.Width, target.Bounds.Height },

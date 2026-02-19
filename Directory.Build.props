@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>

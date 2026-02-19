@@ -102,6 +102,8 @@ public sealed class FileSystemTools(IHarness harness)
         if (!exists)
             return McpResponse.Error("file_not_found", $"File not found: '{path}'", sw.ElapsedMilliseconds);
         var bytes = await harness.FileSystem.ReadBytesAsync(path, ct);
+        // SHA1/MD5 used for file fingerprinting, not security — suppress weak-crypto warnings
+#pragma warning disable CA5350, CA5351
         byte[] hash = algorithm.ToLowerInvariant() switch
         {
             "sha256" => SHA256.HashData(bytes),
@@ -109,6 +111,7 @@ public sealed class FileSystemTools(IHarness harness)
             "md5" => MD5.HashData(bytes),
             _ => [],
         };
+#pragma warning restore CA5350, CA5351
         if (hash.Length == 0)
             return McpResponse.Error("invalid_parameter",
                 $"Unsupported algorithm '{algorithm}'. Use 'sha256', 'sha1', or 'md5'.", sw.ElapsedMilliseconds);

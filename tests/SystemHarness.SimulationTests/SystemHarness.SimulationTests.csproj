@@ -5,6 +5,7 @@
     <RootNamespace>SystemHarness.SimulationTests</RootNamespace>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+
   </PropertyGroup>
 
   <ItemGroup>

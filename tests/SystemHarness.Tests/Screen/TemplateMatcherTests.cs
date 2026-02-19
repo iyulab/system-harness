@@ -11,6 +11,7 @@ public class TemplateMatcherTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         foreach (var f in _tempFiles)
             File.Delete(f);
     }

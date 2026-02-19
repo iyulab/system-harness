@@ -211,7 +211,7 @@ public sealed class WindowsScreen : IScreen, IDisposable
         }
         finally
         {
-            PInvoke.ReleaseDC(HWND.Null, screenDc);
+            _ = PInvoke.ReleaseDC(HWND.Null, screenDc);
         }
     }
 
@@ -307,7 +307,7 @@ public sealed class WindowsScreen : IScreen, IDisposable
 
                     fixed (byte* pPixels = pixelData)
                     {
-                        PInvoke.SetDIBitsToDevice(memDc, 0, 0, (uint)width, (uint)height,
+                        _ = PInvoke.SetDIBitsToDevice(memDc, 0, 0, (uint)width, (uint)height,
                             0, 0, 0, (uint)height, pPixels, &bmi, DIB_USAGE.DIB_RGB_COLORS);
                     }
 
@@ -317,7 +317,7 @@ public sealed class WindowsScreen : IScreen, IDisposable
                     // Read back pixel data
                     fixed (byte* pPixels = pixelData)
                     {
-                        PInvoke.GetDIBits(memDc, hBitmap, 0, (uint)height,
+                        _ = PInvoke.GetDIBits(memDc, hBitmap, 0, (uint)height,
                             pPixels, &bmi, DIB_USAGE.DIB_RGB_COLORS);
                     }
 
@@ -335,7 +335,7 @@ public sealed class WindowsScreen : IScreen, IDisposable
         }
         finally
         {
-            PInvoke.ReleaseDC(HWND.Null, screenDc);
+            _ = PInvoke.ReleaseDC(HWND.Null, screenDc);
             PInvoke.DestroyIcon(hIcon);
         }
     }

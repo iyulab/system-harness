@@ -107,7 +107,7 @@ public static class ConvenienceHelpers
         await harness.Mouse.ClickAsync(x, y, ct: ct);
     }
 
-    private static IReadOnlyList<OcrWord> FindMatchingWords(OcrResult ocr, string text)
+    private static List<OcrWord> FindMatchingWords(OcrResult ocr, string text)
     {
         var results = new List<OcrWord>();
         foreach (var line in ocr.Lines)

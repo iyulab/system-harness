@@ -16,7 +16,7 @@ public sealed class OfficeApp : IOfficeApp
 
     public async Task<int> OpenDocumentAsync(string filePath, CancellationToken ct = default)
     {
-        var info = await _harness.Process.StartAsync(filePath);
+        var info = await _harness.Process.StartAsync(filePath, ct: ct);
         // Wait for the window to appear
         var fileName = Path.GetFileName(filePath);
         await _harness.Window.WaitForWindowAsync(fileName, TimeSpan.FromSeconds(15), ct);

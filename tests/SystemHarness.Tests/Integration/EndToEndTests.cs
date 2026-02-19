@@ -4,7 +4,7 @@ namespace SystemHarness.Tests.Integration;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
-public class EndToEndTests : IAsyncLifetime
+public sealed class EndToEndTests : IAsyncLifetime, IDisposable
 {
     private WindowsHarness _harness = null!;
 
@@ -17,6 +17,8 @@ public class EndToEndTests : IAsyncLifetime
         });
         return Task.CompletedTask;
     }
+
+    public void Dispose() => _harness?.Dispose();
 
     public Task DisposeAsync()
     {

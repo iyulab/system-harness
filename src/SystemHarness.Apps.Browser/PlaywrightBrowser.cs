@@ -140,7 +140,7 @@ public sealed class PlaywrightBrowser : IBrowser
         if (index >= 0 && index < pages.Count)
         {
             await pages[index].CloseAsync();
-            _currentPage = _context.Pages.LastOrDefault();
+            _currentPage = _context.Pages.Count > 0 ? _context.Pages[^1] : null;
         }
     }
 

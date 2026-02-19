@@ -75,6 +75,6 @@ public class OfficeServiceRegistrationTests
         public IOcr Ocr => null!;
         public ITemplateMatcher TemplateMatcher => null!;
         public void Dispose() { }
-        public ValueTask DisposeAsync() => default;
+        public static ValueTask DisposeAsync() => default;
     }
 }

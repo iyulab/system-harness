@@ -1,3 +1,4 @@
+using System.Globalization;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -88,7 +89,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
     [McpServerTool(Name = "monitor_read"), Description(
         "Read events from a monitor's JSONL output file. " +
         "Optionally filter events since a timestamp (ISO 8601).")]
-    public async Task<string> ReadAsync(
+    public static async Task<string> ReadAsync(
         [Description("Path to the JSONL output file to read.")] string outputPath,
         [Description("Optional ISO 8601 timestamp to filter events after (e.g., '2024-01-15T10:30:00Z').")] string? since = null,
         [Description("Maximum number of events to return (from the end).")] int limit = 100,
@@ -97,7 +98,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
         var sw = Stopwatch.StartNew();
         if (string.IsNullOrWhiteSpace(outputPath))
             return McpResponse.Error("invalid_parameter", "outputPath cannot be empty.", sw.ElapsedMilliseconds);
-        DateTime? sinceDate = since is not null ? DateTime.Parse(since) : null;
+        DateTime? sinceDate = since is not null ? DateTime.Parse(since, CultureInfo.InvariantCulture) : null;
 
         var events = await MonitorManager.ReadEventsAsync(outputPath, sinceDate, ct);
         var limited = events.TakeLast(limit).ToArray();
@@ -159,13 +160,13 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
             monitorType = "file",
             watchDir = fullDir,
             timestamp = DateTime.UtcNow.ToString("O"),
-        });
+        }, ct);
 
         // Flush event queue periodically
         while (!ct.IsCancellationRequested)
         {
             while (eventQueue.TryDequeue(out var evt))
-                await MonitorManager.WriteEventAsync(outputPath, evt);
+                await MonitorManager.WriteEventAsync(outputPath, evt, ct);
 
             await Task.Delay(500, ct);
         }
@@ -187,7 +188,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
             monitorType = "process",
             initialProcessCount = knownPids.Count,
             timestamp = DateTime.UtcNow.ToString("O"),
-        });
+        }, ct);
 
         while (!ct.IsCancellationRequested)
         {
@@ -205,7 +206,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                     pid = proc.Pid,
                     name = proc.Name,
                     timestamp = DateTime.UtcNow.ToString("O"),
-                });
+                }, ct);
             }
 
             // Detect exited processes
@@ -216,7 +217,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                     type = "process_exited",
                     pid,
                     timestamp = DateTime.UtcNow.ToString("O"),
-                });
+                }, ct);
             }
 
             knownPids = currentPids;
@@ -247,7 +248,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
             monitorType = "window",
             initialWindowCount = knownWindows.Count,
             timestamp = DateTime.UtcNow.ToString("O"),
-        });
+        }, ct);
 
         while (!ct.IsCancellationRequested)
         {
@@ -266,11 +267,11 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                     await MonitorManager.WriteEventAsync(outputPath, new
                     {
                         type = "window_created",
-                        handle = handle.ToString(),
+                        handle = handle.ToString(CultureInfo.InvariantCulture),
                         title = win.Title,
                         processId = win.ProcessId,
                         timestamp = DateTime.UtcNow.ToString("O"),
-                    });
+                    }, ct);
                 }
             }
 
@@ -282,10 +283,10 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                     await MonitorManager.WriteEventAsync(outputPath, new
                     {
                         type = "window_closed",
-                        handle = handle.ToString(),
+                        handle = handle.ToString(CultureInfo.InvariantCulture),
                         title = info.Title,
                         timestamp = DateTime.UtcNow.ToString("O"),
-                    });
+                    }, ct);
                 }
             }
 
@@ -297,11 +298,11 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                     await MonitorManager.WriteEventAsync(outputPath, new
                     {
                         type = "window_title_changed",
-                        handle = handle.ToString(),
+                        handle = handle.ToString(CultureInfo.InvariantCulture),
                         oldTitle = prev.Title,
                         newTitle = win.Title,
                         timestamp = DateTime.UtcNow.ToString("O"),
-                    });
+                    }, ct);
                 }
             }
 
@@ -314,10 +315,10 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                     await MonitorManager.WriteEventAsync(outputPath, new
                     {
                         type = "window_focused",
-                        handle = fg.Handle.ToString(),
+                        handle = fg.Handle.ToString(CultureInfo.InvariantCulture),
                         title = fg.Title,
                         timestamp = DateTime.UtcNow.ToString("O"),
-                    });
+                    }, ct);
                     lastForeground = fg.Handle;
                 }
             }
@@ -350,7 +351,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
             type = "monitor_started",
             monitorType = "clipboard",
             timestamp = DateTime.UtcNow.ToString("O"),
-        });
+        }, ct);
 
         while (!ct.IsCancellationRequested)
         {
@@ -377,7 +378,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                         preview,
                         length = text?.Length,
                         timestamp = DateTime.UtcNow.ToString("O"),
-                    });
+                    }, ct);
                     lastTextHash = currentHash;
                 }
             }
@@ -395,7 +396,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
             type = "monitor_started",
             monitorType = "dialog",
             timestamp = DateTime.UtcNow.ToString("O"),
-        });
+        }, ct);
 
         while (!ct.IsCancellationRequested)
         {
@@ -421,14 +422,14 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                         await MonitorManager.WriteEventAsync(outputPath, new
                         {
                             type = "dialog_appeared",
-                            handle = handle.ToString(),
+                            handle = handle.ToString(CultureInfo.InvariantCulture),
                             title = win.Title,
                             className = win.ClassName,
                             processId = win.ProcessId,
-                            parentHandle = win.ParentHandle?.ToString(),
+                            parentHandle = win.ParentHandle?.ToString(CultureInfo.InvariantCulture),
                             bounds = new { win.Bounds.X, win.Bounds.Y, win.Bounds.Width, win.Bounds.Height },
                             timestamp = DateTime.UtcNow.ToString("O"),
-                        });
+                        }, ct);
                     }
                 }
 
@@ -440,9 +441,9 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                     await MonitorManager.WriteEventAsync(outputPath, new
                     {
                         type = "dialog_closed",
-                        handle = handle.ToString(),
+                        handle = handle.ToString(CultureInfo.InvariantCulture),
                         timestamp = DateTime.UtcNow.ToString("O"),
-                    });
+                    }, ct);
                 }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
@@ -471,7 +472,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
             target = target ?? "full_screen",
             snapshotDir,
             timestamp = DateTime.UtcNow.ToString("O"),
-        });
+        }, ct);
 
         while (!ct.IsCancellationRequested)
         {
@@ -502,7 +503,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                             width = screenshot.Width,
                             height = screenshot.Height,
                             timestamp = DateTime.UtcNow.ToString("O"),
-                        });
+                        }, ct);
                     }
 
                     lastHash = currentHash;

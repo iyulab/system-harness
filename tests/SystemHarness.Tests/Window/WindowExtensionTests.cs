@@ -1,3 +1,4 @@
+using System.Globalization;
 using SystemHarness.Windows;
 
 namespace SystemHarness.Tests.Window;
@@ -26,7 +27,7 @@ public class WindowExtensionTests
                 return;
             }
 
-            var handle = windows[0].Handle.ToString();
+            var handle = windows[0].Handle.ToString(CultureInfo.InvariantCulture);
 
             // Ensure window starts in Normal state
             await _window.RestoreAsync(handle);

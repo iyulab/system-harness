@@ -1,10 +1,12 @@
+using System.Globalization;
+
 namespace SystemHarness.SimulationTests.Scenarios;
 
 /// <summary>
 /// Tests multi-monitor operations. Some tests may be skipped on single-monitor systems.
 /// </summary>
 [Collection("Simulation")]
-[Trait("Category", "Local")]
+[Trait("Category", "Integration")]
 public class MultiMonitorTests : SimulationTestBase
 {
     public MultiMonitorTests(SimulationFixture fixture) : base(fixture) { }
@@ -50,7 +52,7 @@ public class MultiMonitorTests : SimulationTestBase
         {
             var wins = await Window.FindByProcessIdAsync(proc.Pid);
             Assert.NotEmpty(wins);
-            var handle = wins[0].Handle.ToString();
+            var handle = wins[0].Handle.ToString(CultureInfo.InvariantCulture);
 
             var primary = monitors.First(m => m.IsPrimary);
 

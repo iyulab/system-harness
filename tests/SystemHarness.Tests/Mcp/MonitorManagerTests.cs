@@ -13,6 +13,7 @@ public class MonitorManagerTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         _manager.Dispose();
         if (Directory.Exists(_tempDir))
             Directory.Delete(_tempDir, true);

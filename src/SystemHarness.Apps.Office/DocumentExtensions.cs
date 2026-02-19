@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 
 namespace SystemHarness.Apps.Office;
@@ -66,7 +67,7 @@ public static class DocumentExtensions
         foreach (var sheet in content.Sheets)
         {
             if (content.Sheets.Count > 1)
-                sb.AppendLine($"[{sheet.Name}]");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"[{sheet.Name}]");
 
             foreach (var row in sheet.Rows)
             {
@@ -91,7 +92,7 @@ public static class DocumentExtensions
         {
             if (content.Sheets.Count > 1)
             {
-                sb.AppendLine($"## {sheet.Name}");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"## {sheet.Name}");
                 sb.AppendLine();
             }
 
@@ -116,7 +117,7 @@ public static class DocumentExtensions
 
         foreach (var slide in content.Slides)
         {
-            sb.AppendLine($"--- Slide {slide.Number} ---");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"--- Slide {slide.Number} ---");
             foreach (var text in slide.Texts)
             {
                 sb.AppendLine(text);
@@ -136,7 +137,7 @@ public static class DocumentExtensions
 
         foreach (var slide in content.Slides)
         {
-            sb.AppendLine($"## Slide {slide.Number}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"## Slide {slide.Number}");
             sb.AppendLine();
             foreach (var text in slide.Texts)
             {
@@ -145,7 +146,7 @@ public static class DocumentExtensions
             }
             if (slide.Notes is not null)
             {
-                sb.AppendLine($"> **Notes:** {slide.Notes}");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"> **Notes:** {slide.Notes}");
                 sb.AppendLine();
             }
         }
@@ -192,7 +193,7 @@ public static class DocumentExtensions
 
             if (content.Sections.Count > 1)
             {
-                sb.AppendLine($"## Section {s + 1}");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"## Section {s + 1}");
                 sb.AppendLine();
             }
 

@@ -1,3 +1,4 @@
+using System.Globalization;
 using ChildProcessGuard;
 using SystemHarness.Windows;
 
@@ -131,7 +132,7 @@ public class WindowsWindowTests : IClassFixture<NotepadFixture>
         var windows = await _window.ListAsync();
         var first = windows[0];
 
-        await _window.FocusAsync(first.Handle.ToString());
+        await _window.FocusAsync(first.Handle.ToString(CultureInfo.InvariantCulture));
     }
 
     [Fact]
@@ -148,7 +149,7 @@ public class WindowsWindowTests : IClassFixture<NotepadFixture>
 
         if (target is not null)
         {
-            await _window.CloseAsync(target.Handle.ToString());
+            await _window.CloseAsync(target.Handle.ToString(CultureInfo.InvariantCulture));
             await Task.Delay(500);
         }
     }

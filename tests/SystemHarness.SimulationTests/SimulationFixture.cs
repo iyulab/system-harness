@@ -27,4 +27,4 @@ public class SimulationFixture : IAsyncLifetime
 /// Tests run sequentially to avoid desktop state conflicts (focus, clipboard, input).
 /// </summary>
 [CollectionDefinition("Simulation", DisableParallelization = true)]
-public class SimulationCollection : ICollectionFixture<SimulationFixture>;
+public class SimulationDefinition : ICollectionFixture<SimulationFixture>;

@@ -18,7 +18,7 @@ public sealed class WindowsWindow : IWindow
 
         unsafe
         {
-            PInvoke.EnumWindows((hwnd, _) =>
+            PInvoke.EnumWindows((hwnd, lParam) =>
             {
                 if (!PInvoke.IsWindowVisible(hwnd))
                 {
@@ -48,7 +48,7 @@ public sealed class WindowsWindow : IWindow
                 PInvoke.GetWindowRect(hwnd, out var rect);
 
                 uint processId = 0;
-                PInvoke.GetWindowThreadProcessId(hwnd, &processId);
+                _ = PInvoke.GetWindowThreadProcessId(hwnd, &processId);
 
                 // Get class name
                 string? className = null;
@@ -161,7 +161,7 @@ public sealed class WindowsWindow : IWindow
 
         // Add WS_EX_LAYERED style
         var exStyle = PInvoke.GetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
-        PInvoke.SetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+        _ = PInvoke.SetWindowLong(hwnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
 
         // Set opacity via SetLayeredWindowAttributes
         PInvoke.SetLayeredWindowAttributes(hwnd, new COLORREF(0), alpha,
@@ -194,7 +194,7 @@ public sealed class WindowsWindow : IWindow
             PInvoke.GetWindowRect(hwnd, out var rect);
 
             uint processId = 0;
-            PInvoke.GetWindowThreadProcessId(hwnd, &processId);
+            _ = PInvoke.GetWindowThreadProcessId(hwnd, &processId);
 
             WindowState state;
             if (PInvoke.IsIconic(hwnd))
@@ -268,7 +268,7 @@ public sealed class WindowsWindow : IWindow
 
             unsafe
             {
-                PInvoke.EnumChildWindows(parentHwnd, (hwnd, _) =>
+                PInvoke.EnumChildWindows(parentHwnd, (hwnd, lParam) =>
                 {
                     var titleLength = PInvoke.GetWindowTextLength(hwnd);
                     var title = string.Empty;
@@ -287,7 +287,7 @@ public sealed class WindowsWindow : IWindow
                     PInvoke.GetWindowRect(hwnd, out var rect);
 
                     uint processId = 0;
-                    PInvoke.GetWindowThreadProcessId(hwnd, &processId);
+                    _ = PInvoke.GetWindowThreadProcessId(hwnd, &processId);
 
                     // Get class name
                     string? className = null;

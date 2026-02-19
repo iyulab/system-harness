@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Compression;
 using System.Reflection;
 using System.Text.Json;
@@ -158,7 +159,7 @@ public sealed class AutoUpdater : IDisposable
 
         try
         {
-            var lastCheck = DateTime.Parse(File.ReadAllText(CheckFile).Trim());
+            var lastCheck = DateTime.Parse(File.ReadAllText(CheckFile).Trim(), CultureInfo.InvariantCulture);
             return DateTime.UtcNow - lastCheck > CheckInterval;
         }
         catch { return true; }

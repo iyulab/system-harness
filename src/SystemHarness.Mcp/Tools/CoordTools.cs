@@ -1,3 +1,4 @@
+using System.Globalization;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -30,7 +31,7 @@ public sealed class CoordTools(IHarness harness)
         {
             x = absX,
             y = absY,
-            window = new { handle = win.Handle.ToString(), win.Title },
+            window = new { handle = win.Handle.ToString(CultureInfo.InvariantCulture), win.Title },
             windowBounds = new { win.Bounds.X, win.Bounds.Y, win.Bounds.Width, win.Bounds.Height },
         }, sw.ElapsedMilliseconds);
     }
@@ -61,7 +62,7 @@ public sealed class CoordTools(IHarness harness)
             x = relX,
             y = relY,
             inside,
-            window = new { handle = win.Handle.ToString(), win.Title },
+            window = new { handle = win.Handle.ToString(CultureInfo.InvariantCulture), win.Title },
             windowBounds = new { win.Bounds.X, win.Bounds.Y, win.Bounds.Width, win.Bounds.Height },
         }, sw.ElapsedMilliseconds);
     }

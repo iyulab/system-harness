@@ -108,24 +108,24 @@ public class SmokeTests
     public void WindowState_HasExpectedValues()
     {
         // Verify all expected states exist
-        Assert.True(Enum.IsDefined(typeof(WindowState), WindowState.Normal));
-        Assert.True(Enum.IsDefined(typeof(WindowState), WindowState.Minimized));
-        Assert.True(Enum.IsDefined(typeof(WindowState), WindowState.Maximized));
+        Assert.True(Enum.IsDefined(WindowState.Normal));
+        Assert.True(Enum.IsDefined(WindowState.Minimized));
+        Assert.True(Enum.IsDefined(WindowState.Maximized));
     }
 
     [Fact]
     public void MouseButton_HasExpectedValues()
     {
-        Assert.True(Enum.IsDefined(typeof(MouseButton), MouseButton.Left));
-        Assert.True(Enum.IsDefined(typeof(MouseButton), MouseButton.Right));
-        Assert.True(Enum.IsDefined(typeof(MouseButton), MouseButton.Middle));
+        Assert.True(Enum.IsDefined(MouseButton.Left));
+        Assert.True(Enum.IsDefined(MouseButton.Right));
+        Assert.True(Enum.IsDefined(MouseButton.Middle));
     }
 
     [Fact]
     public void ImageFormat_HasExpectedValues()
     {
-        Assert.True(Enum.IsDefined(typeof(ImageFormat), ImageFormat.Png));
-        Assert.True(Enum.IsDefined(typeof(ImageFormat), ImageFormat.Jpeg));
+        Assert.True(Enum.IsDefined(ImageFormat.Png));
+        Assert.True(Enum.IsDefined(ImageFormat.Jpeg));
     }
 
     [Fact]

@@ -29,7 +29,7 @@ internal static class DpiInitializer
             {
                 // Fallback: may already be set by manifest, or running on older Windows
                 // This is non-fatal — coordinate calculations may be incorrect on high-DPI
-                System.Diagnostics.Debug.WriteLine(
+                System.Diagnostics.Trace.TraceWarning(
                     $"SetProcessDpiAwarenessContext failed (error {Marshal.GetLastWin32Error()}). " +
                     "DPI awareness may be set via manifest.");
             }

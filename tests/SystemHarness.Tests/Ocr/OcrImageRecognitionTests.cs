@@ -18,7 +18,11 @@ public class OcrImageRecognitionTests : IDisposable
         _ocr = new WindowsOcr(_screen);
     }
 
-    public void Dispose() => _screen.Dispose();
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _screen.Dispose();
+    }
 
     [Fact]
     public async Task RecognizeImage_SimpleEnglishText_ReturnsCorrectText()

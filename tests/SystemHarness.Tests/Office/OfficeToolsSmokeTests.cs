@@ -24,6 +24,7 @@ public class OfficeToolsSmokeTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         try { Directory.Delete(_tempDir, true); } catch { }
     }
 

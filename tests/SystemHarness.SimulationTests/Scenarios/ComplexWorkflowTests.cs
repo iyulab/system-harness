@@ -1,3 +1,4 @@
+using System.Globalization;
 using SystemHarness.SimulationTests.Helpers;
 
 namespace SystemHarness.SimulationTests.Scenarios;
@@ -6,7 +7,7 @@ namespace SystemHarness.SimulationTests.Scenarios;
 /// Tests complex multi-app workflows simulating real-world automation scenarios.
 /// </summary>
 [Collection("Simulation")]
-[Trait("Category", "Local")]
+[Trait("Category", "Integration")]
 public class ComplexWorkflowTests : SimulationTestBase
 {
     public ComplexWorkflowTests(SimulationFixture fixture) : base(fixture) { }
@@ -82,7 +83,7 @@ public class ComplexWorkflowTests : SimulationTestBase
                 var wins = await Window.FindByProcessIdAsync(pids[i]);
                 if (wins.Count == 0) continue;
 
-                await Window.FocusAsync(wins[0].Handle.ToString());
+                await Window.FocusAsync(wins[0].Handle.ToString(CultureInfo.InvariantCulture));
                 await Task.Delay(300);
 
                 await Keyboard.TypeAsync($"Instance {i}: Unique content {Guid.NewGuid():N}");

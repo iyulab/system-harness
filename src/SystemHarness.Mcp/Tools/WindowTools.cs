@@ -1,3 +1,4 @@
+using System.Globalization;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -221,7 +222,7 @@ public sealed class WindowTools(IHarness harness)
 
         return McpResponse.Ok(new
         {
-            handle = win.Handle.ToString(),
+            handle = win.Handle.ToString(CultureInfo.InvariantCulture),
             win.Title,
             win.ProcessId,
             win.ClassName,
@@ -241,7 +242,7 @@ public sealed class WindowTools(IHarness harness)
         return McpResponse.Ok(new
         {
             found = true,
-            handle = win.Handle.ToString(),
+            handle = win.Handle.ToString(CultureInfo.InvariantCulture),
             win.Title,
             win.ProcessId,
             bounds = new { win.Bounds.X, win.Bounds.Y, win.Bounds.Width, win.Bounds.Height },
@@ -269,7 +270,7 @@ public sealed class WindowTools(IHarness harness)
             return McpResponse.Ok(new
             {
                 found = true,
-                handle = win.Handle.ToString(),
+                handle = win.Handle.ToString(CultureInfo.InvariantCulture),
                 win.Title,
                 win.ProcessId,
                 bounds = new { win.Bounds.X, win.Bounds.Y, win.Bounds.Width, win.Bounds.Height },

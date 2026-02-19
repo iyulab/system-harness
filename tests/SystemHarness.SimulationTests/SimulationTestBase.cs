@@ -6,7 +6,7 @@ namespace SystemHarness.SimulationTests;
 [Collection("Simulation")]
 public abstract class SimulationTestBase : IAsyncLifetime
 {
-    protected readonly SimulationFixture Fixture;
+    protected SimulationFixture Fixture { get; }
     protected IHarness Harness => Fixture.Harness;
     protected IShell Shell => Harness.Shell;
     protected IProcessManager Process => Harness.Process;

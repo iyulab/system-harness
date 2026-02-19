@@ -1,3 +1,4 @@
+using System.Globalization;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -50,7 +51,7 @@ public sealed class ObserverTools(IObserver observer)
         {
             window = observation.WindowInfo is not null ? new
             {
-                handle = observation.WindowInfo.Handle.ToString(),
+                handle = observation.WindowInfo.Handle.ToString(CultureInfo.InvariantCulture),
                 observation.WindowInfo.Title,
                 observation.WindowInfo.ProcessId,
                 bounds = new

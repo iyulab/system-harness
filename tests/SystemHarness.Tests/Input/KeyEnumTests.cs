@@ -24,7 +24,7 @@ public class KeyEnumTests
     [InlineData(Key.LaunchApp2)]
     public void MediaBrowserSystemKeys_AreDefined(Key key)
     {
-        Assert.True(Enum.IsDefined(typeof(Key), key));
+        Assert.True(Enum.IsDefined(key));
     }
 
     [Fact]
@@ -73,6 +73,6 @@ public class KeyEnumTests
     [InlineData(Key.Insert)]
     public void CoreKeys_AreDefined(Key key)
     {
-        Assert.True(Enum.IsDefined(typeof(Key), key));
+        Assert.True(Enum.IsDefined(key));
     }
 }

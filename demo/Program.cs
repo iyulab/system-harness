@@ -1,3 +1,5 @@
+using System.Globalization;
+
 // Find solution root
 var solutionRoot = FindSolutionRoot();
 var envPath = Path.Combine(solutionRoot, "demo", ".env");
@@ -31,7 +33,7 @@ for (int i = 0; i < args.Length; i++)
             categoryFilter = args[++i];
             break;
         case "--timeout" when i + 1 < args.Length:
-            timeoutSeconds = int.Parse(args[++i]);
+            timeoutSeconds = int.Parse(args[++i], CultureInfo.InvariantCulture);
             break;
         case "--list":
             listOnly = true;
@@ -173,10 +175,7 @@ await using (agent)
         ElapsedSeconds = Math.Round(r.Elapsed.TotalSeconds, 1),
         r.Error,
     });
-    var json = System.Text.Json.JsonSerializer.Serialize(jsonResults, new System.Text.Json.JsonSerializerOptions
-    {
-        WriteIndented = true,
-    });
+    var json = System.Text.Json.JsonSerializer.Serialize(jsonResults, DemoJsonOptions.Indented);
     File.WriteAllText(resultsPath, json);
     Console.WriteLine($"  Results written to: {resultsPath}");
 }
@@ -238,4 +237,13 @@ static Dictionary<string, string> ParseEnv(string path)
         env[trimmed[..idx].Trim()] = trimmed[(idx + 1)..].Trim();
     }
     return env;
+}
+
+/// <summary>Cached JSON serializer options for the demo runner.</summary>
+static file class DemoJsonOptions
+{
+    public static readonly System.Text.Json.JsonSerializerOptions Indented = new()
+    {
+        WriteIndented = true,
+    };
 }

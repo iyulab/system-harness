@@ -16,6 +16,7 @@ public class HwpxReaderTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         try { Directory.Delete(_tempDir, true); } catch { }
     }
 
@@ -487,7 +488,7 @@ public class HwpxReaderTests : IDisposable
         await _reader.WriteHwpxAsync(path, content);
 
         using var zip = System.IO.Compression.ZipFile.OpenRead(path);
-        var binEntries = zip.Entries.Where(e => e.FullName.StartsWith("BinData/")).ToList();
+        var binEntries = zip.Entries.Where(e => e.FullName.StartsWith("BinData/", StringComparison.Ordinal)).ToList();
         Assert.Single(binEntries);
         Assert.EndsWith(".png", binEntries[0].Name);
     }

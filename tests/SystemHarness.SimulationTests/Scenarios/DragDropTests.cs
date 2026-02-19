@@ -4,7 +4,7 @@ namespace SystemHarness.SimulationTests.Scenarios;
 /// Tests drag and drop operations.
 /// </summary>
 [Collection("Simulation")]
-[Trait("Category", "Local")]
+[Trait("Category", "Integration")]
 public class DragDropTests : SimulationTestBase
 {
     public DragDropTests(SimulationFixture fixture) : base(fixture) { }

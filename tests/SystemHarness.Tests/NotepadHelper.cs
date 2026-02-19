@@ -1,3 +1,4 @@
+using System.Globalization;
 using FlaUI.Core.AutomationElements;
 using FlaUI.Core.Conditions;
 using FlaUI.Core.Definitions;
@@ -59,7 +60,7 @@ internal static class NotepadHelper
         // Step 2: Send WM_CLOSE to each window
         foreach (var w in wins)
         {
-            try { await window.CloseAsync(w.Handle.ToString()); }
+            try { await window.CloseAsync(w.Handle.ToString(CultureInfo.InvariantCulture)); }
             catch { /* already gone */ }
         }
 
@@ -144,7 +145,7 @@ internal static class NotepadHelper
         // Send WM_CLOSE to each new Notepad window
         foreach (var w in newNotepadWindows)
         {
-            try { await window.CloseAsync(w.Handle.ToString()); }
+            try { await window.CloseAsync(w.Handle.ToString(CultureInfo.InvariantCulture)); }
             catch { /* already gone */ }
         }
 
@@ -273,7 +274,7 @@ internal static class NotepadHelper
         {
             try
             {
-                await window.FocusAsync(w.Handle.ToString());
+                await window.FocusAsync(w.Handle.ToString(CultureInfo.InvariantCulture));
                 await Task.Delay(300);
 
                 // Strategy 1: Alt+N (classic Windows "Don't Save" hotkey)

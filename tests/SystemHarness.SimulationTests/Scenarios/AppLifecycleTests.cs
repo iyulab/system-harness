@@ -6,7 +6,7 @@ namespace SystemHarness.SimulationTests.Scenarios;
 /// Tests application lifecycle: start → interact → graceful close.
 /// </summary>
 [Collection("Simulation")]
-[Trait("Category", "Local")]
+[Trait("Category", "Integration")]
 public class AppLifecycleTests : SimulationTestBase
 {
     public AppLifecycleTests(SimulationFixture fixture) : base(fixture) { }

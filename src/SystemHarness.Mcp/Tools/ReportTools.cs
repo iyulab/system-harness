@@ -1,3 +1,4 @@
+using System.Globalization;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -37,7 +38,7 @@ public sealed class ReportTools(IHarness harness)
             }).ToArray(),
             windows = windows.Select(w => new
             {
-                handle = w.Handle.ToString(),
+                handle = w.Handle.ToString(CultureInfo.InvariantCulture),
                 w.Title,
                 w.ProcessId,
                 bounds = new { w.Bounds.X, w.Bounds.Y, w.Bounds.Width, w.Bounds.Height },
@@ -171,7 +172,7 @@ public sealed class ReportTools(IHarness harness)
 
         return McpResponse.Ok(new
         {
-            handle = target.Handle.ToString(),
+            handle = target.Handle.ToString(CultureInfo.InvariantCulture),
             target.Title,
             target.ProcessId,
             target.ClassName,
@@ -180,7 +181,7 @@ public sealed class ReportTools(IHarness harness)
             monitor = new { monitor.Index, monitor.Name },
             children = children.Select(c => new
             {
-                handle = c.Handle.ToString(),
+                handle = c.Handle.ToString(CultureInfo.InvariantCulture),
                 c.Title,
                 c.ClassName,
             }).ToArray(),

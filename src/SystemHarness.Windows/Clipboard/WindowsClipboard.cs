@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Runtime.InteropServices;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -332,7 +333,7 @@ public sealed class WindowsClipboard : IClipboard
                         var buffer = new char[len + 1];
                         fixed (char* pBuf = buffer)
                         {
-                            DragQueryFileW(hDrop, i, pBuf, len + 1);
+                            _ = DragQueryFileW(hDrop, i, pBuf, len + 1);
                         }
                         files.Add(new string(buffer, 0, (int)len));
                     }
@@ -464,13 +465,13 @@ public sealed class WindowsClipboard : IClipboard
         const string startHtml = "<html><body>\r\n<!--StartFragment-->";
         const string endHtml = "<!--EndFragment-->\r\n</body></html>";
 
-        var headerLen = string.Format(header, 0, 0, 0, 0).Length;
+        var headerLen = string.Format(CultureInfo.InvariantCulture, header, 0, 0, 0, 0).Length;
         var startHtmlIdx = headerLen;
         var startFragIdx = startHtmlIdx + startHtml.Length;
         var endFragIdx = startFragIdx + System.Text.Encoding.UTF8.GetByteCount(htmlFragment);
         var endHtmlIdx = endFragIdx + endHtml.Length;
 
-        return string.Format(header, startHtmlIdx, endHtmlIdx, startFragIdx, endFragIdx)
+        return string.Format(CultureInfo.InvariantCulture, header, startHtmlIdx, endHtmlIdx, startFragIdx, endFragIdx)
             + startHtml + htmlFragment + endHtml;
     }
 

@@ -32,7 +32,7 @@ public sealed class AuditingShell : IShell
                 Duration = sw.Elapsed,
                 Success = result.Success,
                 Error = result.Success ? null : result.StdErr,
-            });
+            }, ct);
             return result;
         }
         catch (Exception ex)
@@ -47,7 +47,7 @@ public sealed class AuditingShell : IShell
                 Duration = sw.Elapsed,
                 Success = false,
                 Error = ex.Message,
-            });
+            }, ct);
             throw;
         }
     }
@@ -69,7 +69,7 @@ public sealed class AuditingShell : IShell
                 Duration = sw.Elapsed,
                 Success = result.Success,
                 Error = result.Success ? null : result.StdErr,
-            });
+            }, ct);
             return result;
         }
         catch (Exception ex)
@@ -84,7 +84,7 @@ public sealed class AuditingShell : IShell
                 Duration = sw.Elapsed,
                 Success = false,
                 Error = ex.Message,
-            });
+            }, ct);
             throw;
         }
     }

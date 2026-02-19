@@ -4,7 +4,7 @@ namespace SystemHarness.SimulationTests.Scenarios;
 /// Tests error recovery, timeout handling, and cancellation behavior.
 /// </summary>
 [Collection("Simulation")]
-[Trait("Category", "Local")]
+[Trait("Category", "Integration")]
 public class ErrorRecoveryTests : SimulationTestBase
 {
     public ErrorRecoveryTests(SimulationFixture fixture) : base(fixture) { }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using SystemHarness.Windows;
 
 namespace SystemHarness.Tests.Display;
@@ -97,7 +98,7 @@ public class WindowsDisplayTests
         if (list.Count == 0) return;
 
         var target = list[0];
-        var monitor = await _display.GetMonitorForWindowAsync(target.Handle.ToString());
+        var monitor = await _display.GetMonitorForWindowAsync(target.Handle.ToString(CultureInfo.InvariantCulture));
 
         Assert.NotNull(monitor);
         Assert.True(monitor.Bounds.Width > 0);

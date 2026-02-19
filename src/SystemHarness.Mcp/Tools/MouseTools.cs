@@ -1,3 +1,4 @@
+using System.Globalization;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -117,7 +118,7 @@ public sealed class MouseTools(IHarness harness)
         {
             from = new { x = absFromX, y = absFromY },
             to = new { x = absToX, y = absToY },
-            window = new { handle = win.Handle.ToString(), win.Title },
+            window = new { handle = win.Handle.ToString(CultureInfo.InvariantCulture), win.Title },
         }, sw.ElapsedMilliseconds);
     }
 

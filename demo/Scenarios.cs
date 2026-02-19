@@ -1,4 +1,4 @@
-record Scenario(string Name, string Category, string Task);
+sealed record Scenario(string Name, string Category, string Task);
 
 static class Scenarios
 {

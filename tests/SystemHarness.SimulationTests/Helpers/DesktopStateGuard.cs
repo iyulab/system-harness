@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace SystemHarness.SimulationTests.Helpers;
 
 /// <summary>
@@ -65,7 +67,7 @@ public sealed class DesktopStateGuard : IAsyncDisposable
         try
         {
             if (_savedForegroundHandle != 0)
-                await _window.FocusAsync(_savedForegroundHandle.ToString());
+                await _window.FocusAsync(_savedForegroundHandle.ToString(CultureInfo.InvariantCulture));
         }
         catch { }
     }

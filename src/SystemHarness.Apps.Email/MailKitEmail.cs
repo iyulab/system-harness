@@ -217,7 +217,8 @@ public sealed class MailKitEmail : IEmail
             throw new InvalidOperationException($"Attachment not found: {attachmentName}");
 
         using var ms = new MemoryStream();
-        await attachment.Content.DecodeToAsync(ms, ct);
+        if (attachment.Content is not null)
+            await attachment.Content.DecodeToAsync(ms, ct);
         return ms.ToArray();
     }
 

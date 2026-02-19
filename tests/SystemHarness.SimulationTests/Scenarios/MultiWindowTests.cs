@@ -1,10 +1,12 @@
+using System.Globalization;
+
 namespace SystemHarness.SimulationTests.Scenarios;
 
 /// <summary>
 /// Tests multi-window operations: focus switching, minimize/maximize/restore, positioning.
 /// </summary>
 [Collection("Simulation")]
-[Trait("Category", "Local")]
+[Trait("Category", "Integration")]
 public class MultiWindowTests : SimulationTestBase
 {
     public MultiWindowTests(SimulationFixture fixture) : base(fixture) { }
@@ -27,17 +29,17 @@ public class MultiWindowTests : SimulationTestBase
             Assert.NotEmpty(wins2);
 
             // Type in first notepad
-            await Window.FocusAsync(wins1[0].Handle.ToString());
+            await Window.FocusAsync(wins1[0].Handle.ToString(CultureInfo.InvariantCulture));
             await Task.Delay(300);
             await Keyboard.TypeAsync("Text for Notepad 1");
 
             // Type in second notepad
-            await Window.FocusAsync(wins2[0].Handle.ToString());
+            await Window.FocusAsync(wins2[0].Handle.ToString(CultureInfo.InvariantCulture));
             await Task.Delay(300);
             await Keyboard.TypeAsync("Text for Notepad 2");
 
             // Verify each has its own content
-            await Window.FocusAsync(wins1[0].Handle.ToString());
+            await Window.FocusAsync(wins1[0].Handle.ToString(CultureInfo.InvariantCulture));
             await Task.Delay(200);
             await Keyboard.HotkeyAsync(default, Key.Ctrl, Key.A);
             await Task.Delay(100);
@@ -45,7 +47,7 @@ public class MultiWindowTests : SimulationTestBase
             await Task.Delay(200);
             var text1 = await Clipboard.GetTextAsync();
 
-            await Window.FocusAsync(wins2[0].Handle.ToString());
+            await Window.FocusAsync(wins2[0].Handle.ToString(CultureInfo.InvariantCulture));
             await Task.Delay(200);
             await Keyboard.HotkeyAsync(default, Key.Ctrl, Key.A);
             await Task.Delay(100);
@@ -73,7 +75,7 @@ public class MultiWindowTests : SimulationTestBase
         {
             var wins = await Window.FindByProcessIdAsync(proc.Pid);
             Assert.NotEmpty(wins);
-            var handle = wins[0].Handle.ToString();
+            var handle = wins[0].Handle.ToString(CultureInfo.InvariantCulture);
 
             // Normal → Maximize
             await Window.MaximizeAsync(handle);
@@ -109,7 +111,7 @@ public class MultiWindowTests : SimulationTestBase
         {
             var wins = await Window.FindByProcessIdAsync(proc.Pid);
             Assert.NotEmpty(wins);
-            var handle = wins[0].Handle.ToString();
+            var handle = wins[0].Handle.ToString(CultureInfo.InvariantCulture);
 
             // Move to specific position
             await Window.MoveAsync(handle, 100, 100);
@@ -139,7 +141,7 @@ public class MultiWindowTests : SimulationTestBase
         {
             var wins = await Window.FindByProcessIdAsync(proc.Pid);
             Assert.NotEmpty(wins);
-            var handle = wins[0].Handle.ToString();
+            var handle = wins[0].Handle.ToString(CultureInfo.InvariantCulture);
 
             await Window.ResizeAsync(handle, 800, 600);
             await Task.Delay(300);

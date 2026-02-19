@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 
 namespace SystemHarness.Mcp.Dispatch;
@@ -39,13 +40,13 @@ public sealed class CommandRegistry
     public string FormatCategoryList()
     {
         var sb = new StringBuilder();
-        sb.AppendLine($"{Count} commands in {_categories.Count} categories:\n");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{Count} commands in {_categories.Count} categories:\n");
         foreach (var cat in GetCategories())
         {
             var cmds = _categories[cat];
             var mutations = cmds.Count(c => c.IsMutation);
             var reads = cmds.Count - mutations;
-            sb.AppendLine($"  {cat} ({cmds.Count}) — {reads} read, {mutations} mutation");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"  {cat} ({cmds.Count}) — {reads} read, {mutations} mutation");
         }
         sb.AppendLine($"\nUse help(\"<category>\") to list commands in a category.");
         return McpResponse.Content(sb.ToString(), "text");
@@ -58,11 +59,11 @@ public sealed class CommandRegistry
             return McpResponse.Error("not_found", $"Unknown category: '{category}'. Use help() to list categories.");
 
         var sb = new StringBuilder();
-        sb.AppendLine($"{category} ({cmds.Count} commands):\n");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{category} ({cmds.Count} commands):\n");
         foreach (var cmd in cmds.OrderBy(c => c.Name, StringComparer.OrdinalIgnoreCase))
         {
             var kind = cmd.IsMutation ? "do" : "get";
-            sb.AppendLine($"  [{kind}] {cmd.Name} — {cmd.Description}");
+            sb.AppendLine(CultureInfo.InvariantCulture, $"  [{kind}] {cmd.Name} — {cmd.Description}");
         }
         sb.AppendLine($"\nUse help(\"<command>\") for parameter details.");
         return McpResponse.Content(sb.ToString(), "text");
@@ -76,8 +77,8 @@ public sealed class CommandRegistry
 
         var sb = new StringBuilder();
         var kind = cmd.IsMutation ? "do" : "get";
-        sb.AppendLine($"{cmd.Name} [{kind}]");
-        sb.AppendLine($"  {cmd.Description}\n");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{cmd.Name} [{kind}]");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"  {cmd.Description}\n");
 
         if (cmd.Parameters.Count == 0)
         {
@@ -89,11 +90,11 @@ public sealed class CommandRegistry
             foreach (var p in cmd.Parameters)
             {
                 var req = p.IsRequired ? "required" : $"optional, default={p.DefaultValue ?? "null"}";
-                sb.AppendLine($"    {p.Name} ({p.TypeName}, {req}) — {p.Description}");
+                sb.AppendLine(CultureInfo.InvariantCulture, $"    {p.Name} ({p.TypeName}, {req}) — {p.Description}");
             }
         }
 
-        sb.AppendLine($"\n  Example: {kind}(\"{cmd.Name}\"{(cmd.Parameters.Count > 0 ? ", '{...}'" : "")})");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"\n  Example: {kind}(\"{cmd.Name}\"{(cmd.Parameters.Count > 0 ? ", '{...}'" : "")})");
         return McpResponse.Content(sb.ToString(), "text");
     }
 }

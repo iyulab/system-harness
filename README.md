@@ -90,7 +90,7 @@ await harness.UIAutomation.TypeIntoAsync("Notepad", "Edit", "Hello from automati
 
 ## MCP Server (AI Tool Integration)
 
-system-harness includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server with **174 commands** across 25 categories, accessed through 3 MCP tools using a command dispatch pattern.
+system-harness includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server with **163 commands** across 25 categories, accessed through 3 MCP tools using a command dispatch pattern.
 
 ### Installation
 

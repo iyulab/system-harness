@@ -1,3 +1,4 @@
+using System.Globalization;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -160,7 +161,7 @@ public sealed class KeyboardTools(IHarness harness)
                         return McpResponse.Ok(new
                         {
                             hotkey = keys, detected = true, expectType, expectValue,
-                            window = new { handle = win.Handle.ToString(), win.Title },
+                            window = new { handle = win.Handle.ToString(CultureInfo.InvariantCulture), win.Title },
                             attempts,
                         }, sw.ElapsedMilliseconds);
                     break;

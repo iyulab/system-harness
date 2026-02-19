@@ -13,19 +13,19 @@ public class EnumTests
     [Fact]
     public void UIControlType_CommonValues()
     {
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.Unknown));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.Button));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.CheckBox));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.ComboBox));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.Edit));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.List));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.Menu));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.MenuItem));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.Tab));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.Text));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.Tree));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.Window));
-        Assert.True(Enum.IsDefined(typeof(UIControlType), UIControlType.Custom));
+        Assert.True(Enum.IsDefined(UIControlType.Unknown));
+        Assert.True(Enum.IsDefined(UIControlType.Button));
+        Assert.True(Enum.IsDefined(UIControlType.CheckBox));
+        Assert.True(Enum.IsDefined(UIControlType.ComboBox));
+        Assert.True(Enum.IsDefined(UIControlType.Edit));
+        Assert.True(Enum.IsDefined(UIControlType.List));
+        Assert.True(Enum.IsDefined(UIControlType.Menu));
+        Assert.True(Enum.IsDefined(UIControlType.MenuItem));
+        Assert.True(Enum.IsDefined(UIControlType.Tab));
+        Assert.True(Enum.IsDefined(UIControlType.Text));
+        Assert.True(Enum.IsDefined(UIControlType.Tree));
+        Assert.True(Enum.IsDefined(UIControlType.Window));
+        Assert.True(Enum.IsDefined(UIControlType.Custom));
     }
 
     [Fact]

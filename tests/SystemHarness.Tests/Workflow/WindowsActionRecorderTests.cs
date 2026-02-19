@@ -284,7 +284,7 @@ public class WindowsActionRecorderTests
 
     // --- Stubs ---
 
-    private class StubMouse : IMouse
+    private sealed class StubMouse : IMouse
     {
         public List<(string Method, int X, int Y)> Calls { get; } = [];
         public List<(int X, int Y, MouseButton Button)> ClickCalls { get; } = [];
@@ -330,7 +330,7 @@ public class WindowsActionRecorderTests
         }
     }
 
-    private class StubKeyboard : IKeyboard
+    private sealed class StubKeyboard : IKeyboard
     {
         public List<Key> KeyPressCalls { get; } = [];
         public List<Key> KeyDownCalls { get; } = [];

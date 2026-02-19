@@ -37,7 +37,9 @@ public class WindowsHarnessTests
     public void ImplementsIHarness()
     {
         using var harness = new WindowsHarness();
+#pragma warning disable CA1859 // intentional: testing interface implementation
         IHarness iface = harness;
+#pragma warning restore CA1859
 
         Assert.NotNull(iface.Shell);
         Assert.NotNull(iface.Screen);

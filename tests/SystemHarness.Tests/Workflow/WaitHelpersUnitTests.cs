@@ -112,7 +112,7 @@ public class WaitHelpersUnitTests
 
     // --- Stubs ---
 
-    private class WaitStubHarness : IHarness
+    private sealed class WaitStubHarness : IHarness
     {
         private readonly string _ocrText;
         private readonly UIElement? _foundElement;
@@ -149,7 +149,7 @@ public class WaitHelpersUnitTests
         public void Dispose() { }
     }
 
-    private class WaitStubOcr : IOcr
+    private sealed class WaitStubOcr : IOcr
     {
         private readonly string _text;
         public WaitStubOcr(string text) => _text = text;
@@ -164,7 +164,7 @@ public class WaitHelpersUnitTests
             Task.FromResult(new OcrResult { Text = _text, Lines = [] });
     }
 
-    private class WaitStubUIAutomation : IUIAutomation
+    private sealed class WaitStubUIAutomation : IUIAutomation
     {
         private readonly UIElement? _foundElement;
         public WaitStubUIAutomation(UIElement? foundElement) => _foundElement = foundElement;
@@ -191,7 +191,7 @@ public class WaitHelpersUnitTests
             Task.CompletedTask;
     }
 
-    private class WaitStubWindow : IWindow
+    private sealed class WaitStubWindow : IWindow
     {
         private readonly WindowState _state;
         public WaitStubWindow(WindowState state) => _state = state;

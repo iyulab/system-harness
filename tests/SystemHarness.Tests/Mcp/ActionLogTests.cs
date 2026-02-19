@@ -7,7 +7,11 @@ namespace SystemHarness.Tests.Mcp;
 public class ActionLogTests : IDisposable
 {
     public ActionLogTests() => ActionLog.Clear();
-    public void Dispose() => ActionLog.Clear();
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        ActionLog.Clear();
+    }
 
     [Fact]
     public void Record_StoresAction()

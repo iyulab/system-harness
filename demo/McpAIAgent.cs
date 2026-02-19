@@ -4,7 +4,7 @@ using Microsoft.Extensions.AI;
 using ModelContextProtocol.Client;
 using OpenAI;
 
-record McpAIAgentConfig
+sealed record McpAIAgentConfig
 {
     public required string McpServerCommand { get; init; }
     public required string[] McpServerArgs { get; init; }
@@ -14,7 +14,7 @@ record McpAIAgentConfig
     public int ScenarioTimeoutSeconds { get; init; } = 120;
 }
 
-record ScenarioResult(
+sealed record ScenarioResult(
     string ScenarioName,
     bool Success,
     string Response,
@@ -22,7 +22,7 @@ record ScenarioResult(
     TimeSpan Elapsed,
     string? Error);
 
-class McpAIAgent : IAsyncDisposable
+sealed class McpAIAgent : IAsyncDisposable
 {
     private readonly McpClient _mcpClient;
     private readonly IChatClient _chatClient;

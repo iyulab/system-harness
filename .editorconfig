@@ -103,3 +103,7 @@ dotnet_naming_symbols.interfaces.applicable_accessibilities = *
 dotnet_naming_rule.interfaces_prefix.symbols = interfaces
 dotnet_naming_rule.interfaces_prefix.style = interface_style
 dotnet_naming_rule.interfaces_prefix.severity = warning
+
+# Test projects: allow underscores in test method names (e.g., Method_Should_Work)
+[tests/**/*.cs]
+dotnet_diagnostic.CA1707.severity = none

@@ -74,7 +74,7 @@ public sealed class WindowsKeyboard : IKeyboard
         }, ct);
     }
 
-    private Task TypeViaSendInputAsync(string text, int delayMs, CancellationToken ct)
+    private static Task TypeViaSendInputAsync(string text, int delayMs, CancellationToken ct)
     {
         return Task.Run(async () =>
         {

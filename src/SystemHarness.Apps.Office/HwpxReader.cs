@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Compression;
 using System.Xml.Linq;
 
@@ -552,7 +553,7 @@ public sealed class HwpxReader : IHwpReader
 
         var headElem = new XElement(NsHead + "head",
             new XAttribute(XNamespace.Xmlns + "hh", NsHead.NamespaceName),
-            new XAttribute("secCnt", content.Sections.Count.ToString()));
+            new XAttribute("secCnt", content.Sections.Count.ToString(CultureInfo.InvariantCulture)));
 
         // Collect unique charShapeIds from all runs and write charProperties
         var charShapes = new Dictionary<int, HwpRun>();

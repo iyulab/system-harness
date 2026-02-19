@@ -4,7 +4,7 @@ namespace SystemHarness.SimulationTests.Scenarios;
 /// Tests clipboard exchange between API and applications.
 /// </summary>
 [Collection("Simulation")]
-[Trait("Category", "Local")]
+[Trait("Category", "Integration")]
 public class ClipboardExchangeTests : SimulationTestBase
 {
     public ClipboardExchangeTests(SimulationFixture fixture) : base(fixture) { }

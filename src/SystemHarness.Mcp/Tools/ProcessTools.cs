@@ -1,3 +1,4 @@
+using System.Globalization;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -170,7 +171,7 @@ public sealed class ProcessTools(IHarness harness)
 
     [McpServerTool(Name = "process_wait_exit"), Description(
         "Wait for a process to exit by PID. Polls until the process terminates or timeout is reached.")]
-    public async Task<string> WaitExitAsync(
+    public static async Task<string> WaitExitAsync(
         [Description("Process ID to wait for.")] int pid,
         [Description("Maximum time to wait in milliseconds.")] int timeoutMs = 30000,
         CancellationToken ct = default)
@@ -284,7 +285,7 @@ public sealed class ProcessTools(IHarness harness)
                 pid = g.Key,
                 windows = g.Select(w => new
                 {
-                    handle = w.Handle.ToString(),
+                    handle = w.Handle.ToString(CultureInfo.InvariantCulture),
                     w.Title,
                 }).ToArray(),
             })

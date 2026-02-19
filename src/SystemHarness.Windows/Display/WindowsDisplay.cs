@@ -48,7 +48,7 @@ public sealed class WindowsDisplay : IDisplay
     {
         var monitors = await GetMonitorsAsync(ct);
         return monitors.FirstOrDefault(m => m.IsPrimary)
-            ?? monitors.First();
+            ?? monitors[0];
     }
 
     public async Task<MonitorInfo> GetMonitorAtPointAsync(int x, int y, CancellationToken ct = default)
@@ -111,7 +111,7 @@ public sealed class WindowsDisplay : IDisplay
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"GetDpiForMonitor failed for monitor {index}: {ex.Message}");
+            System.Diagnostics.Trace.TraceWarning($"GetDpiForMonitor failed for monitor {index}: {ex.Message}");
         }
 
         var deviceName = new string(monitorInfo.szDevice.AsSpan()).TrimEnd('\0');
@@ -138,6 +138,6 @@ public sealed class WindowsDisplay : IDisplay
     {
         var handle = (nint)hMonitor.Value;
         return monitors.FirstOrDefault(m => m.Handle == handle)
-            ?? monitors.First();
+            ?? monitors[0];
     }
 }

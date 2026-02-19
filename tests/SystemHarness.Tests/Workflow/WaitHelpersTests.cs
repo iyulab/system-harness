@@ -4,7 +4,7 @@ namespace SystemHarness.Tests;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
-public class WaitHelpersTests : IAsyncLifetime
+public sealed class WaitHelpersTests : IAsyncLifetime, IDisposable
 {
     private readonly WindowsHarness _harness = new();
     private int _pid;
@@ -17,6 +17,8 @@ public class WaitHelpersTests : IAsyncLifetime
         _pid = info.Pid;
         await Task.Delay(1000);
     }
+
+    public void Dispose() => _harness.Dispose();
 
     public async Task DisposeAsync()
     {

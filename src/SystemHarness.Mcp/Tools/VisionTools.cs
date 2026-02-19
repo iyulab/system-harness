@@ -1,3 +1,4 @@
+using System.Globalization;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -163,7 +164,7 @@ public sealed class VisionTools(IHarness harness)
             lineCount = result.Lines.Count,
             region = new { x = relX, y = relY, width, height },
             absoluteRegion = new { x = absX, y = absY, width, height },
-            window = new { handle = win.Handle.ToString(), win.Title },
+            window = new { handle = win.Handle.ToString(CultureInfo.InvariantCulture), win.Title },
         }, sw.ElapsedMilliseconds);
     }
 

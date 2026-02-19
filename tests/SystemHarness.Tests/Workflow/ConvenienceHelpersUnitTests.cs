@@ -125,7 +125,7 @@ public class ConvenienceHelpersUnitTests
 
     // --- Stubs ---
 
-    private class ConvStubHarness : IHarness
+    private sealed class ConvStubHarness : IHarness
     {
         public ConvStubMouse Mouse { get; } = new();
 
@@ -153,7 +153,7 @@ public class ConvenienceHelpersUnitTests
         public void Dispose() { }
     }
 
-    internal class ConvStubScreen : IScreen
+    internal sealed class ConvStubScreen : IScreen
     {
         private readonly Screenshot _ss;
         public ConvStubScreen(Screenshot ss) => _ss = ss;
@@ -162,7 +162,7 @@ public class ConvenienceHelpersUnitTests
         public Task<Screenshot> CaptureWindowAsync(string t, CancellationToken ct = default) => Task.FromResult(_ss);
     }
 
-    internal class ConvStubOcr : IOcr
+    internal sealed class ConvStubOcr : IOcr
     {
         private readonly OcrResult _result;
         public ConvStubOcr(OcrResult result) => _result = result;
@@ -171,9 +171,9 @@ public class ConvenienceHelpersUnitTests
         public Task<OcrResult> RecognizeImageAsync(byte[] b, OcrOptions? o = null, CancellationToken ct = default) => Task.FromResult(_result);
     }
 
-    internal class ConvStubMouse : IMouse
+    internal sealed class ConvStubMouse : IMouse
     {
-        public record ClickRecord(int X, int Y, MouseButton Button);
+        public sealed record ClickRecord(int X, int Y, MouseButton Button);
         public List<ClickRecord> Clicks { get; } = [];
 
         public Task ClickAsync(int x, int y, MouseButton button = MouseButton.Left, CancellationToken ct = default)

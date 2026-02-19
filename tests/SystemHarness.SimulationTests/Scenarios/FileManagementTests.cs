@@ -4,7 +4,7 @@ namespace SystemHarness.SimulationTests.Scenarios;
 /// Tests file management workflows using Shell + FileSystem combination.
 /// </summary>
 [Collection("Simulation")]
-[Trait("Category", "Local")]
+[Trait("Category", "Integration")]
 public class FileManagementTests : SimulationTestBase
 {
     public FileManagementTests(SimulationFixture fixture) : base(fixture) { }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -800,7 +801,7 @@ public sealed class OpenXmlDocumentReader : IDocumentReader
         if (docRun.FontSize is double size)
         {
             // OpenXML stores font size in half-points
-            rp.Append(new W.FontSize { Val = ((int)(size * 2)).ToString() });
+            rp.Append(new W.FontSize { Val = ((int)(size * 2)).ToString(CultureInfo.InvariantCulture) });
             hasProps = true;
         }
 
@@ -976,7 +977,7 @@ public sealed class OpenXmlDocumentReader : IDocumentReader
         }
         else if (cell.DataType?.Value == S.CellValues.SharedString)
         {
-            cellType = CellValueType.String;
+            cellType = CellValueType.Text;
         }
         else if (cell.DataType?.Value == S.CellValues.Boolean)
         {
@@ -984,7 +985,7 @@ public sealed class OpenXmlDocumentReader : IDocumentReader
         }
         else if (cell.DataType?.Value == S.CellValues.InlineString)
         {
-            cellType = CellValueType.String;
+            cellType = CellValueType.Text;
         }
         else if (cell.CellValue is not null)
         {
@@ -1268,7 +1269,7 @@ public sealed class OpenXmlDocumentReader : IDocumentReader
                 xlCell.CellValue = new S.CellValue(cell.Value ?? "");
                 break;
 
-            case CellValueType.String:
+            case CellValueType.Text:
             default:
                 xlCell.DataType = S.CellValues.String;
                 xlCell.CellValue = new S.CellValue(cell.Value ?? "");

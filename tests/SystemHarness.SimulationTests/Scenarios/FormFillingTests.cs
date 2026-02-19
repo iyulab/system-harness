@@ -4,7 +4,7 @@ namespace SystemHarness.SimulationTests.Scenarios;
 /// Tests multi-step form filling: typing, special characters, Tab navigation.
 /// </summary>
 [Collection("Simulation")]
-[Trait("Category", "Local")]
+[Trait("Category", "Integration")]
 public class FormFillingTests : SimulationTestBase
 {
     public FormFillingTests(SimulationFixture fixture) : base(fixture) { }

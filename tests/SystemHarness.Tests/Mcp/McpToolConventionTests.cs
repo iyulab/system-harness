@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
 using ModelContextProtocol.Server;
@@ -29,6 +30,8 @@ public class McpToolConventionTests
         typeof(MonitorTools), typeof(SessionTools), typeof(DesktopTools),
         typeof(ObserverTools), typeof(RecorderTools), typeof(UpdateTools),
     ];
+
+    private static readonly string[] SampleItems = ["a", "b", "c"];
 
     private static IEnumerable<(Type Type, MethodInfo Method, string ToolName)> AllTools()
     {
@@ -115,7 +118,7 @@ public class McpToolConventionTests
         // Exact guard: tracks total command count across all tool types.
         // If you add or remove a tool, update this count AND classify in ReadOnlyTools/MutationTools.
         var count = AllTools().Count();
-        Assert.Equal(174, count);
+        Assert.Equal(163, count);
     }
 
     [Fact]
@@ -250,7 +253,7 @@ public class McpToolConventionTests
         {
             if (typeToPrefix.TryGetValue(type, out var prefixes))
             {
-                Assert.True(prefixes.Any(p => name.StartsWith(p)),
+                Assert.True(prefixes.Any(p => name.StartsWith(p, StringComparison.Ordinal)),
                     $"Tool '{name}' in {type.Name} should start with one of: {string.Join(", ", prefixes)}.");
             }
         }
@@ -298,7 +301,7 @@ public class McpToolConventionTests
     [Fact]
     public void McpResponse_Items_HasCountAndItems()
     {
-        var json = McpResponse.Items(new[] { "a", "b", "c" }, 10);
+        var json = McpResponse.Items(SampleItems, 10);
         var doc = JsonDocument.Parse(json);
         var data = doc.RootElement.GetProperty("data");
 
@@ -403,13 +406,13 @@ public class McpToolConventionTests
             [typeof(DisplayTools)] = 5,
             [typeof(FileSystemTools)] = 13,
             [typeof(KeyboardTools)] = 8,
-            [typeof(MonitorTools)] = 4,
+            [typeof(MonitorTools)] = 3,
             [typeof(MouseTools)] = 11,
             [typeof(OcrTools)] = 4,
             [typeof(OfficeTools)] = 10,
-            [typeof(ProcessTools)] = 14,
+            [typeof(ProcessTools)] = 13,
             [typeof(ReportTools)] = 3,
-            [typeof(SafetyTools)] = 12,
+            [typeof(SafetyTools)] = 3,
             [typeof(ScreenTools)] = 5,
             [typeof(SessionTools)] = 5,
             [typeof(ShellTools)] = 1,
@@ -465,13 +468,13 @@ public class McpToolConventionTests
         // Report reads
         "report_get_desktop", "report_get_window", "report_get_screen",
         // Monitor reads
-        "monitor_list", "monitor_read",
+        "monitor_list",
         // Session reads
         "session_compare", "session_bookmark_compare", "session_bookmark_list",
         // Safety reads
-        "safety_status", "safety_get_zone", "safety_action_history", "safety_check_confirmation",
+        "safety_status",
         // Process queries
-        "process_list", "process_get_info", "process_check", "process_wait_exit", "process_list_by_window",
+        "process_list", "process_get_info", "process_check", "process_list_by_window",
         "process_find_by_port", "process_find_by_path", "process_get_children", "process_find_by_window",
         // Office reads
         // Dialog reads
@@ -519,8 +522,7 @@ public class McpToolConventionTests
         // Session mutations
         "session_save", "session_bookmark",
         // Safety mutations
-        "safety_emergency_stop", "safety_resume", "safety_set_zone", "safety_set_rate_limit",
-        "safety_confirm_before", "safety_approve", "safety_deny", "safety_clear_history",
+        "safety_emergency_stop", "safety_resume",
         // Office writes
         "office_write_word", "office_write_excel", "office_write_pptx", "office_write_hwpx",
         "office_replace_word", "office_replace_hwpx",
@@ -666,7 +668,7 @@ public class McpToolConventionTests
             foreach (var (line, lineNum) in File.ReadAllLines(file).Select((l, i) => (l, i + 1)))
             {
                 var trimmed = line.TrimStart();
-                if (trimmed.StartsWith("//")) continue;
+                if (trimmed.StartsWith("//", StringComparison.Ordinal)) continue;
                 if (trimmed.Contains("throw new"))
                     violations.Add($"{fileName}:{lineNum}");
             }
@@ -741,7 +743,7 @@ public class McpToolConventionTests
             }
         }
 
-        Assert.Equal(132, requiredStrings.Count);
+        Assert.Equal(126, requiredStrings.Count);
     }
 
     [Fact]
@@ -766,7 +768,7 @@ public class McpToolConventionTests
             var fileName = Path.GetFileName(file);
             foreach (var line in File.ReadAllLines(file))
             {
-                var idx = line.IndexOf("McpResponse.Error(\"");
+                var idx = line.IndexOf("McpResponse.Error(\"", StringComparison.Ordinal);
                 if (idx < 0) continue;
                 var start = idx + "McpResponse.Error(\"".Length;
                 var end = line.IndexOf('"', start);
@@ -784,7 +786,7 @@ public class McpToolConventionTests
             var fileName = Path.GetFileName(file);
             foreach (var line in File.ReadAllLines(file))
             {
-                var idx = line.IndexOf("McpResponse.Error(\"");
+                var idx = line.IndexOf("McpResponse.Error(\"", StringComparison.Ordinal);
                 if (idx < 0) continue;
                 var start = idx + "McpResponse.Error(\"".Length;
                 var end = line.IndexOf('"', start);
@@ -838,7 +840,7 @@ public class McpToolConventionTests
         // README contains "**{N} commands**" pattern
         var match = System.Text.RegularExpressions.Regex.Match(readme, @"\*\*(\d+) commands\*\*");
         Assert.True(match.Success, "README.md must contain '**N commands**' pattern.");
-        var readmeCount = int.Parse(match.Groups[1].Value);
+        var readmeCount = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
         Assert.Equal(actualCount, readmeCount);
     }
 

@@ -16,6 +16,7 @@ public class OpenXmlDocumentReaderTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         try { Directory.Delete(_tempDir, true); } catch { }
     }
 
@@ -444,7 +445,7 @@ public class OpenXmlDocumentReaderTests : IDisposable
                         {
                             RowIndex = 1,
                             Cells = [
-                                new SpreadsheetCell { Address = "A1", Value = "Name", Type = CellValueType.String },
+                                new SpreadsheetCell { Address = "A1", Value = "Name", Type = CellValueType.Text },
                                 new SpreadsheetCell { Address = "B1", Value = "42", Type = CellValueType.Number },
                             ],
                         },
@@ -515,7 +516,7 @@ public class OpenXmlDocumentReaderTests : IDisposable
                                 {
                                     Address = "A1",
                                     Value = "Bold",
-                                    Type = CellValueType.String,
+                                    Type = CellValueType.Text,
                                     Style = new CellStyle { Bold = true },
                                 },
                             ],
@@ -548,7 +549,7 @@ public class OpenXmlDocumentReaderTests : IDisposable
                         {
                             RowIndex = 1,
                             Cells = [
-                                new SpreadsheetCell { Address = "A1", Value = "Merged", Type = CellValueType.String },
+                                new SpreadsheetCell { Address = "A1", Value = "Merged", Type = CellValueType.Text },
                             ],
                         },
                     ],

@@ -74,7 +74,7 @@ public static class CommandRegistrar
             if (type == typeof(Tools.DispatchTools))
                 continue;
 
-            var hasMcpMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+            var hasMcpMethods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
                 .Any(m => m.GetCustomAttribute<McpServerToolAttribute>() is not null);
 
             if (hasMcpMethods)
@@ -95,7 +95,7 @@ public static class CommandRegistrar
                 continue;
 
             // Find types that have methods with [McpServerTool] — these are tool classes
-            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
                 var toolAttr = method.GetCustomAttribute<McpServerToolAttribute>();
@@ -134,7 +134,7 @@ public static class CommandRegistrar
         return string.Concat(snakeName.AsSpan(0, idx), ".", snakeName.AsSpan(idx + 1));
     }
 
-    private static IReadOnlyList<ParamDescriptor> BuildParamDescriptors(MethodInfo method)
+    private static List<ParamDescriptor> BuildParamDescriptors(MethodInfo method)
     {
         var list = new List<ParamDescriptor>();
         foreach (var p in method.GetParameters())
@@ -181,7 +181,7 @@ public static class CommandRegistrar
     {
         return async (JsonElement? args, CancellationToken ct) =>
         {
-            var instance = sp.GetRequiredService(toolType);
+            var instance = method.IsStatic ? null : sp.GetRequiredService(toolType);
             var parameters = method.GetParameters();
             var values = new object?[parameters.Length];
 

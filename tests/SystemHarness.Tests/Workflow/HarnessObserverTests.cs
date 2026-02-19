@@ -117,7 +117,7 @@ public class HarnessObserverTests
 
     // --- Stub implementations ---
 
-    private class StubHarness : IHarness
+    private sealed class StubHarness : IHarness
     {
         public IShell Shell => null!;
         public IProcessManager Process => null!;
@@ -137,7 +137,7 @@ public class HarnessObserverTests
         public void Dispose() { }
     }
 
-    private class StubWindow : IWindow
+    private sealed class StubWindow : IWindow
     {
         public Task<IReadOnlyList<WindowInfo>> ListAsync(CancellationToken ct = default) =>
             Task.FromResult<IReadOnlyList<WindowInfo>>([TestWindow]);
@@ -157,7 +157,7 @@ public class HarnessObserverTests
             Task.CompletedTask;
     }
 
-    private class StubScreen : IScreen
+    private sealed class StubScreen : IScreen
     {
         public Task<Screenshot> CaptureAsync(CaptureOptions? options = null, CancellationToken ct = default) =>
             Task.FromResult(TestScreenshot);
@@ -175,7 +175,7 @@ public class HarnessObserverTests
             Task.FromResult(TestScreenshot);
     }
 
-    private class StubUIAutomation : IUIAutomation
+    private sealed class StubUIAutomation : IUIAutomation
     {
         public Task<UIElement> GetAccessibilityTreeAsync(string titleOrHandle, int maxDepth = 5, CancellationToken ct = default) =>
             Task.FromResult(new UIElement
@@ -205,7 +205,7 @@ public class HarnessObserverTests
             Task.CompletedTask;
     }
 
-    private class StubOcr : IOcr
+    private sealed class StubOcr : IOcr
     {
         public Task<OcrResult> RecognizeScreenAsync(OcrOptions? options = null, CancellationToken ct = default) =>
             Task.FromResult(new OcrResult { Text = "test", Lines = [] });

@@ -1,3 +1,4 @@
+using System.Globalization;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -131,7 +132,7 @@ public sealed class SessionTools(IHarness harness)
             Windows = windows.Where(w => !string.IsNullOrWhiteSpace(w.Title))
                 .Select(w => new SessionWindow
                 {
-                    Handle = w.Handle.ToString(),
+                    Handle = w.Handle.ToString(CultureInfo.InvariantCulture),
                     Title = w.Title,
                     ProcessId = w.ProcessId,
                     X = w.Bounds.X, Y = w.Bounds.Y,

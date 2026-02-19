@@ -33,7 +33,11 @@ public class WindowsUIAutomationTests : IClassFixture<UIAutomationNotepadFixture
     {
     }
 
-    public void Dispose() => _uia.Dispose();
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        _uia.Dispose();
+    }
 
     [Fact]
     public async Task GetFocusedElement_ReturnsElement()

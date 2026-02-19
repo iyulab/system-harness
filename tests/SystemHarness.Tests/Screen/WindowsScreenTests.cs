@@ -1,3 +1,4 @@
+using System.Globalization;
 using SystemHarness.Windows;
 
 namespace SystemHarness.Tests.Screen;
@@ -16,6 +17,7 @@ public class WindowsScreenTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         if (Directory.Exists(_tempDir))
             Directory.Delete(_tempDir, recursive: true);
     }
@@ -127,7 +129,7 @@ public class WindowsScreenTests : IDisposable
 
         Assert.NotNull(target);
 
-        using var screenshot = await _screen.CaptureWindowAsync(target.Handle.ToString());
+        using var screenshot = await _screen.CaptureWindowAsync(target.Handle.ToString(CultureInfo.InvariantCulture));
 
         Assert.NotNull(screenshot);
         Assert.True(screenshot.Bytes.Length > 0);
