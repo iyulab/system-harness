@@ -5,6 +5,7 @@ namespace SystemHarness.Tests.Window;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public class WindowExtensionTests
 {
     private readonly WindowsWindow _window = new();

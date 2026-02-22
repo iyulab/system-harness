@@ -26,6 +26,7 @@ public class NotepadFixture : IAsyncLifetime
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public class WindowsWindowTests : IClassFixture<NotepadFixture>
 {
     private readonly WindowsWindow _window = new();

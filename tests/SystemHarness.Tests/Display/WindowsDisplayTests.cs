@@ -5,6 +5,7 @@ namespace SystemHarness.Tests.Display;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public class WindowsDisplayTests
 {
     private readonly WindowsDisplay _display = new();

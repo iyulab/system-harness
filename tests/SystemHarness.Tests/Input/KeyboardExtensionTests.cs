@@ -4,6 +4,7 @@ namespace SystemHarness.Tests.Input;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public class KeyboardExtensionTests
 {
     private readonly WindowsKeyboard _keyboard = new();

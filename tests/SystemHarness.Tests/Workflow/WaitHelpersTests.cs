@@ -4,6 +4,7 @@ namespace SystemHarness.Tests;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public sealed class WaitHelpersTests : IAsyncLifetime, IDisposable
 {
     private readonly WindowsHarness _harness = new();

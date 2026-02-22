@@ -25,6 +25,7 @@ public class KeyboardNotepadFixture : IAsyncLifetime
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public class WindowsKeyboardTests : IClassFixture<KeyboardNotepadFixture>
 {
     private readonly WindowsKeyboard _keyboard = new();

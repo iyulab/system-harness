@@ -39,7 +39,9 @@ public class TestConventionTests
     [Fact]
     public void AllTestClasses_CategoryIsValid()
     {
-        // Guard: category must be either "CI" or "Local", verified via CustomAttributeData
+        // Guard: category must be "CI", "Local", or "RequiresDesktop" (supplementary).
+        // Every class must have exactly one primary category ("CI" or "Local").
+        // "RequiresDesktop" is an optional supplementary trait for CI desktop-test filtering.
         var invalid = new List<string>();
         var ciCount = 0;
         var localCount = 0;
@@ -61,6 +63,7 @@ public class TestConventionTests
                     {
                         if (value == "CI") ciCount++;
                         else if (value == "Local") localCount++;
+                        else if (value == "RequiresDesktop") { /* valid supplementary category */ }
                         else invalid.Add($"{type.Name} has Category='{value}'");
                     }
                 }
@@ -68,7 +71,7 @@ public class TestConventionTests
         }
 
         Assert.True(invalid.Count == 0,
-            $"Test classes with invalid Category (use 'CI' or 'Local'): {string.Join(", ", invalid)}");
+            $"Test classes with invalid Category (use 'CI', 'Local', or 'RequiresDesktop'): {string.Join(", ", invalid)}");
         Assert.True(ciCount + localCount == AllTestClasses().Count(),
             $"CI({ciCount}) + Local({localCount}) should equal total({AllTestClasses().Count()})");
     }

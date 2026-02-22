@@ -25,6 +25,7 @@ public class UIAutomationNotepadFixture : IAsyncLifetime
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public class WindowsUIAutomationTests : IClassFixture<UIAutomationNotepadFixture>, IDisposable
 {
     private readonly WindowsUIAutomation _uia = new();

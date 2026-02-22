@@ -4,6 +4,7 @@ namespace SystemHarness.Tests.Workflow;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public sealed class ConvenienceHelpersTests : IAsyncLifetime, IDisposable
 {
     private WindowsHarness _harness = null!;

@@ -4,6 +4,7 @@ namespace SystemHarness.Tests.Ocr;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public class WindowsOcrTests : IDisposable
 {
     private readonly WindowsScreen _screen = new();

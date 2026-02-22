@@ -4,6 +4,7 @@ namespace SystemHarness.Tests.Clipboard;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public class ClipboardExtensionTests
 {
     private readonly WindowsClipboard _clipboard = new();

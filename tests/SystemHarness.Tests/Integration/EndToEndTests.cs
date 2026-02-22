@@ -4,6 +4,7 @@ namespace SystemHarness.Tests.Integration;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public sealed class EndToEndTests : IAsyncLifetime, IDisposable
 {
     private WindowsHarness _harness = null!;

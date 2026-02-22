@@ -4,6 +4,7 @@ namespace SystemHarness.Tests.Process;
 
 [Collection("DesktopInteraction")]
 [Trait("Category", "Local")]
+[Trait("Category", "RequiresDesktop")]
 public class WindowsProcessManagerTests
 {
     private readonly WindowsProcessManager _process = new();
