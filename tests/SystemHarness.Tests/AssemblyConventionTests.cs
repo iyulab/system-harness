@@ -29,7 +29,7 @@ public class AssemblyConventionTests
             .ToList();
 
         Assert.Single(versions);
-        Assert.Equal("0.28.1", versions[0]);
+        Assert.Equal("0.28.2", versions[0]);
     }
 
     [Fact]
