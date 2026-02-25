@@ -16,7 +16,11 @@ public sealed class PolicyEnforcingShell : IShell
 
     public Task<ShellResult> RunAsync(string command, ShellOptions? options = null, CancellationToken ct = default)
     {
-        var violation = _policy.CheckViolation("cmd.exe", $"/C {command}");
+        // Extract the first token (program name) to check against blocked programs,
+        // then also check the full "cmd.exe /C {command}" form for pattern matching.
+        var firstToken = command.Split(' ', 2)[0];
+        var violation = _policy.CheckViolation(firstToken, command.Length > firstToken.Length ? command[(firstToken.Length + 1)..] : string.Empty)
+                     ?? _policy.CheckViolation("cmd.exe", $"/C {command}");
         if (violation is not null)
             throw new CommandPolicyException(violation) { BlockedCommand = command };
 

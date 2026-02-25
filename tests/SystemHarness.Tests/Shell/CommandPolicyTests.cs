@@ -292,6 +292,50 @@ public class CommandPolicyTests
         Assert.Same(inner, ex.InnerException);
     }
 
+    // --- 1-arg RunAsync BlockProgram bypass tests ---
+
+    [Theory]
+    [InlineData("format C:")]
+    [InlineData("format C: /FS:NTFS")]
+    [InlineData("shutdown /s /t 0")]
+    [InlineData("diskpart /s script.txt")]
+    [InlineData("reboot")]
+    [InlineData("mkfs /dev/sda1")]
+    [InlineData("fdisk /dev/sda")]
+    public void SingleArgRunAsync_BlockedProgram_IsBlocked(string command)
+    {
+        var policy = CommandPolicy.CreateDefault();
+        var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
+
+        var ex = Assert.Throws<CommandPolicyException>(
+            () => shell.RunAsync(command).GetAwaiter().GetResult());
+        Assert.Equal(command, ex.BlockedCommand);
+        Assert.Contains("blocked", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void SingleArgRunAsync_CustomBlockedProgram_IsBlocked()
+    {
+        var policy = new CommandPolicy().BlockProgram("mytool");
+        var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
+
+        var ex = Assert.Throws<CommandPolicyException>(
+            () => shell.RunAsync("mytool --dangerous-flag").GetAwaiter().GetResult());
+        Assert.Equal("mytool --dangerous-flag", ex.BlockedCommand);
+    }
+
+    [Fact]
+    public void SingleArgRunAsync_BlockedPattern_StillWorks()
+    {
+        var policy = CommandPolicy.CreateDefault();
+        var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
+
+        // Pattern-based blocks should still work via the cmd.exe /C fallback
+        var ex = Assert.Throws<CommandPolicyException>(
+            () => shell.RunAsync("del /S C:\\temp\\*").GetAwaiter().GetResult());
+        Assert.Contains("pattern", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
     private static string? CheckViolation(CommandPolicy policy, string program, string arguments)
     {
         return (string?)typeof(CommandPolicy)
