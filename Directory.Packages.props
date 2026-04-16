@@ -14,10 +14,10 @@
     <!-- Input hooks (cross-platform) -->
     <PackageVersion Include="SharpHook" Version="7.1.1" />
     <!-- DI -->
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.6" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.6" />
     <!-- SourceLink -->
-    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.201" />
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.202" />
     <!-- Benchmarking -->
     <PackageVersion Include="BenchmarkDotNet" Version="0.14.0" />
     <!-- UI Automation -->
@@ -27,23 +27,23 @@
     <!-- System.Drawing.Common: pin to safe version (FlaUI transitive dep, CVE in < 8.0.10) -->
     <PackageVersion Include="System.Drawing.Common" Version="8.0.10" />
     <!-- Browser -->
-    <PackageVersion Include="Microsoft.Playwright" Version="1.58.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.59.0" />
     <!-- Email -->
     <PackageVersion Include="MailKit" Version="4.15.1" />
     <!-- Office -->
     <PackageVersion Include="DocumentFormat.OpenXml" Version="3.5.1" />
     <!-- MCP -->
-    <PackageVersion Include="ModelContextProtocol" Version="1.1.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
+    <PackageVersion Include="ModelContextProtocol" Version="1.2.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.6" />
     <!-- AI Integration (demo) -->
-    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.4.1" />
-    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.4.1" />
-    <PackageVersion Include="OpenAI" Version="2.9.1" />
+    <PackageVersion Include="Microsoft.Extensions.AI" Version="10.5.0" />
+    <PackageVersion Include="Microsoft.Extensions.AI.OpenAI" Version="10.5.0" />
+    <PackageVersion Include="OpenAI" Version="2.10.0" />
     <!-- Testing -->
     <PackageVersion Include="coverlet.collector" Version="8.0.1" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
-    <PackageVersion Include="ChildProcessGuard" Version="1.0.4" />
+    <PackageVersion Include="ChildProcessGuard" Version="1.1.1" />
   </ItemGroup>
 </Project>
