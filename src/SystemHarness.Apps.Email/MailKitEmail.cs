@@ -77,7 +77,7 @@ public sealed class MailKitEmail : IEmail
     {
         EnsureConnected();
 
-        var mailFolder = folder is null ? _imap!.Inbox : await _imap!.GetFolderAsync(folder, ct);
+        var mailFolder = (folder is null ? _imap!.Inbox : await _imap!.GetFolderAsync(folder, ct))!;
         await mailFolder.OpenAsync(FolderAccess.ReadOnly, ct);
 
         var uids = await mailFolder.SearchAsync(SearchQuery.HeaderContains("Message-Id", messageId), ct);
@@ -145,7 +145,7 @@ public sealed class MailKitEmail : IEmail
     {
         EnsureConnected();
 
-        var source = sourceFolder is null ? _imap!.Inbox : await _imap!.GetFolderAsync(sourceFolder, ct);
+        var source = (sourceFolder is null ? _imap!.Inbox : await _imap!.GetFolderAsync(sourceFolder, ct))!;
         await source.OpenAsync(FolderAccess.ReadWrite, ct);
 
         var uids = await source.SearchAsync(SearchQuery.HeaderContains("Message-Id", messageId), ct);
@@ -162,7 +162,7 @@ public sealed class MailKitEmail : IEmail
     {
         EnsureConnected();
 
-        var mailFolder = folder is null ? _imap!.Inbox : await _imap!.GetFolderAsync(folder, ct);
+        var mailFolder = (folder is null ? _imap!.Inbox : await _imap!.GetFolderAsync(folder, ct))!;
         await mailFolder.OpenAsync(FolderAccess.ReadWrite, ct);
 
         var uids = await mailFolder.SearchAsync(SearchQuery.HeaderContains("Message-Id", messageId), ct);
@@ -179,7 +179,7 @@ public sealed class MailKitEmail : IEmail
     {
         EnsureConnected();
 
-        var mailFolder = folder is null ? _imap!.Inbox : await _imap!.GetFolderAsync(folder, ct);
+        var mailFolder = (folder is null ? _imap!.Inbox : await _imap!.GetFolderAsync(folder, ct))!;
         await mailFolder.OpenAsync(FolderAccess.ReadWrite, ct);
 
         var uids = await mailFolder.SearchAsync(SearchQuery.HeaderContains("Message-Id", messageId), ct);
@@ -199,7 +199,7 @@ public sealed class MailKitEmail : IEmail
     {
         EnsureConnected();
 
-        var mailFolder = folder is null ? _imap!.Inbox : await _imap!.GetFolderAsync(folder, ct);
+        var mailFolder = (folder is null ? _imap!.Inbox : await _imap!.GetFolderAsync(folder, ct))!;
         await mailFolder.OpenAsync(FolderAccess.ReadOnly, ct);
 
         var uids = await mailFolder.SearchAsync(SearchQuery.HeaderContains("Message-Id", messageId), ct);
