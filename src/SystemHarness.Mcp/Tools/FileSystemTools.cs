@@ -21,7 +21,9 @@ public sealed class FileSystemTools(IHarness harness)
         return McpResponse.Content(content, "text", sw.ElapsedMilliseconds);
     }
 
-    [McpServerTool(Name = "file_write"), Description("Write text content to a file (creates or overwrites).")]
+    [McpServerTool(Name = "file_write"), Description(
+        "Write text content to a file (creates or overwrites). " +
+        "IMPORTANT: To delete a file use file_delete — never call file_write with empty content as a substitute for deletion.")]
     public async Task<string> WriteAsync(
         [Description("File path to write to (creates parent directories).")] string path,
         [Description("Text content to write.")] string content,
@@ -30,6 +32,10 @@ public sealed class FileSystemTools(IHarness harness)
         var sw = Stopwatch.StartNew();
         if (string.IsNullOrWhiteSpace(path))
             return McpResponse.Error("invalid_parameter", "path cannot be empty.", sw.ElapsedMilliseconds);
+        if (content.Length == 0 && await harness.FileSystem.ExistsAsync(path, ct))
+            return McpResponse.Error("invalid_operation",
+                "Refusing to overwrite an existing file with empty content. To delete a file, use file_delete instead.",
+                sw.ElapsedMilliseconds);
         await harness.FileSystem.WriteAsync(path, content, ct);
         ActionLog.Record("file_write", $"path={path}", sw.ElapsedMilliseconds, true);
         return McpResponse.Confirm($"Written to {path}.", sw.ElapsedMilliseconds);
