@@ -754,7 +754,7 @@ public class McpToolConventionTests
             "bookmark_not_found", "element_not_found", "empty_menu_path",
             "file_not_found", "filename_field_not_found", "image_not_found",
             "invalid_dimensions", "invalid_expect_type", "invalid_key",
-            "invalid_parameter", "invalid_timeout",
+            "invalid_operation", "invalid_parameter", "invalid_timeout",
             "menu_item_not_found", "missing_window", "monitor_not_found",
             "not_found", "not_set", "occurrence_out_of_range", "process_not_found",
             "text_not_found", "update_failed", "window_not_found", "wrong_verb",
@@ -799,7 +799,7 @@ public class McpToolConventionTests
 
         Assert.True(unknownCodes.Count == 0,
             $"Unknown error codes (add to knownCodes or use existing ones):\n{string.Join("\n", unknownCodes)}");
-        Assert.Equal(22, knownCodes.Count);
+        Assert.Equal(23, knownCodes.Count);
     }
 
     [Fact]
