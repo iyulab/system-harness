@@ -47,3 +47,6 @@ dev-docs/
 demo/results.json
 tmp/
 dev-docs/
+
+# IDE language server cache
+*.lscache
