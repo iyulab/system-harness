@@ -37,7 +37,8 @@ public class McpToolConventionTests
     {
         foreach (var type in ToolTypes)
         {
-            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            // Mirror CommandRegistrar.RegisterAll: static tool methods are registered too.
+            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
                 var attr = method.GetCustomAttribute<McpServerToolAttribute>();
@@ -118,7 +119,7 @@ public class McpToolConventionTests
         // Exact guard: tracks total command count across all tool types.
         // If you add or remove a tool, update this count AND classify in ReadOnlyTools/MutationTools.
         var count = AllTools().Count();
-        Assert.Equal(163, count);
+        Assert.Equal(174, count);
     }
 
     [Fact]
@@ -406,13 +407,13 @@ public class McpToolConventionTests
             [typeof(DisplayTools)] = 5,
             [typeof(FileSystemTools)] = 13,
             [typeof(KeyboardTools)] = 8,
-            [typeof(MonitorTools)] = 3,
+            [typeof(MonitorTools)] = 4,
             [typeof(MouseTools)] = 11,
             [typeof(OcrTools)] = 4,
             [typeof(OfficeTools)] = 10,
-            [typeof(ProcessTools)] = 13,
+            [typeof(ProcessTools)] = 14,
             [typeof(ReportTools)] = 3,
-            [typeof(SafetyTools)] = 3,
+            [typeof(SafetyTools)] = 12,
             [typeof(ScreenTools)] = 5,
             [typeof(SessionTools)] = 5,
             [typeof(ShellTools)] = 1,
@@ -468,14 +469,15 @@ public class McpToolConventionTests
         // Report reads
         "report_get_desktop", "report_get_window", "report_get_screen",
         // Monitor reads
-        "monitor_list",
+        "monitor_list", "monitor_read",
         // Session reads
         "session_compare", "session_bookmark_compare", "session_bookmark_list",
         // Safety reads
-        "safety_status",
+        "safety_status", "safety_action_history", "safety_get_zone", "safety_check_confirmation",
         // Process queries
         "process_list", "process_get_info", "process_check", "process_list_by_window",
         "process_find_by_port", "process_find_by_path", "process_get_children", "process_find_by_window",
+        "process_wait_exit",
         // Office reads
         // Dialog reads
         "dialog_check",
@@ -522,7 +524,8 @@ public class McpToolConventionTests
         // Session mutations
         "session_save", "session_bookmark",
         // Safety mutations
-        "safety_emergency_stop", "safety_resume",
+        "safety_emergency_stop", "safety_resume", "safety_set_zone", "safety_set_rate_limit",
+        "safety_confirm_before", "safety_approve", "safety_deny", "safety_clear_history",
         // Office writes
         "office_write_word", "office_write_excel", "office_write_pptx", "office_write_hwpx",
         "office_replace_word", "office_replace_hwpx",
@@ -743,7 +746,7 @@ public class McpToolConventionTests
             }
         }
 
-        Assert.Equal(126, requiredStrings.Count);
+        Assert.Equal(132, requiredStrings.Count);
     }
 
     [Fact]
