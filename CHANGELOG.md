@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.28.4]
+
+**Gap notice — not a release entry.** Releases from 0.4.0 through 0.28.4 were published without
+being recorded here. Reconstructing them now would mean describing changes from memory rather than
+from a record, so the gap is marked instead of filled: for anything in that range, read the commit
+history. Entries resume from the next release.
+
+Note that the entry below is the last recorded one and is far behind the current version — do not
+read it as a description of what this package currently does.
+
 ## [0.3.0-preview.1] - 2026-02-10
 
 ### Added
