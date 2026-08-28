@@ -36,7 +36,7 @@ jobs:
         run: dotnet build --no-restore --nologo
 
       - name: Test (CI only)
-        run: dotnet test tests/SystemHarness.Tests --no-build --nologo --filter "Category=CI" --logger "trx;LogFileName=results.trx"
+        run: dotnet test tests/SystemHarness.Tests --no-build --nologo --filter "Category=CI" --logger "trx;LogFileName=results.trx" --blame-hang --blame-hang-timeout 5m
 
 
   release:
