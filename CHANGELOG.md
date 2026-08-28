@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.28.5]
+
+### Changed
+- Updated `ModelContextProtocol` to 2.2.0 (previously 1.3.0). No public API changes — this
+  package's MCP server only registers tools over stdio and does not use any of the capabilities
+  the 2.0 protocol revision deprecated (roots, sampling, logging).
+- Aligned transitive floors raised by that update: `Microsoft.Extensions.DependencyInjection[.
+  Abstractions]`/`.Hosting` 10.0.8 → 10.0.11, `Microsoft.Extensions.AI`/`.AI.OpenAI` 10.6.0 →
+  10.9.0, and (required by the latter) `OpenAI` SDK 2.10.0 → 2.12.0.
+
 ## [0.28.4]
 
 **Gap notice — not a release entry.** Releases from 0.4.0 through 0.28.4 were published without
