@@ -40,7 +40,11 @@ public class AppLifecycleTests : SimulationTestBase
         }
         finally
         {
-            try { await Process.KillAsync(proc.Pid, TestContext.Current.CancellationToken); } catch { }
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is
+            // exactly when this kill matters most.
+#pragma warning disable xUnit1051
+            try { await Process.KillAsync(proc.Pid, CancellationToken.None); } catch { }
+#pragma warning restore xUnit1051
         }
     }
 

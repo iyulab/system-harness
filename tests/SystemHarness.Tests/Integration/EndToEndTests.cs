@@ -75,8 +75,8 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
             // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this kill matters most.
             #pragma warning disable xUnit1051
             try { await _harness.Process.KillAsync(proc.Pid, CancellationToken.None); } catch { }
+            await Task.Delay(500, CancellationToken.None);
             #pragma warning restore xUnit1051
-            await Task.Delay(500, TestContext.Current.CancellationToken);
 
             // Verify our specific PID is gone (not "notepad" by name, other tests may have instances)
             try
@@ -179,8 +179,8 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
             // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this kill matters most.
             #pragma warning disable xUnit1051
             try { await _harness.Process.KillAsync(proc.Pid, CancellationToken.None); } catch { }
+            await Task.Delay(300, CancellationToken.None);
             #pragma warning restore xUnit1051
-            await Task.Delay(300, TestContext.Current.CancellationToken);
         }
     }
 

@@ -39,7 +39,10 @@ public class WindowsMouseTests
         finally
         {
             // Restore original position
-            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this cleanup matters most.
+            #pragma warning disable xUnit1051
+            await _mouse.MoveAsync(origX, origY, CancellationToken.None);
+            #pragma warning restore xUnit1051
         }
     }
 
@@ -56,7 +59,10 @@ public class WindowsMouseTests
         }
         finally
         {
-            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this cleanup matters most.
+            #pragma warning disable xUnit1051
+            await _mouse.MoveAsync(origX, origY, CancellationToken.None);
+            #pragma warning restore xUnit1051
         }
     }
 
@@ -71,7 +77,10 @@ public class WindowsMouseTests
         }
         finally
         {
-            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this cleanup matters most.
+            #pragma warning disable xUnit1051
+            await _mouse.MoveAsync(origX, origY, CancellationToken.None);
+            #pragma warning restore xUnit1051
         }
     }
 
@@ -85,7 +94,10 @@ public class WindowsMouseTests
         }
         finally
         {
-            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this cleanup matters most.
+            #pragma warning disable xUnit1051
+            await _mouse.MoveAsync(origX, origY, CancellationToken.None);
+            #pragma warning restore xUnit1051
         }
     }
 
@@ -102,7 +114,10 @@ public class WindowsMouseTests
         }
         finally
         {
-            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this cleanup matters most.
+            #pragma warning disable xUnit1051
+            await _mouse.MoveAsync(origX, origY, CancellationToken.None);
+            #pragma warning restore xUnit1051
         }
     }
 
@@ -121,7 +136,10 @@ public class WindowsMouseTests
         }
         finally
         {
-            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this cleanup matters most.
+            #pragma warning disable xUnit1051
+            await _mouse.MoveAsync(origX, origY, CancellationToken.None);
+            #pragma warning restore xUnit1051
         }
     }
 }

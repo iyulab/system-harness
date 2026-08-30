@@ -51,7 +51,10 @@ public class KeyboardExtensionTests
         finally
         {
             // Restore original state
-            await _keyboard.ToggleKeyAsync(Key.CapsLock, initialState, TestContext.Current.CancellationToken);
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this cleanup matters most.
+            #pragma warning disable xUnit1051
+            await _keyboard.ToggleKeyAsync(Key.CapsLock, initialState, CancellationToken.None);
+            #pragma warning restore xUnit1051
         }
     }
 }
