@@ -36,7 +36,16 @@ jobs:
         run: dotnet build --no-restore --nologo
 
       - name: Test (CI only)
-        run: dotnet test tests/SystemHarness.Tests --no-build --nologo --filter "Category=CI" --logger "trx;LogFileName=results.trx" --blame-hang --blame-hang-timeout 5m
+        # `dotnet test` (MTP server-pipe mode) discovers zero tests on this project's
+        # net10.0-windows10.0.19041.0 TFM -- reproduced both locally and on this exact
+        # windows-latest runner (see claudedocs/tools-system-harness/issues/ISSUE-system-harness-
+        # 20260829-220500-mtp-windows-tfm-dotnet-test-crash.md). The built .exe's in-process xUnit
+        # v3 console runner discovers and runs tests normally, so invoke it directly instead.
+        # `-longRunning 300` reports (not kills) tests running past 5m -- the closest equivalent
+        # this runner exposes to `--blame-hang-timeout`, which is an MTP/`dotnet test` concept.
+        run: |
+          & "tests/SystemHarness.Tests/bin/Debug/net10.0-windows10.0.19041.0/SystemHarness.Tests.exe" -trait "Category=CI" -result-trx results.trx -longRunning 300
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 
   release:
