@@ -8,18 +8,19 @@ public class UIAutomationNotepadFixture : IAsyncLifetime
     public ProcessGuardian Guardian { get; } = new();
     public int NotepadPid { get; private set; }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         var proc = Guardian.StartProcess("notepad.exe");
         NotepadPid = proc.Id;
         await Task.Delay(2000);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await NotepadHelper.CloseNotepadByPidAsync(NotepadPid);
         await Guardian.KillAllProcessesAsync();
         Guardian.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
 

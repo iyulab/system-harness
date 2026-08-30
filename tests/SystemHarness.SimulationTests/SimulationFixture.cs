@@ -12,13 +12,14 @@ public class SimulationFixture : IAsyncLifetime
     public ProcessGuardian Guardian { get; } = new();
     public WindowsHarness Harness { get; } = new();
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await Guardian.KillAllProcessesAsync();
         Guardian.Dispose();
         Harness.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
 

@@ -13,17 +13,18 @@ public class DesktopInteractionFixture : IAsyncLifetime
     public ProcessGuardian Guardian { get; } = new();
     private HashSet<nint> _initialNotepadHandles = [];
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         _initialNotepadHandles = await NotepadHelper.SnapshotNotepadHandlesAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         // Close any Notepad windows created during this test collection
         await NotepadHelper.CloseNewNotepadWindowsAsync(_initialNotepadHandles);
         await Guardian.KillAllProcessesAsync();
         Guardian.Dispose();
+        GC.SuppressFinalize(this);
     }
 }
 

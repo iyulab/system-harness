@@ -25,9 +25,9 @@ public abstract class SimulationTestBase : IAsyncLifetime
         Fixture = fixture;
     }
 
-    public virtual Task InitializeAsync() => Task.CompletedTask;
+    public virtual ValueTask InitializeAsync() => ValueTask.CompletedTask;
 
-    public virtual async Task DisposeAsync()
+    public virtual async ValueTask DisposeAsync()
     {
         // Kill all processes launched during the test
         foreach (var pid in _launchedPids)
@@ -35,6 +35,7 @@ public abstract class SimulationTestBase : IAsyncLifetime
             try { await Process.KillAsync(pid); } catch { }
         }
         _launchedPids.Clear();
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>

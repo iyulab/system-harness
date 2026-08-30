@@ -9,22 +9,22 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
 {
     private WindowsHarness _harness = null!;
 
-    public Task InitializeAsync()
+    public ValueTask InitializeAsync()
     {
         _harness = new WindowsHarness(new HarnessOptions
         {
             CommandPolicy = CommandPolicy.CreateDefault(),
             AuditLog = new InMemoryAuditLog(),
         });
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     public void Dispose() => _harness?.Dispose();
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         _harness.Dispose();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     [Fact]

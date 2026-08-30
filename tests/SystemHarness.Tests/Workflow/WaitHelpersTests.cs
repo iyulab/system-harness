@@ -11,7 +11,7 @@ public sealed class WaitHelpersTests : IAsyncLifetime, IDisposable
     private int _pid;
     private HashSet<nint> _handlesBefore = [];
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         _handlesBefore = await NotepadHelper.SnapshotNotepadHandlesAsync();
         var info = await _harness.Process.StartAsync("notepad.exe");
@@ -21,7 +21,7 @@ public sealed class WaitHelpersTests : IAsyncLifetime, IDisposable
 
     public void Dispose() => _harness.Dispose();
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await NotepadHelper.CloseNotepadByPidAsync(_pid);
         await NotepadHelper.CloseNewNotepadWindowsAsync(_handlesBefore);
