@@ -30,7 +30,7 @@ public sealed class ConvenienceHelpersTests : IAsyncLifetime, IDisposable
     [Fact]
     public async Task CaptureAndRecognizeAsync_ReturnsScreenshotAndOcr()
     {
-        var (screenshot, ocr) = await ConvenienceHelpers.CaptureAndRecognizeAsync(_harness);
+        var (screenshot, ocr) = await ConvenienceHelpers.CaptureAndRecognizeAsync(_harness, TestContext.Current.CancellationToken);
         using var _ = screenshot;
 
         Assert.NotNull(screenshot);
@@ -47,17 +47,17 @@ public sealed class ConvenienceHelpersTests : IAsyncLifetime, IDisposable
 
         try
         {
-            await _harness.Process.StartAsync("notepad.exe");
-            await _harness.Window.WaitForWindowAsync("Notepad", TimeSpan.FromSeconds(10));
-            await Task.Delay(500);
+            await _harness.Process.StartAsync("notepad.exe", ct: TestContext.Current.CancellationToken);
+            await _harness.Window.WaitForWindowAsync("Notepad", TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+            await Task.Delay(500, TestContext.Current.CancellationToken);
 
-            await _harness.Window.FocusAsync("Notepad");
-            await Task.Delay(500);
+            await _harness.Window.FocusAsync("Notepad", TestContext.Current.CancellationToken);
+            await Task.Delay(500, TestContext.Current.CancellationToken);
 
-            await _harness.Keyboard.TypeAsync("ConvenienceTest123");
-            await Task.Delay(1000);
+            await _harness.Keyboard.TypeAsync("ConvenienceTest123", ct: TestContext.Current.CancellationToken);
+            await Task.Delay(1000, TestContext.Current.CancellationToken);
 
-            var (screenshot, ocr) = await ConvenienceHelpers.CaptureAndRecognizeWindowAsync(_harness, "Notepad");
+            var (screenshot, ocr) = await ConvenienceHelpers.CaptureAndRecognizeWindowAsync(_harness, "Notepad", TestContext.Current.CancellationToken);
             using var _ = screenshot;
 
             Assert.NotNull(screenshot);
@@ -76,7 +76,7 @@ public sealed class ConvenienceHelpersTests : IAsyncLifetime, IDisposable
     public async Task FindTextOnScreenAsync_FindsText()
     {
         // The taskbar/desktop should have some text visible — just verify no exception
-        var words = await ConvenienceHelpers.FindTextOnScreenAsync(_harness, "Windows");
+        var words = await ConvenienceHelpers.FindTextOnScreenAsync(_harness, "Windows", TestContext.Current.CancellationToken);
 
         Assert.NotNull(words);
     }
@@ -88,23 +88,23 @@ public sealed class ConvenienceHelpersTests : IAsyncLifetime, IDisposable
 
         try
         {
-            await _harness.Process.StartAsync("notepad.exe");
+            await _harness.Process.StartAsync("notepad.exe", ct: TestContext.Current.CancellationToken);
             // Wait for Notepad window to appear
-            await _harness.Window.WaitForWindowAsync("Notepad", TimeSpan.FromSeconds(10));
-            await Task.Delay(500);
+            await _harness.Window.WaitForWindowAsync("Notepad", TimeSpan.FromSeconds(10), TestContext.Current.CancellationToken);
+            await Task.Delay(500, TestContext.Current.CancellationToken);
 
-            await _harness.Window.FocusAsync("Notepad");
-            await Task.Delay(500);
+            await _harness.Window.FocusAsync("Notepad", TestContext.Current.CancellationToken);
+            await Task.Delay(500, TestContext.Current.CancellationToken);
 
-            await _harness.Keyboard.TypeAsync("ClickTarget");
-            await Task.Delay(1000);
+            await _harness.Keyboard.TypeAsync("ClickTarget", ct: TestContext.Current.CancellationToken);
+            await Task.Delay(1000, TestContext.Current.CancellationToken);
 
             // Verify OCR can see the text before attempting click
-            var words = await ConvenienceHelpers.FindTextInWindowAsync(_harness, "Notepad", "ClickTarget");
+            var words = await ConvenienceHelpers.FindTextInWindowAsync(_harness, "Notepad", "ClickTarget", TestContext.Current.CancellationToken);
             Assert.NotEmpty(words);
 
             // Should find and click "ClickTarget" in the Notepad window without throwing
-            await ConvenienceHelpers.ClickTextInWindowAsync(_harness, "Notepad", "ClickTarget");
+            await ConvenienceHelpers.ClickTextInWindowAsync(_harness, "Notepad", "ClickTarget", TestContext.Current.CancellationToken);
         }
         finally
         {

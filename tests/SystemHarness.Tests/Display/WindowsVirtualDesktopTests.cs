@@ -11,7 +11,7 @@ public class WindowsVirtualDesktopTests
     public async Task GetDesktopCountAsync_ThrowsHarnessException()
     {
         var ex = await Assert.ThrowsAsync<HarnessException>(
-            () => _vd.GetDesktopCountAsync());
+            () => _vd.GetDesktopCountAsync(TestContext.Current.CancellationToken));
         Assert.Contains("undocumented COM", ex.Message);
     }
 
@@ -19,7 +19,7 @@ public class WindowsVirtualDesktopTests
     public async Task GetCurrentDesktopIndexAsync_ThrowsHarnessException()
     {
         var ex = await Assert.ThrowsAsync<HarnessException>(
-            () => _vd.GetCurrentDesktopIndexAsync());
+            () => _vd.GetCurrentDesktopIndexAsync(TestContext.Current.CancellationToken));
         Assert.Contains("undocumented COM", ex.Message);
     }
 
@@ -27,7 +27,7 @@ public class WindowsVirtualDesktopTests
     public async Task MoveWindowToDesktopAsync_ThrowsHarnessException()
     {
         var ex = await Assert.ThrowsAsync<HarnessException>(
-            () => _vd.MoveWindowToDesktopAsync("Notepad", 1));
+            () => _vd.MoveWindowToDesktopAsync("Notepad", 1, TestContext.Current.CancellationToken));
         Assert.Contains("IVirtualDesktopManager", ex.Message);
     }
 

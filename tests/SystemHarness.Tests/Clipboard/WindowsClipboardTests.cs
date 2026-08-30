@@ -12,8 +12,8 @@ public class WindowsClipboardTests
     {
         var text = $"SystemHarness test {Guid.NewGuid():N}";
 
-        await _clipboard.SetTextAsync(text);
-        var result = await _clipboard.GetTextAsync();
+        await _clipboard.SetTextAsync(text, TestContext.Current.CancellationToken);
+        var result = await _clipboard.GetTextAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(text, result);
     }
@@ -21,8 +21,8 @@ public class WindowsClipboardTests
     [Fact]
     public async Task SetTextAsync_EmptyString_Works()
     {
-        await _clipboard.SetTextAsync("");
-        var result = await _clipboard.GetTextAsync();
+        await _clipboard.SetTextAsync("", TestContext.Current.CancellationToken);
+        var result = await _clipboard.GetTextAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal("", result);
     }
@@ -32,8 +32,8 @@ public class WindowsClipboardTests
     {
         var text = "Hello 안녕하세요 こんにちは 🎉";
 
-        await _clipboard.SetTextAsync(text);
-        var result = await _clipboard.GetTextAsync();
+        await _clipboard.SetTextAsync(text, TestContext.Current.CancellationToken);
+        var result = await _clipboard.GetTextAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(text, result);
     }
@@ -43,8 +43,8 @@ public class WindowsClipboardTests
     {
         var text = new string('A', 10000);
 
-        await _clipboard.SetTextAsync(text);
-        var result = await _clipboard.GetTextAsync();
+        await _clipboard.SetTextAsync(text, TestContext.Current.CancellationToken);
+        var result = await _clipboard.GetTextAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(text, result);
     }
@@ -54,8 +54,8 @@ public class WindowsClipboardTests
     {
         var html = "<p>Hello World</p>";
 
-        await _clipboard.SetHtmlAsync(html);
-        var result = await _clipboard.GetHtmlAsync();
+        await _clipboard.SetHtmlAsync(html, TestContext.Current.CancellationToken);
+        var result = await _clipboard.GetHtmlAsync(TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.Contains("Hello World", result);
@@ -67,8 +67,8 @@ public class WindowsClipboardTests
         // Regression test: CF_HTML byte offsets must account for multi-byte UTF-8
         var html = "<p>한글 テスト 🔥 emoji</p>";
 
-        await _clipboard.SetHtmlAsync(html);
-        var result = await _clipboard.GetHtmlAsync();
+        await _clipboard.SetHtmlAsync(html, TestContext.Current.CancellationToken);
+        var result = await _clipboard.GetHtmlAsync(TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.Contains("한글", result);
@@ -82,8 +82,8 @@ public class WindowsClipboardTests
         // Create a minimal valid BMP (1x1 pixel, 24-bit)
         var bmp = CreateMinimalBmp();
 
-        await _clipboard.SetImageAsync(bmp);
-        var result = await _clipboard.GetImageAsync();
+        await _clipboard.SetImageAsync(bmp, TestContext.Current.CancellationToken);
+        var result = await _clipboard.GetImageAsync(TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         // Result should be a valid BMP
@@ -96,16 +96,16 @@ public class WindowsClipboardTests
     public async Task SetImageAsync_InvalidData_ThrowsHarnessException()
     {
         await Assert.ThrowsAsync<HarnessException>(() =>
-            _clipboard.SetImageAsync(new byte[] { 1, 2, 3 }));
+            _clipboard.SetImageAsync(new byte[] { 1, 2, 3 }, TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task GetImageAsync_WhenClipboardHasText_ReturnsNull()
     {
         // Set text (not image) on clipboard
-        await _clipboard.SetTextAsync("just text");
+        await _clipboard.SetTextAsync("just text", TestContext.Current.CancellationToken);
 
-        var result = await _clipboard.GetImageAsync();
+        var result = await _clipboard.GetImageAsync(TestContext.Current.CancellationToken);
 
         Assert.Null(result);
     }

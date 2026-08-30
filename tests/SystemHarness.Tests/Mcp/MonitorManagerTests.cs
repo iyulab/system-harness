@@ -71,10 +71,10 @@ public class MonitorManagerTests : IDisposable
     {
         var outputPath = Path.Combine(_tempDir, "write-test.jsonl");
 
-        await MonitorManager.WriteEventAsync(outputPath, new { type = "test", value = 42 });
-        await MonitorManager.WriteEventAsync(outputPath, new { type = "test", value = 99 });
+        await MonitorManager.WriteEventAsync(outputPath, new { type = "test", value = 42 }, TestContext.Current.CancellationToken);
+        await MonitorManager.WriteEventAsync(outputPath, new { type = "test", value = 99 }, TestContext.Current.CancellationToken);
 
-        var lines = await File.ReadAllLinesAsync(outputPath);
+        var lines = await File.ReadAllLinesAsync(outputPath, TestContext.Current.CancellationToken);
         Assert.Equal(2, lines.Length);
 
         var first = JsonDocument.Parse(lines[0]);
@@ -87,17 +87,17 @@ public class MonitorManagerTests : IDisposable
     {
         var outputPath = Path.Combine(_tempDir, "read-test.jsonl");
 
-        await MonitorManager.WriteEventAsync(outputPath, new { type = "a", timestamp = DateTime.UtcNow.ToString("O") });
-        await MonitorManager.WriteEventAsync(outputPath, new { type = "b", timestamp = DateTime.UtcNow.ToString("O") });
+        await MonitorManager.WriteEventAsync(outputPath, new { type = "a", timestamp = DateTime.UtcNow.ToString("O") }, TestContext.Current.CancellationToken);
+        await MonitorManager.WriteEventAsync(outputPath, new { type = "b", timestamp = DateTime.UtcNow.ToString("O") }, TestContext.Current.CancellationToken);
 
-        var events = await MonitorManager.ReadEventsAsync(outputPath);
+        var events = await MonitorManager.ReadEventsAsync(outputPath, ct: TestContext.Current.CancellationToken);
         Assert.Equal(2, events.Count);
     }
 
     [Fact]
     public async Task ReadEventsAsync_NonexistentFile_ReturnsEmpty()
     {
-        var events = await MonitorManager.ReadEventsAsync(Path.Combine(_tempDir, "nope.jsonl"));
+        var events = await MonitorManager.ReadEventsAsync(Path.Combine(_tempDir, "nope.jsonl"), ct: TestContext.Current.CancellationToken);
         Assert.Empty(events);
     }
 
@@ -168,11 +168,11 @@ public class MonitorManagerTests : IDisposable
         var oldTime = "2020-01-01T00:00:00Z";
         var newTime = "2030-01-01T00:00:00Z";
 
-        await MonitorManager.WriteEventAsync(outputPath, new { type = "old", timestamp = oldTime });
-        await MonitorManager.WriteEventAsync(outputPath, new { type = "new", timestamp = newTime });
+        await MonitorManager.WriteEventAsync(outputPath, new { type = "old", timestamp = oldTime }, TestContext.Current.CancellationToken);
+        await MonitorManager.WriteEventAsync(outputPath, new { type = "new", timestamp = newTime }, TestContext.Current.CancellationToken);
 
         // since = 2025 — should exclude 2020 event, include 2030 event
-        var events = await MonitorManager.ReadEventsAsync(outputPath, since: new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        var events = await MonitorManager.ReadEventsAsync(outputPath, since: new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc), ct: TestContext.Current.CancellationToken);
 
         Assert.Single(events);
         Assert.Equal("new", events[0].GetProperty("type").GetString());
@@ -182,9 +182,9 @@ public class MonitorManagerTests : IDisposable
     public async Task ReadEventsAsync_MalformedLines_Skipped()
     {
         var outputPath = Path.Combine(_tempDir, "malformed.jsonl");
-        await File.WriteAllTextAsync(outputPath, "{\"type\":\"good\"}\nnot-json\n{\"type\":\"also_good\"}\n");
+        await File.WriteAllTextAsync(outputPath, "{\"type\":\"good\"}\nnot-json\n{\"type\":\"also_good\"}\n", TestContext.Current.CancellationToken);
 
-        var events = await MonitorManager.ReadEventsAsync(outputPath);
+        var events = await MonitorManager.ReadEventsAsync(outputPath, ct: TestContext.Current.CancellationToken);
         Assert.Equal(2, events.Count);
     }
 
@@ -192,9 +192,9 @@ public class MonitorManagerTests : IDisposable
     public async Task ReadEventsAsync_EmptyLines_Skipped()
     {
         var outputPath = Path.Combine(_tempDir, "empty-lines.jsonl");
-        await File.WriteAllTextAsync(outputPath, "{\"a\":1}\n\n\n{\"b\":2}\n");
+        await File.WriteAllTextAsync(outputPath, "{\"a\":1}\n\n\n{\"b\":2}\n", TestContext.Current.CancellationToken);
 
-        var events = await MonitorManager.ReadEventsAsync(outputPath);
+        var events = await MonitorManager.ReadEventsAsync(outputPath, ct: TestContext.Current.CancellationToken);
         Assert.Equal(2, events.Count);
     }
 

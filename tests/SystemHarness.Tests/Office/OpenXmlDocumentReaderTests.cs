@@ -36,8 +36,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteWordAsync(path, content);
-        var result = await _reader.ReadWordAsync(path);
+        await _reader.WriteWordAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadWordAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, result.Paragraphs.Count);
         Assert.Equal("Hello World", result.Paragraphs[0].Text);
@@ -63,8 +63,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteWordAsync(path, content);
-        var result = await _reader.ReadWordAsync(path);
+        await _reader.WriteWordAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadWordAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Single(result.Paragraphs);
         Assert.Equal(3, result.Paragraphs[0].Runs.Count);
@@ -89,8 +89,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteWordAsync(path, content);
-        var result = await _reader.ReadWordAsync(path);
+        await _reader.WriteWordAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadWordAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Single(result.Tables);
         Assert.Equal(2, result.Tables[0].Rows.Count);
@@ -108,13 +108,13 @@ public class OpenXmlDocumentReaderTests : IDisposable
                 new DocumentParagraph { Text = "Hello World, Hello Again" },
             ],
         };
-        await _reader.WriteWordAsync(path, content);
+        await _reader.WriteWordAsync(path, content, TestContext.Current.CancellationToken);
 
-        int count = await _reader.FindReplaceWordAsync(path, "Hello", "Hi");
+        int count = await _reader.FindReplaceWordAsync(path, "Hello", "Hi", TestContext.Current.CancellationToken);
 
         Assert.Equal(2, count);
 
-        var result = await _reader.ReadWordAsync(path);
+        var result = await _reader.ReadWordAsync(path, TestContext.Current.CancellationToken);
         Assert.Contains("Hi", result.Paragraphs[0].Text);
         Assert.DoesNotContain("Hello", result.Paragraphs[0].Text);
     }
@@ -130,8 +130,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             FooterText = "Page 1",
         };
 
-        await _reader.WriteWordAsync(path, content);
-        var result = await _reader.ReadWordAsync(path);
+        await _reader.WriteWordAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadWordAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Equal("My Header", result.HeaderText);
         Assert.Equal("Page 1", result.FooterText);
@@ -157,8 +157,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteExcelAsync(path, content);
-        var result = await _reader.ReadExcelAsync(path);
+        await _reader.WriteExcelAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadExcelAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Single(result.Sheets);
         Assert.Equal("Data", result.Sheets[0].Name);
@@ -184,8 +184,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteExcelAsync(path, content);
-        var result = await _reader.ReadExcelAsync(path);
+        await _reader.WriteExcelAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadExcelAsync(path, TestContext.Current.CancellationToken);
 
         Assert.NotEmpty(result.Sheets[0].RichRows);
         Assert.NotEmpty(result.Sheets[0].RichRows[0].Cells);
@@ -203,8 +203,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteExcelAsync(path, content);
-        var result = await _reader.ReadExcelAsync(path);
+        await _reader.WriteExcelAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadExcelAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, result.Sheets.Count);
         Assert.Equal("Sheet1", result.Sheets[0].Name);
@@ -225,8 +225,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WritePowerPointAsync(path, content);
-        var result = await _reader.ReadPowerPointAsync(path);
+        await _reader.WritePowerPointAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadPowerPointAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, result.Slides.Count);
         Assert.Contains("Title", result.Slides[0].Texts);
@@ -243,8 +243,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WritePowerPointAsync(path, content);
-        var result = await _reader.ReadPowerPointAsync(path);
+        await _reader.WritePowerPointAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadPowerPointAsync(path, TestContext.Current.CancellationToken);
 
         // The writer creates shapes from texts, so shapes should be populated
         Assert.NotEmpty(result.Slides[0].Shapes);
@@ -282,8 +282,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WritePowerPointAsync(path, content);
-        var result = await _reader.ReadPowerPointAsync(path);
+        await _reader.WritePowerPointAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadPowerPointAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Single(result.Slides);
         Assert.Equal(2, result.Slides[0].Shapes.Count);
@@ -318,8 +318,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WritePowerPointAsync(path, content);
-        var result = await _reader.ReadPowerPointAsync(path);
+        await _reader.WritePowerPointAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadPowerPointAsync(path, TestContext.Current.CancellationToken);
 
         var runs = result.Slides[0].Shapes[0].TextRuns;
         Assert.Equal(3, runs.Count);
@@ -343,8 +343,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WritePowerPointAsync(path, content);
-        var result = await _reader.ReadPowerPointAsync(path);
+        await _reader.WritePowerPointAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadPowerPointAsync(path, TestContext.Current.CancellationToken);
 
         Assert.NotNull(result.Slides[0].Notes);
         Assert.Contains("Speaker notes here", result.Slides[0].Notes);
@@ -381,8 +381,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WritePowerPointAsync(path, content);
-        var result = await _reader.ReadPowerPointAsync(path);
+        await _reader.WritePowerPointAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadPowerPointAsync(path, TestContext.Current.CancellationToken);
 
         Assert.NotEmpty(result.Slides[0].Images);
         Assert.Equal("image/png", result.Slides[0].Images[0].ContentType);
@@ -419,8 +419,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WritePowerPointAsync(path, content);
-        var result = await _reader.ReadPowerPointAsync(path);
+        await _reader.WritePowerPointAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadPowerPointAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Equal(3, result.Slides.Count);
         Assert.NotNull(result.Slides[0].Notes);
@@ -454,8 +454,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteExcelAsync(path, content);
-        var result = await _reader.ReadExcelAsync(path);
+        await _reader.WriteExcelAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadExcelAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Single(result.Sheets);
         Assert.NotEmpty(result.Sheets[0].RichRows);
@@ -489,8 +489,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteExcelAsync(path, content);
-        var result = await _reader.ReadExcelAsync(path);
+        await _reader.WriteExcelAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadExcelAsync(path, TestContext.Current.CancellationToken);
 
         var cells = result.Sheets[0].RichRows[0].Cells;
         var formulaCell = cells.First(c => c.Address == "C1");
@@ -526,8 +526,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteExcelAsync(path, content);
-        var result = await _reader.ReadExcelAsync(path);
+        await _reader.WriteExcelAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadExcelAsync(path, TestContext.Current.CancellationToken);
 
         var cell = result.Sheets[0].RichRows[0].Cells.First(c => c.Address == "A1");
         Assert.NotNull(cell.Style);
@@ -558,8 +558,8 @@ public class OpenXmlDocumentReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteExcelAsync(path, content);
-        var result = await _reader.ReadExcelAsync(path);
+        await _reader.WriteExcelAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadExcelAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Contains("A1:C1", result.Sheets[0].MergedCells);
     }

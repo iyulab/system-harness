@@ -51,7 +51,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.ClickDialogButtonAsync("OK");
+        await handler.ClickDialogButtonAsync("OK", TestContext.Current.CancellationToken);
 
         Assert.Single(kb.Calls);
         Assert.Equal("KeyPress", kb.Calls[0].Method);
@@ -64,7 +64,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.ClickDialogButtonAsync("Cancel");
+        await handler.ClickDialogButtonAsync("Cancel", TestContext.Current.CancellationToken);
 
         Assert.Single(kb.Calls);
         Assert.Equal("KeyPress", kb.Calls[0].Method);
@@ -77,7 +77,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.ClickDialogButtonAsync("Yes");
+        await handler.ClickDialogButtonAsync("Yes", TestContext.Current.CancellationToken);
 
         Assert.Single(kb.Calls);
         Assert.Equal("Hotkey", kb.Calls[0].Method);
@@ -90,7 +90,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.ClickDialogButtonAsync("No");
+        await handler.ClickDialogButtonAsync("No", TestContext.Current.CancellationToken);
 
         Assert.Single(kb.Calls);
         Assert.Equal("Hotkey", kb.Calls[0].Method);
@@ -103,7 +103,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.ClickDialogButtonAsync("Save");
+        await handler.ClickDialogButtonAsync("Save", TestContext.Current.CancellationToken);
 
         Assert.Single(kb.Calls);
         Assert.Equal("Hotkey", kb.Calls[0].Method);
@@ -116,7 +116,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.ClickDialogButtonAsync("Don't Save");
+        await handler.ClickDialogButtonAsync("Don't Save", TestContext.Current.CancellationToken);
 
         Assert.Single(kb.Calls);
         Assert.Equal("Hotkey", kb.Calls[0].Method);
@@ -129,7 +129,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.ClickDialogButtonAsync("Dont Save");
+        await handler.ClickDialogButtonAsync("Dont Save", TestContext.Current.CancellationToken);
 
         Assert.Single(kb.Calls);
         Assert.Equal("Hotkey", kb.Calls[0].Method);
@@ -142,7 +142,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.ClickDialogButtonAsync("ok");
+        await handler.ClickDialogButtonAsync("ok", TestContext.Current.CancellationToken);
 
         Assert.Single(kb.Calls);
         Assert.Equal("KeyPress", kb.Calls[0].Method);
@@ -155,7 +155,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.ClickDialogButtonAsync("Custom Button");
+        await handler.ClickDialogButtonAsync("Custom Button", TestContext.Current.CancellationToken);
 
         // 10 Tab presses + 1 Enter
         Assert.Equal(11, kb.Calls.Count);
@@ -176,7 +176,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.DismissMessageBoxAsync(null);
+        await handler.DismissMessageBoxAsync(null, TestContext.Current.CancellationToken);
 
         Assert.Single(kb.Calls);
         Assert.Equal("KeyPress", kb.Calls[0].Method);
@@ -189,7 +189,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.DismissMessageBoxAsync("Yes");
+        await handler.DismissMessageBoxAsync("Yes", TestContext.Current.CancellationToken);
 
         Assert.Single(kb.Calls);
         Assert.Equal("Hotkey", kb.Calls[0].Method);
@@ -204,7 +204,7 @@ public class DialogHandlerTests
         var kb = new StubKeyboard();
         var handler = new WindowsDialogHandler(kb);
 
-        await handler.SetFileDialogPathAsync(@"C:\test\file.txt");
+        await handler.SetFileDialogPathAsync(@"C:\test\file.txt", TestContext.Current.CancellationToken);
 
         Assert.Single(kb.TypedTexts);
         Assert.Equal(@"C:\test\file.txt", kb.TypedTexts[0]);
@@ -220,7 +220,7 @@ public class DialogHandlerTests
     {
         var handler = new WindowsDialogHandler();
 
-        var result = await handler.IsDialogOpenAsync("NonExistentWindow_XYZ_67890");
+        var result = await handler.IsDialogOpenAsync("NonExistentWindow_XYZ_67890", TestContext.Current.CancellationToken);
 
         Assert.False(result);
     }

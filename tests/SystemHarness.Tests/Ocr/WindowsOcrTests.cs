@@ -24,7 +24,7 @@ public class WindowsOcrTests : IDisposable
     [Fact]
     public async Task RecognizeScreen_ReturnsNonEmptyResult()
     {
-        var result = await _ocr.RecognizeScreenAsync();
+        var result = await _ocr.RecognizeScreenAsync(ct: TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.NotNull(result.Text);
@@ -36,8 +36,8 @@ public class WindowsOcrTests : IDisposable
     [Fact]
     public async Task RecognizeImage_WithScreenshot_Works()
     {
-        using var screenshot = await _screen.CaptureAsync();
-        var result = await _ocr.RecognizeImageAsync(screenshot.Bytes);
+        using var screenshot = await _screen.CaptureAsync(ct: TestContext.Current.CancellationToken);
+        var result = await _ocr.RecognizeImageAsync(screenshot.Bytes, ct: TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.NotNull(result.Lines);
@@ -47,7 +47,7 @@ public class WindowsOcrTests : IDisposable
     [Fact]
     public async Task RecognizeScreen_HasLines()
     {
-        var result = await _ocr.RecognizeScreenAsync();
+        var result = await _ocr.RecognizeScreenAsync(ct: TestContext.Current.CancellationToken);
 
         Assert.NotNull(result.Lines);
         Assert.True(result.Lines.Count > 0, "Desktop should have at least some OCR-detectable lines");
@@ -56,7 +56,7 @@ public class WindowsOcrTests : IDisposable
     [Fact]
     public async Task RecognizeScreen_WordsHaveBoundingRects()
     {
-        var result = await _ocr.RecognizeScreenAsync();
+        var result = await _ocr.RecognizeScreenAsync(ct: TestContext.Current.CancellationToken);
 
         Assert.NotNull(result.Lines);
         var allWords = result.Lines.SelectMany(l => l.Words).ToList();
@@ -73,9 +73,9 @@ public class WindowsOcrTests : IDisposable
     [Fact]
     public async Task RecognizeImage_UnsupportedLanguage_ThrowsHarnessException()
     {
-        using var screenshot = await _screen.CaptureAsync();
+        using var screenshot = await _screen.CaptureAsync(ct: TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<HarnessException>(() =>
-            _ocr.RecognizeImageAsync(screenshot.Bytes, new OcrOptions { Language = "zz-ZZ" }));
+            _ocr.RecognizeImageAsync(screenshot.Bytes, new OcrOptions { Language = "zz-ZZ" }, TestContext.Current.CancellationToken));
     }
 }

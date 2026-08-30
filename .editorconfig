@@ -107,15 +107,3 @@ dotnet_naming_rule.interfaces_prefix.severity = warning
 # Test projects: allow underscores in test method names (e.g., Method_Should_Work)
 [tests/**/*.cs]
 dotnet_diagnostic.CA1707.severity = none
-
-# TODO(upstream: claudedocs/tools-system-harness/issues/ISSUE-system-harness-20260829-220500-
-# mtp-windows-tfm-dotnet-test-crash.md): xUnit v3's xUnit1051 (pass TestContext.Current.
-# CancellationToken to cancellable calls) fired on ~862 call sites when this project migrated to
-# xUnit v3 -- this UI-automation suite is unusually Task.Delay/WaitForExitAsync-dense compared to
-# the rest of the ecosystem, which converted cleanly. Downgraded here only to unblock the MTP
-# windows-TFM discovery experiment this migration exists to run; every other migrated submodule
-# keeps xUnit1051 at its default severity, so this is scoped to this repo, not ecosystem policy.
-# Recovery: convert the call sites (append TestContext.Current.CancellationToken; review
-# finally/cleanup paths by hand -- cancelling cleanup there can orphan child processes) then
-# remove this line.
-dotnet_diagnostic.xUnit1051.severity = suggestion

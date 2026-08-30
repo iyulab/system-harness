@@ -47,12 +47,12 @@ public class OfficeToolsSmokeTests : IDisposable
                 { "text": "Finding two", "listType": "Bullet" }
             ]
         }
-        """);
+        """, TestContext.Current.CancellationToken);
 
         Assert.Contains("5 paragraphs", writeResult);
         Assert.True(File.Exists(path));
 
-        var markdown = await _tools.ReadWordAsync(path);
+        var markdown = await _tools.ReadWordAsync(path, TestContext.Current.CancellationToken);
         Assert.Contains("# Project Report", markdown);
         Assert.Contains("This is the introduction paragraph.", markdown);
         Assert.Contains("## Key Findings", markdown);
@@ -72,12 +72,12 @@ public class OfficeToolsSmokeTests : IDisposable
                 { "text": "Hello again" }
             ]
         }
-        """);
+        """, TestContext.Current.CancellationToken);
 
-        var result = await _tools.FindReplaceWordAsync(path, "Hello", "Hi");
+        var result = await _tools.FindReplaceWordAsync(path, "Hello", "Hi", TestContext.Current.CancellationToken);
         Assert.Contains("\"count\":2", result);
 
-        var markdown = await _tools.ReadWordAsync(path);
+        var markdown = await _tools.ReadWordAsync(path, TestContext.Current.CancellationToken);
         Assert.Contains("Hi World", markdown);
         Assert.Contains("Hi again", markdown);
     }
@@ -109,13 +109,13 @@ public class OfficeToolsSmokeTests : IDisposable
                 }
             ]
         }
-        """);
+        """, TestContext.Current.CancellationToken);
 
         Assert.Contains("2 sheet(s)", writeResult);
         Assert.Contains("5 total rows", writeResult);
         Assert.True(File.Exists(path));
 
-        var markdown = await _tools.ReadExcelAsync(path);
+        var markdown = await _tools.ReadExcelAsync(path, TestContext.Current.CancellationToken);
         Assert.Contains("Sales", markdown);
         Assert.Contains("Product", markdown);
         Assert.Contains("Widget A", markdown);
@@ -138,12 +138,12 @@ public class OfficeToolsSmokeTests : IDisposable
                 { "texts": ["Next Steps"], "notes": "Discuss timeline" }
             ]
         }
-        """);
+        """, TestContext.Current.CancellationToken);
 
         Assert.Contains("3 slide(s)", writeResult);
         Assert.True(File.Exists(path));
 
-        var markdown = await _tools.ReadPowerPointAsync(path);
+        var markdown = await _tools.ReadPowerPointAsync(path, TestContext.Current.CancellationToken);
         Assert.Contains("Slide 1", markdown);
         Assert.Contains("Annual Review 2025", markdown);
         Assert.Contains("Revenue Growth", markdown);
@@ -171,13 +171,13 @@ public class OfficeToolsSmokeTests : IDisposable
                 }
             ]
         }
-        """);
+        """, TestContext.Current.CancellationToken);
 
         Assert.Contains("1 section(s)", writeResult);
         Assert.Contains("3 paragraphs", writeResult);
         Assert.True(File.Exists(path));
 
-        var markdown = await _tools.ReadHwpxAsync(path);
+        var markdown = await _tools.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
         Assert.Contains("회의록", markdown);
         Assert.Contains("2025년 1월 15일", markdown);
         Assert.Contains("참석자", markdown);
@@ -199,12 +199,12 @@ public class OfficeToolsSmokeTests : IDisposable
                 }
             ]
         }
-        """);
+        """, TestContext.Current.CancellationToken);
 
-        var result = await _tools.FindReplaceHwpxAsync(path, "홍길동", "김철수");
+        var result = await _tools.FindReplaceHwpxAsync(path, "홍길동", "김철수", TestContext.Current.CancellationToken);
         Assert.Contains("\"count\":2", result);
 
-        var markdown = await _tools.ReadHwpxAsync(path);
+        var markdown = await _tools.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
         Assert.Contains("김철수", markdown);
     }
 
@@ -215,14 +215,14 @@ public class OfficeToolsSmokeTests : IDisposable
     {
         var path = TempPath("nonexistent.docx");
         await Assert.ThrowsAsync<FileNotFoundException>(
-            () => _tools.ReadWordAsync(path));
+            () => _tools.ReadWordAsync(path, TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task WriteWord_InvalidJson_ReturnsError()
     {
         var path = TempPath("bad.docx");
-        var result = await _tools.WriteWordAsync(path, "not valid json{{");
+        var result = await _tools.WriteWordAsync(path, "not valid json{{", TestContext.Current.CancellationToken);
         Assert.Contains("invalid_parameter", result);
     }
 
@@ -231,10 +231,10 @@ public class OfficeToolsSmokeTests : IDisposable
     {
         var path = Path.Combine(_tempDir, "nested", "deep", "auto.docx");
 
-        await _tools.WriteWordAsync(path, """{"paragraphs": [{"text": "Hello"}]}""");
+        await _tools.WriteWordAsync(path, """{"paragraphs": [{"text": "Hello"}]}""", TestContext.Current.CancellationToken);
 
         Assert.True(File.Exists(path));
-        var markdown = await _tools.ReadWordAsync(path);
+        var markdown = await _tools.ReadWordAsync(path, TestContext.Current.CancellationToken);
         Assert.Contains("Hello", markdown);
     }
 
@@ -251,9 +251,9 @@ public class OfficeToolsSmokeTests : IDisposable
                 { "text": "Second step", "listType": "Numbered" }
             ]
         }
-        """);
+        """, TestContext.Current.CancellationToken);
 
-        var markdown = await _tools.ReadWordAsync(path);
+        var markdown = await _tools.ReadWordAsync(path, TestContext.Current.CancellationToken);
         Assert.Contains("1. First step", markdown);
         Assert.Contains("1. Second step", markdown);
     }
@@ -264,7 +264,7 @@ public class OfficeToolsSmokeTests : IDisposable
     public async Task WriteWord_WrongExtension_ReturnsError()
     {
         var path = TempPath("wrong.xlsx");
-        var result = await _tools.WriteWordAsync(path, """{"paragraphs": [{"text": "Hi"}]}""");
+        var result = await _tools.WriteWordAsync(path, """{"paragraphs": [{"text": "Hi"}]}""", TestContext.Current.CancellationToken);
         Assert.Contains("invalid_parameter", result);
         Assert.Contains("Expected .docx", result);
     }
@@ -273,7 +273,7 @@ public class OfficeToolsSmokeTests : IDisposable
     public async Task WriteWord_EmptyParagraphs_ReturnsError()
     {
         var path = TempPath("empty.docx");
-        var result = await _tools.WriteWordAsync(path, """{"paragraphs": []}""");
+        var result = await _tools.WriteWordAsync(path, """{"paragraphs": []}""", TestContext.Current.CancellationToken);
         Assert.Contains("invalid_parameter", result);
         Assert.Contains("at least one paragraph", result);
     }
@@ -282,7 +282,7 @@ public class OfficeToolsSmokeTests : IDisposable
     public async Task WriteExcel_EmptySheets_ReturnsError()
     {
         var path = TempPath("empty.xlsx");
-        var result = await _tools.WriteExcelAsync(path, """{"sheets": []}""");
+        var result = await _tools.WriteExcelAsync(path, """{"sheets": []}""", TestContext.Current.CancellationToken);
         Assert.Contains("invalid_parameter", result);
         Assert.Contains("at least one sheet", result);
     }
@@ -291,7 +291,7 @@ public class OfficeToolsSmokeTests : IDisposable
     public async Task ReadWord_WrongExtension_ReturnsError()
     {
         var path = TempPath("wrong.pptx");
-        var result = await _tools.ReadWordAsync(path);
+        var result = await _tools.ReadWordAsync(path, TestContext.Current.CancellationToken);
         Assert.Contains("invalid_parameter", result);
         Assert.Contains("Expected .docx", result);
     }

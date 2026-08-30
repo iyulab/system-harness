@@ -26,7 +26,7 @@ public class HarnessObserverTests
         var harness = new StubHarness();
         var observer = new HarnessObserver(harness);
 
-        using var obs = await observer.ObserveAsync("Test Window");
+        using var obs = await observer.ObserveAsync("Test Window", ct: TestContext.Current.CancellationToken);
 
         Assert.NotNull(obs.Screenshot);
         Assert.NotNull(obs.AccessibilityTree);
@@ -47,7 +47,7 @@ public class HarnessObserverTests
             IncludeOcr = false,
         };
 
-        using var obs = await observer.ObserveAsync("Test Window", options);
+        using var obs = await observer.ObserveAsync("Test Window", options, TestContext.Current.CancellationToken);
 
         Assert.NotNull(obs.Screenshot);
         Assert.Null(obs.AccessibilityTree);
@@ -66,7 +66,7 @@ public class HarnessObserverTests
             IncludeOcr = true,
         };
 
-        using var obs = await observer.ObserveAsync("Test Window", options);
+        using var obs = await observer.ObserveAsync("Test Window", options, TestContext.Current.CancellationToken);
 
         Assert.Null(obs.Screenshot); // Screenshot was only for OCR
         Assert.NotNull(obs.OcrText);
@@ -84,7 +84,7 @@ public class HarnessObserverTests
             IncludeOcr = false,
         };
 
-        using var obs = await observer.ObserveAsync("Test Window", options);
+        using var obs = await observer.ObserveAsync("Test Window", options, TestContext.Current.CancellationToken);
 
         Assert.Null(obs.Screenshot);
         Assert.Null(obs.AccessibilityTree);
@@ -103,7 +103,7 @@ public class HarnessObserverTests
             IncludeAccessibilityTree = false,
         };
 
-        using var obs = await observer.ObserveAsync("12345", options);
+        using var obs = await observer.ObserveAsync("12345", options, TestContext.Current.CancellationToken);
 
         Assert.NotNull(obs.WindowInfo);
         Assert.Equal(12345, obs.WindowInfo.Handle);

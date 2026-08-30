@@ -11,7 +11,7 @@ public class WaitHelpersUnitTests
     public async Task WaitForTextAsync_TextFound_ReturnsOcrResult()
     {
         var harness = new WaitStubHarness(ocrText: "Hello World");
-        var result = await WaitHelpers.WaitForTextAsync(harness, "Hello", ShortTimeout);
+        var result = await WaitHelpers.WaitForTextAsync(harness, "Hello", ShortTimeout, TestContext.Current.CancellationToken);
         Assert.Contains("Hello", result.Text, StringComparison.OrdinalIgnoreCase);
     }
 
@@ -19,7 +19,7 @@ public class WaitHelpersUnitTests
     public async Task WaitForTextAsync_CaseInsensitive()
     {
         var harness = new WaitStubHarness(ocrText: "Hello World");
-        var result = await WaitHelpers.WaitForTextAsync(harness, "hello", ShortTimeout);
+        var result = await WaitHelpers.WaitForTextAsync(harness, "hello", ShortTimeout, TestContext.Current.CancellationToken);
         Assert.NotNull(result);
     }
 
@@ -28,7 +28,7 @@ public class WaitHelpersUnitTests
     {
         var harness = new WaitStubHarness(ocrText: "something else");
         await Assert.ThrowsAsync<TimeoutException>(
-            () => WaitHelpers.WaitForTextAsync(harness, "missing", ShortTimeout));
+            () => WaitHelpers.WaitForTextAsync(harness, "missing", ShortTimeout, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class WaitHelpersUnitTests
         var harness = new WaitStubHarness(foundElement: element);
         var condition = new UIElementCondition { Name = "OKButton" };
 
-        var result = await WaitHelpers.WaitForElementAsync(harness, "TestWindow", condition, ShortTimeout);
+        var result = await WaitHelpers.WaitForElementAsync(harness, "TestWindow", condition, ShortTimeout, TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.Equal("OKButton", result.Name);
@@ -64,7 +64,7 @@ public class WaitHelpersUnitTests
         var condition = new UIElementCondition { Name = "Missing" };
 
         await Assert.ThrowsAsync<TimeoutException>(
-            () => WaitHelpers.WaitForElementAsync(harness, "TestWindow", condition, ShortTimeout));
+            () => WaitHelpers.WaitForElementAsync(harness, "TestWindow", condition, ShortTimeout, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class WaitHelpersUnitTests
     {
         var harness = new WaitStubHarness(windowState: WindowState.Maximized);
 
-        await WaitHelpers.WaitForWindowStateAsync(harness, "TestWindow", WindowState.Maximized, ShortTimeout);
+        await WaitHelpers.WaitForWindowStateAsync(harness, "TestWindow", WindowState.Maximized, ShortTimeout, TestContext.Current.CancellationToken);
         // No exception = success
     }
 
@@ -96,7 +96,7 @@ public class WaitHelpersUnitTests
         var harness = new WaitStubHarness(windowState: WindowState.Normal);
 
         await Assert.ThrowsAsync<TimeoutException>(
-            () => WaitHelpers.WaitForWindowStateAsync(harness, "TestWindow", WindowState.Minimized, ShortTimeout));
+            () => WaitHelpers.WaitForWindowStateAsync(harness, "TestWindow", WindowState.Minimized, ShortTimeout, TestContext.Current.CancellationToken));
     }
 
     [Fact]

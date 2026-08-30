@@ -13,7 +13,7 @@ public class WindowsDisplayTests
     [Fact]
     public async Task GetMonitorsAsync_ReturnsAtLeastOneMonitor()
     {
-        var monitors = await _display.GetMonitorsAsync();
+        var monitors = await _display.GetMonitorsAsync(TestContext.Current.CancellationToken);
 
         Assert.NotEmpty(monitors);
         Assert.Contains(monitors, m => m.IsPrimary);
@@ -22,7 +22,7 @@ public class WindowsDisplayTests
     [Fact]
     public async Task GetMonitorsAsync_MonitorHasValidProperties()
     {
-        var monitors = await _display.GetMonitorsAsync();
+        var monitors = await _display.GetMonitorsAsync(TestContext.Current.CancellationToken);
         var primary = monitors.First(m => m.IsPrimary);
 
         Assert.True(primary.Bounds.Width > 0);
@@ -37,7 +37,7 @@ public class WindowsDisplayTests
     [Fact]
     public async Task GetPrimaryMonitorAsync_ReturnsPrimary()
     {
-        var primary = await _display.GetPrimaryMonitorAsync();
+        var primary = await _display.GetPrimaryMonitorAsync(TestContext.Current.CancellationToken);
 
         Assert.True(primary.IsPrimary);
         Assert.True(primary.Bounds.Width > 0);
@@ -46,11 +46,11 @@ public class WindowsDisplayTests
     [Fact]
     public async Task GetMonitorAtPointAsync_ReturnsMonitor()
     {
-        var primary = await _display.GetPrimaryMonitorAsync();
+        var primary = await _display.GetPrimaryMonitorAsync(TestContext.Current.CancellationToken);
         var center = (primary.Bounds.X + primary.Bounds.Width / 2,
                       primary.Bounds.Y + primary.Bounds.Height / 2);
 
-        var monitor = await _display.GetMonitorAtPointAsync(center.Item1, center.Item2);
+        var monitor = await _display.GetMonitorAtPointAsync(center.Item1, center.Item2, TestContext.Current.CancellationToken);
 
         Assert.NotNull(monitor);
         Assert.True(monitor.Bounds.Width > 0);
@@ -59,7 +59,7 @@ public class WindowsDisplayTests
     [Fact]
     public async Task GetVirtualScreenBoundsAsync_ReturnsValidBounds()
     {
-        var bounds = await _display.GetVirtualScreenBoundsAsync();
+        var bounds = await _display.GetVirtualScreenBoundsAsync(TestContext.Current.CancellationToken);
 
         Assert.True(bounds.Width > 0);
         Assert.True(bounds.Height > 0);
@@ -68,7 +68,7 @@ public class WindowsDisplayTests
     [Fact]
     public async Task GetMonitorsAsync_WorkAreaSmallerThanBounds()
     {
-        var monitors = await _display.GetMonitorsAsync();
+        var monitors = await _display.GetMonitorsAsync(TestContext.Current.CancellationToken);
 
         foreach (var monitor in monitors)
         {
@@ -81,7 +81,7 @@ public class WindowsDisplayTests
     [Fact]
     public async Task GetMonitorsAsync_IndicesAreSequential()
     {
-        var monitors = await _display.GetMonitorsAsync();
+        var monitors = await _display.GetMonitorsAsync(TestContext.Current.CancellationToken);
 
         for (var i = 0; i < monitors.Count; i++)
         {
@@ -94,12 +94,12 @@ public class WindowsDisplayTests
     {
         // Use any visible window title — the desktop window is always present
         var windows = new WindowsWindow();
-        var list = await windows.ListAsync();
+        var list = await windows.ListAsync(TestContext.Current.CancellationToken);
 
         if (list.Count == 0) return;
 
         var target = list[0];
-        var monitor = await _display.GetMonitorForWindowAsync(target.Handle.ToString(CultureInfo.InvariantCulture));
+        var monitor = await _display.GetMonitorForWindowAsync(target.Handle.ToString(CultureInfo.InvariantCulture), TestContext.Current.CancellationToken);
 
         Assert.NotNull(monitor);
         Assert.True(monitor.Bounds.Width > 0);

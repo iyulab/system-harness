@@ -57,7 +57,7 @@ public class WindowsHarnessTests
     public async Task Shell_WorksThroughFacade()
     {
         using var harness = new WindowsHarness();
-        var result = await harness.Shell.RunAsync("cmd", "/C echo hello");
+        var result = await harness.Shell.RunAsync("cmd", "/C echo hello", ct: TestContext.Current.CancellationToken);
         Assert.True(result.Success);
         Assert.Contains("hello", result.StdOut);
     }
@@ -69,8 +69,8 @@ public class WindowsHarnessTests
         var tempFile = Path.Combine(Path.GetTempPath(), $"harness-test-{Guid.NewGuid()}.txt");
         try
         {
-            await harness.FileSystem.WriteAsync(tempFile, "facade-test");
-            var content = await harness.FileSystem.ReadAsync(tempFile);
+            await harness.FileSystem.WriteAsync(tempFile, "facade-test", TestContext.Current.CancellationToken);
+            var content = await harness.FileSystem.ReadAsync(tempFile, TestContext.Current.CancellationToken);
             Assert.Equal("facade-test", content);
         }
         finally

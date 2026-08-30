@@ -12,7 +12,7 @@ public class WindowsProcessManagerTests
     [Fact]
     public async Task ListAsync_ReturnsProcesses()
     {
-        var processes = await _process.ListAsync();
+        var processes = await _process.ListAsync(ct: TestContext.Current.CancellationToken);
 
         Assert.NotEmpty(processes);
         Assert.All(processes, p => Assert.True(p.Pid >= 0)); // PID 0 = Idle process on Windows
@@ -21,7 +21,7 @@ public class WindowsProcessManagerTests
     [Fact]
     public async Task ListAsync_WithFilter_FiltersResults()
     {
-        var processes = await _process.ListAsync("explorer");
+        var processes = await _process.ListAsync("explorer", TestContext.Current.CancellationToken);
 
         Assert.All(processes, p =>
             Assert.Contains("explorer", p.Name, StringComparison.OrdinalIgnoreCase));
@@ -30,7 +30,7 @@ public class WindowsProcessManagerTests
     [Fact]
     public async Task IsRunningAsync_ExistingProcess_ReturnsTrue()
     {
-        var running = await _process.IsRunningAsync("explorer");
+        var running = await _process.IsRunningAsync("explorer", TestContext.Current.CancellationToken);
 
         Assert.True(running);
     }
@@ -38,7 +38,7 @@ public class WindowsProcessManagerTests
     [Fact]
     public async Task IsRunningAsync_NonExistentProcess_ReturnsFalse()
     {
-        var running = await _process.IsRunningAsync("nonexistent_process_xyz_12345");
+        var running = await _process.IsRunningAsync("nonexistent_process_xyz_12345", TestContext.Current.CancellationToken);
 
         Assert.False(running);
     }
@@ -47,20 +47,20 @@ public class WindowsProcessManagerTests
     public async Task StartAsync_AndKill_WorksCorrectly()
     {
         var handlesBefore = await NotepadHelper.SnapshotNotepadHandlesAsync();
-        var info = await _process.StartAsync("notepad.exe");
+        var info = await _process.StartAsync("notepad.exe", ct: TestContext.Current.CancellationToken);
         try
         {
             Assert.True(info.Pid > 0);
             Assert.Equal("notepad", info.Name, ignoreCase: true);
 
             // Give it a moment to start
-            await Task.Delay(500);
+            await Task.Delay(500, TestContext.Current.CancellationToken);
 
-            var isRunning = await _process.IsRunningAsync("notepad");
+            var isRunning = await _process.IsRunningAsync("notepad", TestContext.Current.CancellationToken);
             Assert.True(isRunning);
 
-            await _process.KillAsync(info.Pid);
-            await Task.Delay(500);
+            await _process.KillAsync(info.Pid, TestContext.Current.CancellationToken);
+            await Task.Delay(500, TestContext.Current.CancellationToken);
 
             // Verify it's killed
             try
@@ -79,7 +79,10 @@ public class WindowsProcessManagerTests
         {
             await NotepadHelper.CloseNotepadByPidAsync(info.Pid);
             await NotepadHelper.CloseNewNotepadWindowsAsync(handlesBefore);
-            try { await _process.KillAsync(info.Pid); } catch { }
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this kill matters most.
+            #pragma warning disable xUnit1051
+            try { await _process.KillAsync(info.Pid, CancellationToken.None); } catch { }
+            #pragma warning restore xUnit1051
         }
     }
 
@@ -87,13 +90,13 @@ public class WindowsProcessManagerTests
     public async Task KillAsync_NonExistentPid_DoesNotThrow()
     {
         // Should not throw even for non-existent PID
-        await _process.KillAsync(999999);
+        await _process.KillAsync(999999, TestContext.Current.CancellationToken);
     }
 
     [Fact]
     public async Task ProcessInfo_HasExpectedFields()
     {
-        var processes = await _process.ListAsync("explorer");
+        var processes = await _process.ListAsync("explorer", TestContext.Current.CancellationToken);
 
         if (processes.Count > 0)
         {

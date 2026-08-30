@@ -24,10 +24,10 @@ public class HarnessOptionsTests
         using var harness = new WindowsHarness(options);
 
         Assert.Throws<CommandPolicyException>(
-            () => harness.Shell.RunAsync("shutdown", "/s /t 0").GetAwaiter().GetResult());
+            () => harness.Shell.RunAsync("shutdown", "/s /t 0", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
 
         // Safe commands still work
-        var result = await harness.Shell.RunAsync("cmd", "/C echo safe");
+        var result = await harness.Shell.RunAsync("cmd", "/C echo safe", ct: TestContext.Current.CancellationToken);
         Assert.True(result.Success);
     }
 
@@ -38,9 +38,9 @@ public class HarnessOptionsTests
         var options = new HarnessOptions { AuditLog = log };
 
         using var harness = new WindowsHarness(options);
-        await harness.Shell.RunAsync("cmd", "/C echo audited");
+        await harness.Shell.RunAsync("cmd", "/C echo audited", ct: TestContext.Current.CancellationToken);
 
-        var entries = await log.GetEntriesAsync();
+        var entries = await log.GetEntriesAsync(TestContext.Current.CancellationToken);
         Assert.Single(entries);
         Assert.Equal("Shell", entries[0].Category);
     }
@@ -59,10 +59,10 @@ public class HarnessOptionsTests
 
         // Blocked command should not be audited (policy throws before audit)
         Assert.Throws<CommandPolicyException>(
-            () => harness.Shell.RunAsync("shutdown", "/s /t 0").GetAwaiter().GetResult());
+            () => harness.Shell.RunAsync("shutdown", "/s /t 0", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
 
         // Audit log should record the exception
-        var entries = await log.GetEntriesAsync();
+        var entries = await log.GetEntriesAsync(TestContext.Current.CancellationToken);
         Assert.Single(entries);
         Assert.False(entries[0].Success);
     }
@@ -87,7 +87,7 @@ public class HarnessOptionsTests
         var shell = provider.GetRequiredService<IShell>();
 
         Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("format", "C:").GetAwaiter().GetResult());
+            () => shell.RunAsync("format", "C:", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
     }
 
     // --- Edge cases (cycle 229) ---
@@ -130,7 +130,7 @@ public class HarnessOptionsTests
 
         // Blocked
         Assert.Throws<CommandPolicyException>(
-            () => harness.Shell.RunAsync("notepad.exe", "test.txt").GetAwaiter().GetResult());
+            () => harness.Shell.RunAsync("notepad.exe", "test.txt", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
 
         // Not blocked — format is not in custom policy
         // (Just verify it doesn't throw — we can't actually run format)

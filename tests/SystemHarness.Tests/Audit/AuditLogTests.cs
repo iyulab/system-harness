@@ -15,9 +15,9 @@ public class AuditLogTests
             Category = "Shell",
             Action = "RunAsync",
             Details = "echo hello",
-        });
+        }, TestContext.Current.CancellationToken);
 
-        var entries = await log.GetEntriesAsync();
+        var entries = await log.GetEntriesAsync(TestContext.Current.CancellationToken);
         Assert.Single(entries);
         Assert.Equal("Shell", entries[0].Category);
     }
@@ -26,14 +26,14 @@ public class AuditLogTests
     public async Task InMemoryLog_FiltersByCategory()
     {
         var log = new InMemoryAuditLog();
-        await log.AppendAsync(new AuditEntry { Timestamp = DateTimeOffset.UtcNow, Category = "Shell", Action = "Run", Details = "cmd" });
-        await log.AppendAsync(new AuditEntry { Timestamp = DateTimeOffset.UtcNow, Category = "Mouse", Action = "Click", Details = "100,200" });
-        await log.AppendAsync(new AuditEntry { Timestamp = DateTimeOffset.UtcNow, Category = "Shell", Action = "Run", Details = "dir" });
+        await log.AppendAsync(new AuditEntry { Timestamp = DateTimeOffset.UtcNow, Category = "Shell", Action = "Run", Details = "cmd" }, TestContext.Current.CancellationToken);
+        await log.AppendAsync(new AuditEntry { Timestamp = DateTimeOffset.UtcNow, Category = "Mouse", Action = "Click", Details = "100,200" }, TestContext.Current.CancellationToken);
+        await log.AppendAsync(new AuditEntry { Timestamp = DateTimeOffset.UtcNow, Category = "Shell", Action = "Run", Details = "dir" }, TestContext.Current.CancellationToken);
 
-        var shellEntries = await log.GetEntriesAsync("Shell");
+        var shellEntries = await log.GetEntriesAsync("Shell", TestContext.Current.CancellationToken);
         Assert.Equal(2, shellEntries.Count);
 
-        var mouseEntries = await log.GetEntriesAsync("Mouse");
+        var mouseEntries = await log.GetEntriesAsync("Mouse", TestContext.Current.CancellationToken);
         Assert.Single(mouseEntries);
     }
 
@@ -49,10 +49,10 @@ public class AuditLogTests
                 Category = "Shell",
                 Action = "Run",
                 Details = $"cmd-{i}",
-            });
+            }, TestContext.Current.CancellationToken);
         }
 
-        var entries = await log.GetEntriesAsync();
+        var entries = await log.GetEntriesAsync(TestContext.Current.CancellationToken);
         Assert.Equal(3, entries.Count);
         // Oldest should be evicted
         Assert.Equal("cmd-2", entries[0].Details);
@@ -75,7 +75,7 @@ public class AuditLogTests
         }));
 
         await Task.WhenAll(tasks);
-        var entries = await log.GetEntriesAsync();
+        var entries = await log.GetEntriesAsync(TestContext.Current.CancellationToken);
         Assert.Equal(100, entries.Count);
     }
 
@@ -85,10 +85,10 @@ public class AuditLogTests
         var log = new InMemoryAuditLog();
         var shell = new AuditingShell(new WindowsShell(), log);
 
-        var result = await shell.RunAsync("cmd", "/C echo audited");
+        var result = await shell.RunAsync("cmd", "/C echo audited", ct: TestContext.Current.CancellationToken);
         Assert.True(result.Success);
 
-        var entries = await log.GetEntriesAsync();
+        var entries = await log.GetEntriesAsync(TestContext.Current.CancellationToken);
         Assert.Single(entries);
         Assert.Equal("Shell", entries[0].Category);
         Assert.Equal("RunAsync", entries[0].Action);
@@ -103,10 +103,10 @@ public class AuditLogTests
         var log = new InMemoryAuditLog();
         var shell = new AuditingShell(new WindowsShell(), log);
 
-        var result = await shell.RunAsync("cmd", "/C exit 1");
+        var result = await shell.RunAsync("cmd", "/C exit 1", ct: TestContext.Current.CancellationToken);
         Assert.False(result.Success);
 
-        var entries = await log.GetEntriesAsync();
+        var entries = await log.GetEntriesAsync(TestContext.Current.CancellationToken);
         Assert.Single(entries);
         Assert.False(entries[0].Success);
     }
@@ -117,9 +117,9 @@ public class AuditLogTests
         var log = new InMemoryAuditLog();
         var shell = new AuditingShell(new WindowsShell(), log);
 
-        await shell.RunAsync("echo single-string");
+        await shell.RunAsync("echo single-string", ct: TestContext.Current.CancellationToken);
 
-        var entries = await log.GetEntriesAsync();
+        var entries = await log.GetEntriesAsync(TestContext.Current.CancellationToken);
         Assert.Single(entries);
         Assert.Equal("echo single-string", entries[0].Details);
     }
@@ -156,9 +156,9 @@ public class AuditLogTests
         var log = new InMemoryAuditLog();
         var shell = new AuditingShell(new WindowsShell(), log);
 
-        await shell.RunAsync("cmd", "/C echo test");
+        await shell.RunAsync("cmd", "/C echo test", ct: TestContext.Current.CancellationToken);
 
-        var entries = await log.GetEntriesAsync();
+        var entries = await log.GetEntriesAsync(TestContext.Current.CancellationToken);
         Assert.Single(entries);
         Assert.NotNull(entries[0].Duration);
         Assert.True(entries[0].Duration!.Value.TotalMilliseconds >= 0);
@@ -170,9 +170,9 @@ public class AuditLogTests
         var log = new InMemoryAuditLog();
         var shell = new AuditingShell(new WindowsShell(), log);
 
-        await shell.RunAsync("cmd", "/C echo error 1>&2 && exit 1");
+        await shell.RunAsync("cmd", "/C echo error 1>&2 && exit 1", ct: TestContext.Current.CancellationToken);
 
-        var entries = await log.GetEntriesAsync();
+        var entries = await log.GetEntriesAsync(TestContext.Current.CancellationToken);
         Assert.Single(entries);
         Assert.False(entries[0].Success);
         Assert.NotNull(entries[0].Error);
@@ -187,9 +187,9 @@ public class AuditLogTests
             Timestamp = DateTimeOffset.UtcNow,
             Category = "Shell",
             Action = "Run",
-        });
+        }, TestContext.Current.CancellationToken);
 
-        var results = await log.GetEntriesAsync("Keyboard");
+        var results = await log.GetEntriesAsync("Keyboard", TestContext.Current.CancellationToken);
         Assert.Empty(results);
     }
 
@@ -204,9 +204,9 @@ public class AuditLogTests
                 Timestamp = DateTimeOffset.UtcNow,
                 Category = "Test",
                 Action = $"Action_{i}",
-            });
+            }, TestContext.Current.CancellationToken);
 
-        var entries = await log.GetEntriesAsync();
+        var entries = await log.GetEntriesAsync(TestContext.Current.CancellationToken);
         Assert.True(entries.Count <= 5, $"Expected at most 5, got {entries.Count}");
     }
 

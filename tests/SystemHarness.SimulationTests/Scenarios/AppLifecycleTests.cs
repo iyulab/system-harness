@@ -15,32 +15,32 @@ public class AppLifecycleTests : SimulationTestBase
     public async Task Notepad_StartTypeAndClose()
     {
         var proc = await LaunchAppAsync("notepad.exe");
-        await Task.Delay(1000);
+        await Task.Delay(1000, TestContext.Current.CancellationToken);
 
         try
         {
-            await Window.FocusAsync("Notepad");
-            await Task.Delay(300);
+            await Window.FocusAsync("Notepad", TestContext.Current.CancellationToken);
+            await Task.Delay(300, TestContext.Current.CancellationToken);
 
-            await Keyboard.TypeAsync("Hello from Simulation Test!");
-            await Task.Delay(500);
+            await Keyboard.TypeAsync("Hello from Simulation Test!", ct: TestContext.Current.CancellationToken);
+            await Task.Delay(500, TestContext.Current.CancellationToken);
 
             // Verify window exists
-            var windows = await Window.FindByProcessIdAsync(proc.Pid);
+            var windows = await Window.FindByProcessIdAsync(proc.Pid, TestContext.Current.CancellationToken);
             Assert.NotEmpty(windows);
 
             // Close without saving (Alt+F4 then Don't Save)
-            await Keyboard.HotkeyAsync(default, Key.Alt, Key.F4);
-            await Task.Delay(500);
+            await Keyboard.HotkeyAsync(TestContext.Current.CancellationToken, new Key[] { Key.Alt, Key.F4 });
+            await Task.Delay(500, TestContext.Current.CancellationToken);
 
             // Handle "Do you want to save" dialog — press Don't Save (Tab, Enter or 'N')
-            await Keyboard.KeyPressAsync(Key.Tab);
-            await Task.Delay(100);
-            await Keyboard.KeyPressAsync(Key.Enter);
+            await Keyboard.KeyPressAsync(Key.Tab, TestContext.Current.CancellationToken);
+            await Task.Delay(100, TestContext.Current.CancellationToken);
+            await Keyboard.KeyPressAsync(Key.Enter, TestContext.Current.CancellationToken);
         }
         finally
         {
-            try { await Process.KillAsync(proc.Pid); } catch { }
+            try { await Process.KillAsync(proc.Pid, TestContext.Current.CancellationToken); } catch { }
         }
     }
 
@@ -53,18 +53,22 @@ public class AppLifecycleTests : SimulationTestBase
             WorkingDirectory = tempDir,
         };
 
-        var proc = await Process.StartAsync("notepad.exe", options);
-        await Task.Delay(1000);
+        var proc = await Process.StartAsync("notepad.exe", options, TestContext.Current.CancellationToken);
+        await Task.Delay(1000, TestContext.Current.CancellationToken);
 
         try
         {
             Assert.True(proc.Pid > 0);
-            var running = await Process.IsRunningAsync("notepad");
+            var running = await Process.IsRunningAsync("notepad", TestContext.Current.CancellationToken);
             Assert.True(running);
         }
         finally
         {
-            await Process.KillAsync(proc.Pid);
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is
+            // exactly when this kill matters most.
+#pragma warning disable xUnit1051
+            await Process.KillAsync(proc.Pid, CancellationToken.None);
+#pragma warning restore xUnit1051
         }
     }
 
@@ -77,8 +81,8 @@ public class AppLifecycleTests : SimulationTestBase
             RedirectOutput = true,
         };
 
-        var proc = await Process.StartAsync("cmd.exe", options);
-        var exited = await Process.WaitForExitAsync(proc.Pid, TimeSpan.FromSeconds(5));
+        var proc = await Process.StartAsync("cmd.exe", options, TestContext.Current.CancellationToken);
+        var exited = await Process.WaitForExitAsync(proc.Pid, TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
 
         Assert.True(exited);
     }
@@ -87,13 +91,13 @@ public class AppLifecycleTests : SimulationTestBase
     public async Task GracefulShutdown_ClosesApplication()
     {
         var proc = await LaunchAppAsync("notepad.exe");
-        await Task.Delay(1000);
+        await Task.Delay(1000, TestContext.Current.CancellationToken);
 
         await AppLifecycleHelper.GracefulShutdownAsync(
             Process, Window, "Notepad", proc.Pid,
             TimeSpan.FromSeconds(3));
 
-        await Task.Delay(500);
+        await Task.Delay(500, TestContext.Current.CancellationToken);
 
         // Verify process is gone
         try

@@ -42,7 +42,7 @@ public class WindowsWindowTests : IClassFixture<NotepadFixture>
     [Fact]
     public async Task ListAsync_ReturnsVisibleWindows()
     {
-        var windows = await _window.ListAsync();
+        var windows = await _window.ListAsync(TestContext.Current.CancellationToken);
 
         Assert.NotEmpty(windows);
         Assert.All(windows, w =>
@@ -57,7 +57,7 @@ public class WindowsWindowTests : IClassFixture<NotepadFixture>
     [Fact]
     public async Task ListAsync_WindowsHaveBoundsAndProcessId()
     {
-        var windows = await _window.ListAsync();
+        var windows = await _window.ListAsync(TestContext.Current.CancellationToken);
 
         Assert.Contains(windows, w =>
             w.Bounds.Width > 0 && w.Bounds.Height > 0);
@@ -67,9 +67,9 @@ public class WindowsWindowTests : IClassFixture<NotepadFixture>
     [Fact]
     public async Task FocusAsync_WithNotepad_Works()
     {
-        await _window.FocusAsync("Notepad");
+        await _window.FocusAsync("Notepad", TestContext.Current.CancellationToken);
 
-        var windows = await _window.ListAsync();
+        var windows = await _window.ListAsync(TestContext.Current.CancellationToken);
         Assert.Contains(windows, w =>
             w.Title.Contains("Notepad", StringComparison.OrdinalIgnoreCase));
     }
@@ -77,13 +77,13 @@ public class WindowsWindowTests : IClassFixture<NotepadFixture>
     [Fact]
     public async Task MinimizeAsync_AndMaximizeAsync_Work()
     {
-        await _window.MinimizeAsync("Notepad");
-        await Task.Delay(300);
+        await _window.MinimizeAsync("Notepad", TestContext.Current.CancellationToken);
+        await Task.Delay(300, TestContext.Current.CancellationToken);
 
-        await _window.MaximizeAsync("Notepad");
-        await Task.Delay(300);
+        await _window.MaximizeAsync("Notepad", TestContext.Current.CancellationToken);
+        await Task.Delay(300, TestContext.Current.CancellationToken);
 
-        var windows = await _window.ListAsync();
+        var windows = await _window.ListAsync(TestContext.Current.CancellationToken);
         Assert.Contains(windows, w =>
             w.Title.Contains("Notepad", StringComparison.OrdinalIgnoreCase));
     }
@@ -91,13 +91,13 @@ public class WindowsWindowTests : IClassFixture<NotepadFixture>
     [Fact]
     public async Task ResizeAsync_ChangesWindowSize()
     {
-        await _window.FocusAsync("Notepad");
-        await Task.Delay(200);
+        await _window.FocusAsync("Notepad", TestContext.Current.CancellationToken);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
 
-        await _window.ResizeAsync("Notepad", 800, 600);
-        await Task.Delay(300);
+        await _window.ResizeAsync("Notepad", 800, 600, TestContext.Current.CancellationToken);
+        await Task.Delay(300, TestContext.Current.CancellationToken);
 
-        var windows = await _window.ListAsync();
+        var windows = await _window.ListAsync(TestContext.Current.CancellationToken);
         var notepad = windows.FirstOrDefault(w =>
             w.Title.Contains("Notepad", StringComparison.OrdinalIgnoreCase));
 
@@ -109,10 +109,10 @@ public class WindowsWindowTests : IClassFixture<NotepadFixture>
     [Fact]
     public async Task MoveAsync_ChangesWindowPosition()
     {
-        await _window.MoveAsync("Notepad", 100, 100);
-        await Task.Delay(300);
+        await _window.MoveAsync("Notepad", 100, 100, TestContext.Current.CancellationToken);
+        await Task.Delay(300, TestContext.Current.CancellationToken);
 
-        var windows = await _window.ListAsync();
+        var windows = await _window.ListAsync(TestContext.Current.CancellationToken);
         var notepad = windows.FirstOrDefault(w =>
             w.Title.Contains("Notepad", StringComparison.OrdinalIgnoreCase));
 
@@ -125,25 +125,25 @@ public class WindowsWindowTests : IClassFixture<NotepadFixture>
     public async Task FocusAsync_NonExistentWindow_ThrowsHarnessException()
     {
         await Assert.ThrowsAsync<HarnessException>(() =>
-            _window.FocusAsync("NonExistentWindow_XYZ_99999"));
+            _window.FocusAsync("NonExistentWindow_XYZ_99999", TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task FocusAsync_ByHandle_Works()
     {
-        var windows = await _window.ListAsync();
+        var windows = await _window.ListAsync(TestContext.Current.CancellationToken);
         var first = windows[0];
 
-        await _window.FocusAsync(first.Handle.ToString(CultureInfo.InvariantCulture));
+        await _window.FocusAsync(first.Handle.ToString(CultureInfo.InvariantCulture), TestContext.Current.CancellationToken);
     }
 
     [Fact]
     public async Task CloseAsync_ClosesWindow()
     {
         _guardian.StartProcess("calc.exe");
-        await Task.Delay(1500);
+        await Task.Delay(1500, TestContext.Current.CancellationToken);
 
-        var windows = await _window.ListAsync();
+        var windows = await _window.ListAsync(TestContext.Current.CancellationToken);
         var target = windows.FirstOrDefault(w =>
             w.Title.Contains("Calc", StringComparison.OrdinalIgnoreCase) ||
             w.Title.Contains("계산기", StringComparison.OrdinalIgnoreCase) ||
@@ -151,8 +151,8 @@ public class WindowsWindowTests : IClassFixture<NotepadFixture>
 
         if (target is not null)
         {
-            await _window.CloseAsync(target.Handle.ToString(CultureInfo.InvariantCulture));
-            await Task.Delay(500);
+            await _window.CloseAsync(target.Handle.ToString(CultureInfo.InvariantCulture), TestContext.Current.CancellationToken);
+            await Task.Delay(500, TestContext.Current.CancellationToken);
         }
     }
 }

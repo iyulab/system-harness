@@ -63,9 +63,9 @@ public class EmergencyStopTests
         var task = Task.Run(async () =>
         {
             await Task.Delay(Timeout.Infinite, stop.Token);
-        });
+        }, TestContext.Current.CancellationToken);
 
-        await Task.Delay(50); // let task start
+        await Task.Delay(50, TestContext.Current.CancellationToken); // let task start
         stop.Trigger();
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);

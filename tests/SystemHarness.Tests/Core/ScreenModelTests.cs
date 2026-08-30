@@ -73,9 +73,9 @@ public class ScreenModelTests
         var path = Path.Combine(Path.GetTempPath(), $"screenshot-test-{Guid.NewGuid()}.png");
         try
         {
-            await screenshot.SaveAsync(path);
+            await screenshot.SaveAsync(path, TestContext.Current.CancellationToken);
             Assert.True(File.Exists(path));
-            Assert.Equal(bytes, await File.ReadAllBytesAsync(path));
+            Assert.Equal(bytes, await File.ReadAllBytesAsync(path, TestContext.Current.CancellationToken));
         }
         finally
         {

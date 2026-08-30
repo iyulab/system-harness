@@ -25,7 +25,7 @@ public class WindowsActionRecorderTests
     public async Task GetRecordedActionsAsync_InitiallyEmpty()
     {
         using var recorder = new WindowsActionRecorder(new StubMouse(), new StubKeyboard());
-        var actions = await recorder.GetRecordedActionsAsync();
+        var actions = await recorder.GetRecordedActionsAsync(TestContext.Current.CancellationToken);
         Assert.Empty(actions);
     }
 
@@ -35,7 +35,7 @@ public class WindowsActionRecorderTests
     public async Task StopRecordingAsync_WhenNotRecording_DoesNotThrow()
     {
         using var recorder = new WindowsActionRecorder(new StubMouse(), new StubKeyboard());
-        await recorder.StopRecordingAsync(); // Should not throw
+        await recorder.StopRecordingAsync(TestContext.Current.CancellationToken); // Should not throw
     }
 
     // --- Dispose Tests ---
@@ -53,7 +53,7 @@ public class WindowsActionRecorderTests
     {
         var recorder = new WindowsActionRecorder(new StubMouse(), new StubKeyboard());
         recorder.Dispose();
-        await Assert.ThrowsAsync<ObjectDisposedException>(() => recorder.StartRecordingAsync());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => recorder.StartRecordingAsync(TestContext.Current.CancellationToken));
     }
 
     // --- ReplayAsync Argument Validation ---
@@ -63,7 +63,7 @@ public class WindowsActionRecorderTests
     {
         using var recorder = new WindowsActionRecorder(new StubMouse(), new StubKeyboard());
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
-            () => recorder.ReplayAsync([], speedMultiplier: 0));
+            () => recorder.ReplayAsync([], speedMultiplier: 0, ct: TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -71,14 +71,14 @@ public class WindowsActionRecorderTests
     {
         using var recorder = new WindowsActionRecorder(new StubMouse(), new StubKeyboard());
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
-            () => recorder.ReplayAsync([], speedMultiplier: -1.0));
+            () => recorder.ReplayAsync([], speedMultiplier: -1.0, ct: TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task ReplayAsync_EmptyActions_Completes()
     {
         using var recorder = new WindowsActionRecorder(new StubMouse(), new StubKeyboard());
-        await recorder.ReplayAsync([]);
+        await recorder.ReplayAsync([], ct: TestContext.Current.CancellationToken);
     }
 
     // --- ReplayAsync Dispatch Tests ---
@@ -89,7 +89,7 @@ public class WindowsActionRecorderTests
         var mouse = new StubMouse();
         using var recorder = new WindowsActionRecorder(mouse, new StubKeyboard());
 
-        await recorder.ReplayAsync([MakeAction(RecordedActionType.MouseMove, x: 100, y: 200)]);
+        await recorder.ReplayAsync([MakeAction(RecordedActionType.MouseMove, x: 100, y: 200)], ct: TestContext.Current.CancellationToken);
 
         Assert.Single(mouse.Calls);
         Assert.Equal(("MoveAsync", 100, 200), mouse.Calls[0]);
@@ -101,7 +101,7 @@ public class WindowsActionRecorderTests
         var mouse = new StubMouse();
         using var recorder = new WindowsActionRecorder(mouse, new StubKeyboard());
 
-        await recorder.ReplayAsync([MakeAction(RecordedActionType.MouseClick, x: 50, y: 60, button: MouseButton.Right)]);
+        await recorder.ReplayAsync([MakeAction(RecordedActionType.MouseClick, x: 50, y: 60, button: MouseButton.Right)], ct: TestContext.Current.CancellationToken);
 
         Assert.Single(mouse.ClickCalls);
         Assert.Equal((50, 60, MouseButton.Right), mouse.ClickCalls[0]);
@@ -113,7 +113,7 @@ public class WindowsActionRecorderTests
         var mouse = new StubMouse();
         using var recorder = new WindowsActionRecorder(mouse, new StubKeyboard());
 
-        await recorder.ReplayAsync([MakeAction(RecordedActionType.MouseDown, x: 10, y: 20, button: MouseButton.Left)]);
+        await recorder.ReplayAsync([MakeAction(RecordedActionType.MouseDown, x: 10, y: 20, button: MouseButton.Left)], ct: TestContext.Current.CancellationToken);
 
         Assert.Single(mouse.ButtonDownCalls);
         Assert.Equal((10, 20, MouseButton.Left), mouse.ButtonDownCalls[0]);
@@ -125,7 +125,7 @@ public class WindowsActionRecorderTests
         var mouse = new StubMouse();
         using var recorder = new WindowsActionRecorder(mouse, new StubKeyboard());
 
-        await recorder.ReplayAsync([MakeAction(RecordedActionType.MouseUp, x: 30, y: 40, button: MouseButton.Middle)]);
+        await recorder.ReplayAsync([MakeAction(RecordedActionType.MouseUp, x: 30, y: 40, button: MouseButton.Middle)], ct: TestContext.Current.CancellationToken);
 
         Assert.Single(mouse.ButtonUpCalls);
         Assert.Equal((30, 40, MouseButton.Middle), mouse.ButtonUpCalls[0]);
@@ -137,7 +137,7 @@ public class WindowsActionRecorderTests
         var mouse = new StubMouse();
         using var recorder = new WindowsActionRecorder(mouse, new StubKeyboard());
 
-        await recorder.ReplayAsync([MakeAction(RecordedActionType.MouseScroll, x: 5, y: 10, scrollDelta: -3)]);
+        await recorder.ReplayAsync([MakeAction(RecordedActionType.MouseScroll, x: 5, y: 10, scrollDelta: -3)], ct: TestContext.Current.CancellationToken);
 
         Assert.Single(mouse.ScrollCalls);
         Assert.Equal((5, 10, -3), mouse.ScrollCalls[0]);
@@ -149,7 +149,7 @@ public class WindowsActionRecorderTests
         var keyboard = new StubKeyboard();
         using var recorder = new WindowsActionRecorder(new StubMouse(), keyboard);
 
-        await recorder.ReplayAsync([MakeAction(RecordedActionType.KeyPress, key: Key.Enter)]);
+        await recorder.ReplayAsync([MakeAction(RecordedActionType.KeyPress, key: Key.Enter)], ct: TestContext.Current.CancellationToken);
 
         Assert.Single(keyboard.KeyPressCalls);
         Assert.Equal(Key.Enter, keyboard.KeyPressCalls[0]);
@@ -161,7 +161,7 @@ public class WindowsActionRecorderTests
         var keyboard = new StubKeyboard();
         using var recorder = new WindowsActionRecorder(new StubMouse(), keyboard);
 
-        await recorder.ReplayAsync([MakeAction(RecordedActionType.KeyDown, key: Key.Ctrl)]);
+        await recorder.ReplayAsync([MakeAction(RecordedActionType.KeyDown, key: Key.Ctrl)], ct: TestContext.Current.CancellationToken);
 
         Assert.Single(keyboard.KeyDownCalls);
         Assert.Equal(Key.Ctrl, keyboard.KeyDownCalls[0]);
@@ -173,7 +173,7 @@ public class WindowsActionRecorderTests
         var keyboard = new StubKeyboard();
         using var recorder = new WindowsActionRecorder(new StubMouse(), keyboard);
 
-        await recorder.ReplayAsync([MakeAction(RecordedActionType.KeyUp, key: Key.Shift)]);
+        await recorder.ReplayAsync([MakeAction(RecordedActionType.KeyUp, key: Key.Shift)], ct: TestContext.Current.CancellationToken);
 
         Assert.Single(keyboard.KeyUpCalls);
         Assert.Equal(Key.Shift, keyboard.KeyUpCalls[0]);
@@ -190,7 +190,7 @@ public class WindowsActionRecorderTests
             MakeAction(RecordedActionType.MouseMove, x: 100, y: 100),
             MakeAction(RecordedActionType.MouseClick, x: 100, y: 100),
             MakeAction(RecordedActionType.KeyPress, key: Key.A),
-        ]);
+        ], ct: TestContext.Current.CancellationToken);
 
         Assert.Single(mouse.Calls);
         Assert.Single(mouse.ClickCalls);
@@ -208,7 +208,7 @@ public class WindowsActionRecorderTests
         {
             Type = RecordedActionType.MouseMove,
             Timestamp = DateTimeOffset.UtcNow,
-        }]);
+        }], ct: TestContext.Current.CancellationToken);
 
         Assert.Empty(mouse.Calls);
     }
@@ -224,7 +224,7 @@ public class WindowsActionRecorderTests
         {
             Type = RecordedActionType.KeyPress,
             Timestamp = DateTimeOffset.UtcNow,
-        }]);
+        }], ct: TestContext.Current.CancellationToken);
 
         Assert.Empty(keyboard.KeyPressCalls);
     }
@@ -257,7 +257,7 @@ public class WindowsActionRecorderTests
             X = 10,
             Y = 20,
             // Button is null
-        }]);
+        }], ct: TestContext.Current.CancellationToken);
 
         Assert.Single(mouse.ClickCalls);
         Assert.Equal(MouseButton.Left, mouse.ClickCalls[0].Button);

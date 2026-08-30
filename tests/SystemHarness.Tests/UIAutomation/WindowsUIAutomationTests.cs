@@ -44,7 +44,7 @@ public class WindowsUIAutomationTests : IClassFixture<UIAutomationNotepadFixture
     [Fact]
     public async Task GetFocusedElement_ReturnsElement()
     {
-        var element = await _uia.GetFocusedElementAsync();
+        var element = await _uia.GetFocusedElementAsync(TestContext.Current.CancellationToken);
 
         Assert.NotNull(element);
         Assert.NotNull(element.Name);
@@ -53,7 +53,7 @@ public class WindowsUIAutomationTests : IClassFixture<UIAutomationNotepadFixture
     [Fact]
     public async Task GetRootElement_WithNotepad_ReturnsWindowElement()
     {
-        var root = await _uia.GetRootElementAsync("Notepad");
+        var root = await _uia.GetRootElementAsync("Notepad", TestContext.Current.CancellationToken);
 
         Assert.NotNull(root);
         Assert.Contains("Notepad", root.Name, StringComparison.OrdinalIgnoreCase);
@@ -63,7 +63,7 @@ public class WindowsUIAutomationTests : IClassFixture<UIAutomationNotepadFixture
     [Fact]
     public async Task GetAccessibilityTree_HasChildren()
     {
-        var tree = await _uia.GetAccessibilityTreeAsync("Notepad", maxDepth: 2);
+        var tree = await _uia.GetAccessibilityTreeAsync("Notepad", maxDepth: 2, ct: TestContext.Current.CancellationToken);
 
         Assert.NotNull(tree);
         Assert.NotEmpty(tree.Children);
@@ -72,7 +72,7 @@ public class WindowsUIAutomationTests : IClassFixture<UIAutomationNotepadFixture
     [Fact]
     public async Task GetAccessibilityTree_DepthZero_NoChildren()
     {
-        var tree = await _uia.GetAccessibilityTreeAsync("Notepad", maxDepth: 0);
+        var tree = await _uia.GetAccessibilityTreeAsync("Notepad", maxDepth: 0, ct: TestContext.Current.CancellationToken);
 
         Assert.NotNull(tree);
         Assert.Empty(tree.Children);
@@ -82,7 +82,7 @@ public class WindowsUIAutomationTests : IClassFixture<UIAutomationNotepadFixture
     public async Task FindAll_ByControlType_FindsElements()
     {
         var condition = new UIElementCondition { ControlType = UIControlType.MenuItem };
-        var elements = await _uia.FindAllAsync("Notepad", condition);
+        var elements = await _uia.FindAllAsync("Notepad", condition, TestContext.Current.CancellationToken);
 
         // Notepad has menu items (File, Edit, Format, View, Help)
         Assert.NotEmpty(elements);
@@ -96,8 +96,8 @@ public class WindowsUIAutomationTests : IClassFixture<UIAutomationNotepadFixture
         var editCondition = new UIElementCondition { ControlType = UIControlType.Edit };
         var docCondition = new UIElementCondition { ControlType = UIControlType.Document };
 
-        var edit = await _uia.FindFirstAsync("Notepad", editCondition);
-        var doc = await _uia.FindFirstAsync("Notepad", docCondition);
+        var edit = await _uia.FindFirstAsync("Notepad", editCondition, TestContext.Current.CancellationToken);
+        var doc = await _uia.FindFirstAsync("Notepad", docCondition, TestContext.Current.CancellationToken);
 
         // At least one should exist
         Assert.True(edit is not null || doc is not null,
@@ -108,7 +108,7 @@ public class WindowsUIAutomationTests : IClassFixture<UIAutomationNotepadFixture
     public async Task FindFirst_NonExistent_ReturnsNull()
     {
         var condition = new UIElementCondition { AutomationId = "NonExistentId_XYZ_99999" };
-        var element = await _uia.FindFirstAsync("Notepad", condition);
+        var element = await _uia.FindFirstAsync("Notepad", condition, TestContext.Current.CancellationToken);
 
         Assert.Null(element);
     }
@@ -117,13 +117,13 @@ public class WindowsUIAutomationTests : IClassFixture<UIAutomationNotepadFixture
     public async Task GetRootElement_NonExistentWindow_ThrowsHarnessException()
     {
         await Assert.ThrowsAsync<HarnessException>(() =>
-            _uia.GetRootElementAsync("NonExistentWindow_XYZ_99999"));
+            _uia.GetRootElementAsync("NonExistentWindow_XYZ_99999", TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task UIElement_HasBoundingRectangle()
     {
-        var root = await _uia.GetRootElementAsync("Notepad");
+        var root = await _uia.GetRootElementAsync("Notepad", TestContext.Current.CancellationToken);
 
         Assert.True(root.BoundingRectangle.Width > 0);
         Assert.True(root.BoundingRectangle.Height > 0);
@@ -132,7 +132,7 @@ public class WindowsUIAutomationTests : IClassFixture<UIAutomationNotepadFixture
     [Fact]
     public async Task UIElement_IsEnabled()
     {
-        var root = await _uia.GetRootElementAsync("Notepad");
+        var root = await _uia.GetRootElementAsync("Notepad", TestContext.Current.CancellationToken);
 
         Assert.True(root.IsEnabled);
     }

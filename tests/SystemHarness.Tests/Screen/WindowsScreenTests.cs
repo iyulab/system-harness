@@ -25,7 +25,7 @@ public class WindowsScreenTests : IDisposable
     [Fact]
     public async Task CaptureAsync_DefaultOptions_ReturnsJpeg()
     {
-        using var screenshot = await _screen.CaptureAsync();
+        using var screenshot = await _screen.CaptureAsync(ct: TestContext.Current.CancellationToken);
 
         Assert.NotNull(screenshot);
         Assert.True(screenshot.Bytes.Length > 0);
@@ -39,7 +39,7 @@ public class WindowsScreenTests : IDisposable
     public async Task CaptureAsync_JpegFormat_ProducesJpeg()
     {
         var options = new CaptureOptions { Format = ImageFormat.Jpeg, Quality = 80 };
-        using var screenshot = await _screen.CaptureAsync(options);
+        using var screenshot = await _screen.CaptureAsync(options, TestContext.Current.CancellationToken);
 
         Assert.Equal("image/jpeg", screenshot.MimeType);
         // JPEG magic bytes: FF D8
@@ -56,7 +56,7 @@ public class WindowsScreenTests : IDisposable
             TargetWidth = null,
             TargetHeight = null,
         };
-        using var screenshot = await _screen.CaptureAsync(options);
+        using var screenshot = await _screen.CaptureAsync(options, TestContext.Current.CancellationToken);
 
         Assert.Equal("image/png", screenshot.MimeType);
         // PNG magic bytes: 89 50 4E 47
@@ -75,7 +75,7 @@ public class WindowsScreenTests : IDisposable
             TargetWidth = 640,
             TargetHeight = 480,
         };
-        using var screenshot = await _screen.CaptureAsync(options);
+        using var screenshot = await _screen.CaptureAsync(options, TestContext.Current.CancellationToken);
 
         Assert.Equal(640, screenshot.Width);
         Assert.Equal(480, screenshot.Height);
@@ -89,7 +89,7 @@ public class WindowsScreenTests : IDisposable
             TargetWidth = null,
             TargetHeight = null,
         };
-        using var screenshot = await _screen.CaptureAsync(options);
+        using var screenshot = await _screen.CaptureAsync(options, TestContext.Current.CancellationToken);
 
         // Should be screen resolution (at least 800x600)
         Assert.True(screenshot.Width >= 800);
@@ -99,7 +99,7 @@ public class WindowsScreenTests : IDisposable
     [Fact]
     public async Task CaptureAsync_Base64_IsValid()
     {
-        using var screenshot = await _screen.CaptureAsync();
+        using var screenshot = await _screen.CaptureAsync(ct: TestContext.Current.CancellationToken);
 
         var base64 = screenshot.Base64;
         Assert.NotNull(base64);
@@ -113,7 +113,7 @@ public class WindowsScreenTests : IDisposable
     [Fact]
     public async Task CaptureRegionAsync_CapturesSubset()
     {
-        using var screenshot = await _screen.CaptureRegionAsync(0, 0, 200, 200);
+        using var screenshot = await _screen.CaptureRegionAsync(0, 0, 200, 200, TestContext.Current.CancellationToken);
 
         Assert.NotNull(screenshot);
         Assert.True(screenshot.Bytes.Length > 0);
@@ -124,12 +124,12 @@ public class WindowsScreenTests : IDisposable
     {
         // Use an already-open window instead of launching notepad
         var windowApi = new WindowsWindow();
-        var windows = await windowApi.ListAsync();
+        var windows = await windowApi.ListAsync(TestContext.Current.CancellationToken);
         var target = windows.FirstOrDefault(w => w.Bounds.Width > 100 && w.Bounds.Height > 100);
 
         Assert.NotNull(target);
 
-        using var screenshot = await _screen.CaptureWindowAsync(target.Handle.ToString(CultureInfo.InvariantCulture));
+        using var screenshot = await _screen.CaptureWindowAsync(target.Handle.ToString(CultureInfo.InvariantCulture), TestContext.Current.CancellationToken);
 
         Assert.NotNull(screenshot);
         Assert.True(screenshot.Bytes.Length > 0);
@@ -144,13 +144,13 @@ public class WindowsScreenTests : IDisposable
         {
             TargetWidth = 320,
             TargetHeight = 240,
-        });
+        }, TestContext.Current.CancellationToken);
 
         var filePath = Path.Combine(_tempDir, "capture.jpg");
-        await screenshot.SaveAsync(filePath);
+        await screenshot.SaveAsync(filePath, TestContext.Current.CancellationToken);
 
         Assert.True(File.Exists(filePath));
-        var fileBytes = await File.ReadAllBytesAsync(filePath);
+        var fileBytes = await File.ReadAllBytesAsync(filePath, TestContext.Current.CancellationToken);
         Assert.Equal(screenshot.Bytes.Length, fileBytes.Length);
     }
 
@@ -158,6 +158,6 @@ public class WindowsScreenTests : IDisposable
     public async Task CaptureWindowAsync_NonExistent_ThrowsHarnessException()
     {
         await Assert.ThrowsAsync<HarnessException>(() =>
-            _screen.CaptureWindowAsync("NonExistentWindow_XYZ_99999"));
+            _screen.CaptureWindowAsync("NonExistentWindow_XYZ_99999", TestContext.Current.CancellationToken));
     }
 }

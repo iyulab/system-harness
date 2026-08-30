@@ -34,13 +34,13 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
         try
         {
             // Write via shell
-            await _harness.Shell.RunAsync("cmd", $"/C echo e2e-content > \"{tempFile}\"");
+            await _harness.Shell.RunAsync("cmd", $"/C echo e2e-content > \"{tempFile}\"", ct: TestContext.Current.CancellationToken);
 
             // Read via filesystem
-            var exists = await _harness.FileSystem.ExistsAsync(tempFile);
+            var exists = await _harness.FileSystem.ExistsAsync(tempFile, TestContext.Current.CancellationToken);
             Assert.True(exists);
 
-            var content = await _harness.FileSystem.ReadAsync(tempFile);
+            var content = await _harness.FileSystem.ReadAsync(tempFile, TestContext.Current.CancellationToken);
             Assert.Contains("e2e-content", content);
         }
         finally
@@ -55,25 +55,28 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
         var handlesBefore = await NotepadHelper.SnapshotNotepadHandlesAsync();
 
         // Start notepad
-        var proc = await _harness.Process.StartAsync("notepad.exe");
-        await Task.Delay(500);
+        var proc = await _harness.Process.StartAsync("notepad.exe", ct: TestContext.Current.CancellationToken);
+        await Task.Delay(500, TestContext.Current.CancellationToken);
 
         try
         {
             // Verify it's running
-            var isRunning = await _harness.Process.IsRunningAsync("notepad");
+            var isRunning = await _harness.Process.IsRunningAsync("notepad", TestContext.Current.CancellationToken);
             Assert.True(isRunning);
 
             // List and find it
-            var processes = await _harness.Process.ListAsync("notepad");
+            var processes = await _harness.Process.ListAsync("notepad", TestContext.Current.CancellationToken);
             Assert.NotEmpty(processes);
         }
         finally
         {
             await NotepadHelper.CloseNotepadByPidAsync(proc.Pid);
             await NotepadHelper.CloseNewNotepadWindowsAsync(handlesBefore);
-            try { await _harness.Process.KillAsync(proc.Pid); } catch { }
-            await Task.Delay(500);
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this kill matters most.
+            #pragma warning disable xUnit1051
+            try { await _harness.Process.KillAsync(proc.Pid, CancellationToken.None); } catch { }
+            #pragma warning restore xUnit1051
+            await Task.Delay(500, TestContext.Current.CancellationToken);
 
             // Verify our specific PID is gone (not "notepad" by name, other tests may have instances)
             try
@@ -92,7 +95,7 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
     [Fact]
     public async Task ScreenCapture_ReturnsValidImage()
     {
-        using var screenshot = await _harness.Screen.CaptureAsync();
+        using var screenshot = await _harness.Screen.CaptureAsync(ct: TestContext.Current.CancellationToken);
 
         Assert.NotNull(screenshot);
         Assert.True(screenshot.Width > 0);
@@ -110,7 +113,7 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
             Format = ImageFormat.Png,
             TargetWidth = null,
             TargetHeight = null,
-        });
+        }, TestContext.Current.CancellationToken);
 
         Assert.Equal("image/png", screenshot.MimeType);
         // PNG magic bytes: 0x89 P N G
@@ -123,8 +126,8 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
     {
         var testText = $"e2e-clipboard-{Guid.NewGuid()}";
 
-        await _harness.Clipboard.SetTextAsync(testText);
-        var result = await _harness.Clipboard.GetTextAsync();
+        await _harness.Clipboard.SetTextAsync(testText, TestContext.Current.CancellationToken);
+        var result = await _harness.Clipboard.GetTextAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(testText, result);
     }
@@ -132,17 +135,17 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
     [Fact]
     public async Task MousePosition_GetAndMove()
     {
-        var (origX, origY) = await _harness.Mouse.GetPositionAsync();
+        var (origX, origY) = await _harness.Mouse.GetPositionAsync(TestContext.Current.CancellationToken);
 
-        await _harness.Mouse.MoveAsync(100, 100);
-        await Task.Delay(100);
+        await _harness.Mouse.MoveAsync(100, 100, TestContext.Current.CancellationToken);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
 
-        var (newX, newY) = await _harness.Mouse.GetPositionAsync();
+        var (newX, newY) = await _harness.Mouse.GetPositionAsync(TestContext.Current.CancellationToken);
         Assert.InRange(newX, 95, 105);
         Assert.InRange(newY, 95, 105);
 
         // Restore original position
-        await _harness.Mouse.MoveAsync(origX, origY);
+        await _harness.Mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -151,21 +154,21 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
         var handlesBefore = await NotepadHelper.SnapshotNotepadHandlesAsync();
 
         // Launch notepad
-        var proc = await _harness.Process.StartAsync("notepad.exe");
-        await Task.Delay(1000);
+        var proc = await _harness.Process.StartAsync("notepad.exe", ct: TestContext.Current.CancellationToken);
+        await Task.Delay(1000, TestContext.Current.CancellationToken);
 
         try
         {
             // Focus it
-            await _harness.Window.FocusAsync("Notepad");
-            await Task.Delay(300);
+            await _harness.Window.FocusAsync("Notepad", TestContext.Current.CancellationToken);
+            await Task.Delay(300, TestContext.Current.CancellationToken);
 
             // Type some text
-            await _harness.Keyboard.TypeAsync("Hello from E2E test!");
-            await Task.Delay(300);
+            await _harness.Keyboard.TypeAsync("Hello from E2E test!", ct: TestContext.Current.CancellationToken);
+            await Task.Delay(300, TestContext.Current.CancellationToken);
 
             // Capture screen
-            using var screenshot = await _harness.Screen.CaptureAsync();
+            using var screenshot = await _harness.Screen.CaptureAsync(ct: TestContext.Current.CancellationToken);
             Assert.NotNull(screenshot);
             Assert.True(screenshot.Bytes.Length > 0);
         }
@@ -173,8 +176,11 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
         {
             await NotepadHelper.CloseNotepadByPidAsync(proc.Pid);
             await NotepadHelper.CloseNewNotepadWindowsAsync(handlesBefore);
-            try { await _harness.Process.KillAsync(proc.Pid); } catch { }
-            await Task.Delay(300);
+            // Cleanup must not be cancelled by the test's own token -- a cancelled test is exactly when this kill matters most.
+            #pragma warning disable xUnit1051
+            try { await _harness.Process.KillAsync(proc.Pid, CancellationToken.None); } catch { }
+            #pragma warning restore xUnit1051
+            await Task.Delay(300, TestContext.Current.CancellationToken);
         }
     }
 
@@ -182,17 +188,17 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
     public async Task PolicyBlocksDangerousViaFacade()
     {
         Assert.Throws<CommandPolicyException>(
-            () => _harness.Shell.RunAsync("format", "C: /FS:NTFS").GetAwaiter().GetResult());
+            () => _harness.Shell.RunAsync("format", "C: /FS:NTFS", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
 
         // But safe commands work
-        var result = await _harness.Shell.RunAsync("cmd", "/C echo safe");
+        var result = await _harness.Shell.RunAsync("cmd", "/C echo safe", ct: TestContext.Current.CancellationToken);
         Assert.True(result.Success);
     }
 
     [Fact]
     public async Task WindowManagement_ListAndFocus()
     {
-        var windows = await _harness.Window.ListAsync();
+        var windows = await _harness.Window.ListAsync(TestContext.Current.CancellationToken);
         Assert.NotEmpty(windows);
 
         // Find at least one visible window
@@ -220,10 +226,10 @@ public sealed class EndToEndTests : IAsyncLifetime, IDisposable
     [Fact]
     public async Task SystemInfo_ThroughHarness()
     {
-        var machine = await _harness.SystemInfo.GetMachineNameAsync();
+        var machine = await _harness.SystemInfo.GetMachineNameAsync(TestContext.Current.CancellationToken);
         Assert.NotEmpty(machine);
 
-        var user = await _harness.SystemInfo.GetUserNameAsync();
+        var user = await _harness.SystemInfo.GetUserNameAsync(TestContext.Current.CancellationToken);
         Assert.NotEmpty(user);
     }
 

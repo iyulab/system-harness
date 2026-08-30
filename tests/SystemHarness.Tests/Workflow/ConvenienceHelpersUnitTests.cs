@@ -39,7 +39,7 @@ public class ConvenienceHelpersUnitTests
     public async Task CaptureAndRecognizeAsync_ReturnsBothResults()
     {
         var harness = new ConvStubHarness(StubScreenshot, MakeOcrResult(("Hello", 10, 10, 50, 20)));
-        var (screenshot, ocr) = await ConvenienceHelpers.CaptureAndRecognizeAsync(harness);
+        var (screenshot, ocr) = await ConvenienceHelpers.CaptureAndRecognizeAsync(harness, TestContext.Current.CancellationToken);
 
         Assert.NotNull(screenshot);
         Assert.NotNull(ocr);
@@ -53,7 +53,7 @@ public class ConvenienceHelpersUnitTests
             ("Save", 100, 200, 40, 20),
             ("Cancel", 200, 200, 60, 20)));
 
-        var words = await ConvenienceHelpers.FindTextOnScreenAsync(harness, "Save");
+        var words = await ConvenienceHelpers.FindTextOnScreenAsync(harness, "Save", TestContext.Current.CancellationToken);
 
         Assert.Single(words);
         Assert.Equal("Save", words[0].Text);
@@ -63,7 +63,7 @@ public class ConvenienceHelpersUnitTests
     public async Task FindTextOnScreenAsync_CaseInsensitive()
     {
         var harness = new ConvStubHarness(StubScreenshot, MakeOcrResult(("HELLO", 10, 10, 50, 20)));
-        var words = await ConvenienceHelpers.FindTextOnScreenAsync(harness, "hello");
+        var words = await ConvenienceHelpers.FindTextOnScreenAsync(harness, "hello", TestContext.Current.CancellationToken);
 
         Assert.Single(words);
     }
@@ -72,7 +72,7 @@ public class ConvenienceHelpersUnitTests
     public async Task FindTextOnScreenAsync_NoMatch_ReturnsEmpty()
     {
         var harness = new ConvStubHarness(StubScreenshot, MakeOcrResult(("Save", 100, 200, 40, 20)));
-        var words = await ConvenienceHelpers.FindTextOnScreenAsync(harness, "Delete");
+        var words = await ConvenienceHelpers.FindTextOnScreenAsync(harness, "Delete", TestContext.Current.CancellationToken);
 
         Assert.Empty(words);
     }
@@ -83,7 +83,7 @@ public class ConvenienceHelpersUnitTests
         var harness = new ConvStubHarness(StubScreenshot, MakeOcrResult(("OK", 100, 100, 30, 20)));
 
         var ex = await Assert.ThrowsAsync<HarnessException>(
-            () => ConvenienceHelpers.ClickTextOnScreenAsync(harness, "Missing"));
+            () => ConvenienceHelpers.ClickTextOnScreenAsync(harness, "Missing", TestContext.Current.CancellationToken));
 
         Assert.Contains("Text not found", ex.Message);
     }
@@ -92,7 +92,7 @@ public class ConvenienceHelpersUnitTests
     public async Task ClickTextOnScreenAsync_ClicksWordCenter()
     {
         var harness = new ConvStubHarness(StubScreenshot, MakeOcrResult(("OK", 100, 200, 40, 20)));
-        await ConvenienceHelpers.ClickTextOnScreenAsync(harness, "OK");
+        await ConvenienceHelpers.ClickTextOnScreenAsync(harness, "OK", TestContext.Current.CancellationToken);
 
         // Word center: x=100+40/2=120, y=200+20/2=210
         Assert.Single(harness.Mouse.Clicks);
@@ -106,7 +106,7 @@ public class ConvenienceHelpersUnitTests
         var harness = new ConvStubHarness(StubScreenshot, MakeOcrResult(("OK", 10, 10, 30, 20)));
 
         var ex = await Assert.ThrowsAsync<HarnessException>(
-            () => ConvenienceHelpers.ClickTextInWindowAsync(harness, "Notepad", "Missing"));
+            () => ConvenienceHelpers.ClickTextInWindowAsync(harness, "Notepad", "Missing", TestContext.Current.CancellationToken));
 
         Assert.Contains("Notepad", ex.Message);
     }
@@ -119,7 +119,7 @@ public class ConvenienceHelpersUnitTests
             ("hello", 50, 10, 40, 20),
             ("test", 100, 10, 30, 20)));
 
-        var words = await ConvenienceHelpers.FindTextOnScreenAsync(harness, "test");
+        var words = await ConvenienceHelpers.FindTextOnScreenAsync(harness, "test", TestContext.Current.CancellationToken);
         Assert.Equal(2, words.Count);
     }
 

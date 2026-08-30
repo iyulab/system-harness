@@ -10,7 +10,7 @@ public class WindowsShellTests
     [Fact]
     public async Task RunAsync_SimpleCommand_ReturnsOutput()
     {
-        var result = await _shell.RunAsync("echo hello");
+        var result = await _shell.RunAsync("echo hello", ct: TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.Equal(0, result.ExitCode);
@@ -20,7 +20,7 @@ public class WindowsShellTests
     [Fact]
     public async Task RunAsync_ProgramAndArgs_ReturnsOutput()
     {
-        var result = await _shell.RunAsync("cmd.exe", "/C echo world");
+        var result = await _shell.RunAsync("cmd.exe", "/C echo world", ct: TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.Contains("world", result.StdOut);
@@ -29,7 +29,7 @@ public class WindowsShellTests
     [Fact]
     public async Task RunAsync_FailingCommand_ReturnsNonZeroExitCode()
     {
-        var result = await _shell.RunAsync("cmd.exe", "/C exit 42");
+        var result = await _shell.RunAsync("cmd.exe", "/C exit 42", ct: TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
         Assert.Equal(42, result.ExitCode);
@@ -38,7 +38,7 @@ public class WindowsShellTests
     [Fact]
     public async Task RunAsync_StdErr_IsCaptured()
     {
-        var result = await _shell.RunAsync("cmd.exe", "/C echo error>&2");
+        var result = await _shell.RunAsync("cmd.exe", "/C echo error>&2", ct: TestContext.Current.CancellationToken);
 
         Assert.Contains("error", result.StdErr);
     }
@@ -48,7 +48,7 @@ public class WindowsShellTests
     {
         var options = new ShellOptions { Timeout = TimeSpan.FromMilliseconds(500) };
 
-        var result = await _shell.RunAsync("cmd.exe", "/C ping -n 30 127.0.0.1", options);
+        var result = await _shell.RunAsync("cmd.exe", "/C ping -n 30 127.0.0.1", options, TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
         Assert.Equal(-1, result.ExitCode);
@@ -61,7 +61,7 @@ public class WindowsShellTests
         using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
         var options = new ShellOptions { CancellationToken = cts.Token };
 
-        var result = await _shell.RunAsync("cmd.exe", "/C ping -n 30 127.0.0.1", options);
+        var result = await _shell.RunAsync("cmd.exe", "/C ping -n 30 127.0.0.1", options, TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
         Assert.Equal(-1, result.ExitCode);
@@ -72,7 +72,7 @@ public class WindowsShellTests
     {
         var options = new ShellOptions { MaxOutputChars = 20 };
 
-        var result = await _shell.RunAsync("cmd.exe", "/C echo AAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBB", options);
+        var result = await _shell.RunAsync("cmd.exe", "/C echo AAAAAAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBBBBB", options, TestContext.Current.CancellationToken);
 
         Assert.True(result.WasTruncated);
         Assert.Contains("[truncated", result.StdOut);
@@ -84,7 +84,7 @@ public class WindowsShellTests
     {
         var options = new ShellOptions { WorkingDirectory = "C:\\" };
 
-        var result = await _shell.RunAsync("cmd.exe", "/C cd", options);
+        var result = await _shell.RunAsync("cmd.exe", "/C cd", options, TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.Contains("C:\\", result.StdOut);
@@ -101,7 +101,7 @@ public class WindowsShellTests
             }
         };
 
-        var result = await _shell.RunAsync("cmd.exe", "/C echo %TEST_HARNESS_VAR%", options);
+        var result = await _shell.RunAsync("cmd.exe", "/C echo %TEST_HARNESS_VAR%", options, TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.Contains("harness_value", result.StdOut);
@@ -110,7 +110,7 @@ public class WindowsShellTests
     [Fact]
     public async Task RunAsync_Elapsed_IsPopulated()
     {
-        var result = await _shell.RunAsync("echo fast");
+        var result = await _shell.RunAsync("echo fast", ct: TestContext.Current.CancellationToken);
 
         Assert.True(result.Elapsed > TimeSpan.Zero);
     }
@@ -118,7 +118,7 @@ public class WindowsShellTests
     [Fact]
     public async Task RunAsync_PowerShell_Works()
     {
-        var result = await _shell.RunAsync("powershell.exe", "-NoProfile -Command Write-Output 'pwsh works'");
+        var result = await _shell.RunAsync("powershell.exe", "-NoProfile -Command Write-Output 'pwsh works'", ct: TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.Contains("pwsh works", result.StdOut);
@@ -127,8 +127,7 @@ public class WindowsShellTests
     [Fact]
     public async Task RunAsync_UnicodeOutput_PreservesCharacters()
     {
-        var result = await _shell.RunAsync("powershell.exe",
-            "-NoProfile -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; Write-Output 'café résumé naïve'\"");
+        var result = await _shell.RunAsync("powershell.exe", "-NoProfile -Command \"[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; Write-Output 'café résumé naïve'\"", ct: TestContext.Current.CancellationToken);
 
         Assert.True(result.Success);
         Assert.Contains("café", result.StdOut);

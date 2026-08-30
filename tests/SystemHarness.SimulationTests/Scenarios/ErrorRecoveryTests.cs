@@ -14,7 +14,7 @@ public class ErrorRecoveryTests : SimulationTestBase
     {
         await Assert.ThrowsAsync<HarnessException>(async () =>
         {
-            await Window.FocusAsync("NonExistentWindow_" + Guid.NewGuid().ToString("N"));
+            await Window.FocusAsync("NonExistentWindow_" + Guid.NewGuid().ToString("N"), TestContext.Current.CancellationToken);
         });
     }
 
@@ -23,7 +23,7 @@ public class ErrorRecoveryTests : SimulationTestBase
     {
         await Assert.ThrowsAsync<HarnessException>(async () =>
         {
-            await Window.CloseAsync("NonExistentWindow_" + Guid.NewGuid().ToString("N"));
+            await Window.CloseAsync("NonExistentWindow_" + Guid.NewGuid().ToString("N"), TestContext.Current.CancellationToken);
         });
     }
 
@@ -32,9 +32,7 @@ public class ErrorRecoveryTests : SimulationTestBase
     {
         await Assert.ThrowsAsync<HarnessException>(async () =>
         {
-            await Window.WaitForWindowAsync(
-                "NonExistentWindow_" + Guid.NewGuid().ToString("N"),
-                TimeSpan.FromMilliseconds(500));
+            await Window.WaitForWindowAsync("NonExistentWindow_" + Guid.NewGuid().ToString("N"), TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken);
         });
     }
 
@@ -57,7 +55,7 @@ public class ErrorRecoveryTests : SimulationTestBase
     public async Task KillNonExistentProcess_DoesNotThrow()
     {
         // Using a PID that's very unlikely to exist
-        await Process.KillAsync(999999);
+        await Process.KillAsync(999999, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -69,10 +67,10 @@ public class ErrorRecoveryTests : SimulationTestBase
             RedirectOutput = true,
         };
 
-        var proc = await Process.StartAsync("cmd.exe", options);
-        await Task.Delay(1000); // Let it finish
+        var proc = await Process.StartAsync("cmd.exe", options, TestContext.Current.CancellationToken);
+        await Task.Delay(1000, TestContext.Current.CancellationToken); // Let it finish
 
-        var exited = await Process.WaitForExitAsync(proc.Pid, TimeSpan.FromSeconds(1));
+        var exited = await Process.WaitForExitAsync(proc.Pid, TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken);
         Assert.True(exited);
     }
 
@@ -88,7 +86,7 @@ public class ErrorRecoveryTests : SimulationTestBase
             {
                 await Task.Delay(100);
                 stop.Trigger();
-            });
+            }, TestContext.Current.CancellationToken);
 
             await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
             {

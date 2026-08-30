@@ -25,8 +25,7 @@ public class TemplateMatcherTests : IDisposable
         EmbedPattern(source, 100, pattern, 20, 20, 30, 40);
         var template = ExtractRegion(source, 100, 20, 20, 30, 40);
 
-        var results = await _matcher.FindAsync(
-            ToScreenshot(source, 100, 100), SaveTemp(template, 20, 20), 0.8);
+        var results = await _matcher.FindAsync(ToScreenshot(source, 100, 100), SaveTemp(template, 20, 20), 0.8, TestContext.Current.CancellationToken);
 
         Assert.NotEmpty(results);
         var best = results[0];
@@ -44,8 +43,7 @@ public class TemplateMatcherTests : IDisposable
         var source = CreateNoiseImage(100, 100, seed: 42);
         var template = CreateCheckerboard(20, 20, 4);
 
-        var results = await _matcher.FindAsync(
-            ToScreenshot(source, 100, 100), SaveTemp(template, 20, 20), 0.9);
+        var results = await _matcher.FindAsync(ToScreenshot(source, 100, 100), SaveTemp(template, 20, 20), 0.9, TestContext.Current.CancellationToken);
 
         Assert.Empty(results);
     }
@@ -60,8 +58,7 @@ public class TemplateMatcherTests : IDisposable
         EmbedPattern(source, 200, pattern, 20, 20, 160, 10);
         var template = ExtractRegion(source, 200, 20, 20, 10, 10);
 
-        var results = await _matcher.FindAsync(
-            ToScreenshot(source, 200, 100), SaveTemp(template, 20, 20), 0.8);
+        var results = await _matcher.FindAsync(ToScreenshot(source, 200, 100), SaveTemp(template, 20, 20), 0.8, TestContext.Current.CancellationToken);
 
         Assert.True(results.Count >= 2, $"Expected >=2 matches, got {results.Count}");
     }
@@ -72,8 +69,7 @@ public class TemplateMatcherTests : IDisposable
         var source = CreateNoiseImage(10, 10, seed: 1);
         var template = CreateCheckerboard(20, 20, 4);
 
-        var results = await _matcher.FindAsync(
-            ToScreenshot(source, 10, 10), SaveTemp(template, 20, 20), 0.5);
+        var results = await _matcher.FindAsync(ToScreenshot(source, 10, 10), SaveTemp(template, 20, 20), 0.5, TestContext.Current.CancellationToken);
 
         Assert.Empty(results);
     }
@@ -84,7 +80,7 @@ public class TemplateMatcherTests : IDisposable
         var source = CreateNoiseImage(50, 50, seed: 1);
 
         await Assert.ThrowsAsync<HarnessException>(
-            () => _matcher.FindAsync(ToScreenshot(source, 50, 50), "nonexistent.png", 0.8));
+            () => _matcher.FindAsync(ToScreenshot(source, 50, 50), "nonexistent.png", 0.8, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -94,8 +90,7 @@ public class TemplateMatcherTests : IDisposable
         var source = CreateSolidImage(100, 100, 128);
         var template = CreateSolidImage(20, 20, 128);
 
-        var results = await _matcher.FindAsync(
-            ToScreenshot(source, 100, 100), SaveTemp(template, 20, 20), 0.8);
+        var results = await _matcher.FindAsync(ToScreenshot(source, 100, 100), SaveTemp(template, 20, 20), 0.8, TestContext.Current.CancellationToken);
 
         Assert.Empty(results);
     }
@@ -121,8 +116,7 @@ public class TemplateMatcherTests : IDisposable
         EmbedPattern(source, 100, pattern, 20, 20, 40, 40);
         var template = ExtractRegion(source, 100, 20, 20, 40, 40);
 
-        var results = await _matcher.FindAsync(
-            ToScreenshot(source, 100, 100), SaveTemp(template, 20, 20), 0.8);
+        var results = await _matcher.FindAsync(ToScreenshot(source, 100, 100), SaveTemp(template, 20, 20), 0.8, TestContext.Current.CancellationToken);
 
         Assert.NotEmpty(results);
         var best = results[0];
@@ -140,8 +134,8 @@ public class TemplateMatcherTests : IDisposable
             ExtractRegion(source, 100, 20, 20, 30, 40), 20, 20);
         var screenshot = ToScreenshot(source, 100, 100);
 
-        var highResults = await _matcher.FindAsync(screenshot, templatePath, 0.99);
-        var lowResults = await _matcher.FindAsync(screenshot, templatePath, 0.5);
+        var highResults = await _matcher.FindAsync(screenshot, templatePath, 0.99, TestContext.Current.CancellationToken);
+        var lowResults = await _matcher.FindAsync(screenshot, templatePath, 0.5, TestContext.Current.CancellationToken);
 
         Assert.True(lowResults.Count >= highResults.Count);
     }

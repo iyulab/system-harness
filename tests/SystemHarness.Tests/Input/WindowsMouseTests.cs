@@ -12,7 +12,7 @@ public class WindowsMouseTests
     [Fact]
     public async Task GetPositionAsync_ReturnsValidCoordinates()
     {
-        var (x, y) = await _mouse.GetPositionAsync();
+        var (x, y) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
 
         // Cursor should be within reasonable screen bounds
         Assert.True(x >= 0);
@@ -23,14 +23,14 @@ public class WindowsMouseTests
     public async Task MoveAsync_ChangesCursorPosition()
     {
         // Save original position
-        var (origX, origY) = await _mouse.GetPositionAsync();
+        var (origX, origY) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
 
         try
         {
-            await _mouse.MoveAsync(500, 500);
-            await Task.Delay(100);
+            await _mouse.MoveAsync(500, 500, TestContext.Current.CancellationToken);
+            await Task.Delay(100, TestContext.Current.CancellationToken);
 
-            var (newX, newY) = await _mouse.GetPositionAsync();
+            var (newX, newY) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
 
             // Allow some tolerance for DPI scaling
             Assert.InRange(newX, 490, 510);
@@ -39,7 +39,7 @@ public class WindowsMouseTests
         finally
         {
             // Restore original position
-            await _mouse.MoveAsync(origX, origY);
+            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
         }
     }
 
@@ -47,81 +47,81 @@ public class WindowsMouseTests
     public async Task ClickAsync_DoesNotThrow()
     {
         // Save original position
-        var (origX, origY) = await _mouse.GetPositionAsync();
+        var (origX, origY) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
 
         try
         {
             // Click in a safe area (center of screen)
-            await _mouse.ClickAsync(500, 500);
+            await _mouse.ClickAsync(500, 500, ct: TestContext.Current.CancellationToken);
         }
         finally
         {
-            await _mouse.MoveAsync(origX, origY);
+            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
         }
     }
 
     [Fact]
     public async Task ScrollAsync_DoesNotThrow()
     {
-        var (origX, origY) = await _mouse.GetPositionAsync();
+        var (origX, origY) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
         try
         {
-            await _mouse.ScrollAsync(500, 500, 3); // scroll up
-            await _mouse.ScrollAsync(500, 500, -3); // scroll down
+            await _mouse.ScrollAsync(500, 500, 3, TestContext.Current.CancellationToken); // scroll up
+            await _mouse.ScrollAsync(500, 500, -3, TestContext.Current.CancellationToken); // scroll down
         }
         finally
         {
-            await _mouse.MoveAsync(origX, origY);
+            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
         }
     }
 
     [Fact]
     public async Task DoubleClickAsync_DoesNotThrow()
     {
-        var (origX, origY) = await _mouse.GetPositionAsync();
+        var (origX, origY) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
         try
         {
-            await _mouse.DoubleClickAsync(500, 500);
+            await _mouse.DoubleClickAsync(500, 500, TestContext.Current.CancellationToken);
         }
         finally
         {
-            await _mouse.MoveAsync(origX, origY);
+            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
         }
     }
 
     [Fact]
     public async Task RightClickAsync_DoesNotThrow()
     {
-        var (origX, origY) = await _mouse.GetPositionAsync();
+        var (origX, origY) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
         try
         {
-            await _mouse.RightClickAsync(500, 500);
-            await Task.Delay(100);
+            await _mouse.RightClickAsync(500, 500, TestContext.Current.CancellationToken);
+            await Task.Delay(100, TestContext.Current.CancellationToken);
             // Press Escape to close any context menu
-            await _mouse.ClickAsync(500, 500);
+            await _mouse.ClickAsync(500, 500, ct: TestContext.Current.CancellationToken);
         }
         finally
         {
-            await _mouse.MoveAsync(origX, origY);
+            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
         }
     }
 
     [Fact]
     public async Task DragAsync_MovesCursorFromToPosition()
     {
-        var (origX, origY) = await _mouse.GetPositionAsync();
+        var (origX, origY) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
         try
         {
-            await _mouse.DragAsync(300, 300, 600, 600);
-            await Task.Delay(100);
+            await _mouse.DragAsync(300, 300, 600, 600, TestContext.Current.CancellationToken);
+            await Task.Delay(100, TestContext.Current.CancellationToken);
 
-            var (endX, endY) = await _mouse.GetPositionAsync();
+            var (endX, endY) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
             Assert.InRange(endX, 590, 610);
             Assert.InRange(endY, 590, 610);
         }
         finally
         {
-            await _mouse.MoveAsync(origX, origY);
+            await _mouse.MoveAsync(origX, origY, TestContext.Current.CancellationToken);
         }
     }
 }

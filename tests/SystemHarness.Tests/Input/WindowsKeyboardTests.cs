@@ -58,8 +58,8 @@ public class WindowsKeyboardTests : IClassFixture<KeyboardNotepadFixture>
     public async Task TypeAsync_TypesText()
     {
         await FocusAndClearNotepad();
-        await _keyboard.TypeAsync("hello");
-        await Task.Delay(200);
+        await _keyboard.TypeAsync("hello", ct: TestContext.Current.CancellationToken);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
 
         var text = await GetNotepadText();
         Assert.NotNull(text);
@@ -71,7 +71,7 @@ public class WindowsKeyboardTests : IClassFixture<KeyboardNotepadFixture>
     {
         await FocusAndClearNotepad();
         var start = DateTime.UtcNow;
-        await _keyboard.TypeAsync("abc", delayMs: 50);
+        await _keyboard.TypeAsync("abc", delayMs: 50, ct: TestContext.Current.CancellationToken);
         var elapsed = DateTime.UtcNow - start;
 
         Assert.True(elapsed.TotalMilliseconds >= 90);
@@ -81,12 +81,12 @@ public class WindowsKeyboardTests : IClassFixture<KeyboardNotepadFixture>
     public async Task KeyPressAsync_Enter_CreatesNewLine()
     {
         await FocusAndClearNotepad();
-        await _keyboard.TypeAsync("line1");
-        await Task.Delay(100);
-        await _keyboard.KeyPressAsync(Key.Enter);
-        await Task.Delay(100);
-        await _keyboard.TypeAsync("line2");
-        await Task.Delay(200);
+        await _keyboard.TypeAsync("line1", ct: TestContext.Current.CancellationToken);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+        await _keyboard.KeyPressAsync(Key.Enter, TestContext.Current.CancellationToken);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
+        await _keyboard.TypeAsync("line2", ct: TestContext.Current.CancellationToken);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
 
         var text = await GetNotepadText();
         Assert.NotNull(text);
@@ -98,17 +98,17 @@ public class WindowsKeyboardTests : IClassFixture<KeyboardNotepadFixture>
     public async Task HotkeyAsync_CtrlA_SelectsAll()
     {
         await FocusAndClearNotepad();
-        await _keyboard.TypeAsync("test text");
-        await Task.Delay(300);
+        await _keyboard.TypeAsync("test text", ct: TestContext.Current.CancellationToken);
+        await Task.Delay(300, TestContext.Current.CancellationToken);
 
         // Re-focus to guard against focus loss between typing and hotkey
-        await _window.FocusAsync("Notepad");
-        await Task.Delay(200);
+        await _window.FocusAsync("Notepad", TestContext.Current.CancellationToken);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
 
-        await _keyboard.HotkeyAsync(default, Key.Ctrl, Key.A);
-        await Task.Delay(200);
-        await _keyboard.TypeAsync("replaced");
-        await Task.Delay(300);
+        await _keyboard.HotkeyAsync(TestContext.Current.CancellationToken, new Key[] { Key.Ctrl, Key.A });
+        await Task.Delay(200, TestContext.Current.CancellationToken);
+        await _keyboard.TypeAsync("replaced", ct: TestContext.Current.CancellationToken);
+        await Task.Delay(300, TestContext.Current.CancellationToken);
 
         var text = await GetNotepadText();
         Assert.NotNull(text);
@@ -119,10 +119,10 @@ public class WindowsKeyboardTests : IClassFixture<KeyboardNotepadFixture>
     public async Task KeyDownAsync_AndKeyUpAsync_Work()
     {
         await FocusAndClearNotepad();
-        await _keyboard.KeyDownAsync(Key.Shift);
-        await _keyboard.KeyPressAsync(Key.A);
-        await _keyboard.KeyUpAsync(Key.Shift);
-        await Task.Delay(200);
+        await _keyboard.KeyDownAsync(Key.Shift, TestContext.Current.CancellationToken);
+        await _keyboard.KeyPressAsync(Key.A, TestContext.Current.CancellationToken);
+        await _keyboard.KeyUpAsync(Key.Shift, TestContext.Current.CancellationToken);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
 
         var text = await GetNotepadText();
         Assert.NotNull(text);
@@ -133,8 +133,8 @@ public class WindowsKeyboardTests : IClassFixture<KeyboardNotepadFixture>
     public async Task TypeAsync_SpecialCharacters_TypesCorrectly()
     {
         await FocusAndClearNotepad();
-        await _keyboard.TypeAsync("@#$%^&*()");
-        await Task.Delay(200);
+        await _keyboard.TypeAsync("@#$%^&*()", ct: TestContext.Current.CancellationToken);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
 
         var text = await GetNotepadText();
         Assert.NotNull(text);
@@ -146,8 +146,8 @@ public class WindowsKeyboardTests : IClassFixture<KeyboardNotepadFixture>
     {
         await FocusAndClearNotepad();
         // CJK and accented characters (all BMP)
-        await _keyboard.TypeAsync("\u00e9\u00f1\u00fc");  // éñü
-        await Task.Delay(200);
+        await _keyboard.TypeAsync("\u00e9\u00f1\u00fc", ct: TestContext.Current.CancellationToken);  // éñü
+        await Task.Delay(200, TestContext.Current.CancellationToken);
 
         var text = await GetNotepadText();
         Assert.NotNull(text);
@@ -160,8 +160,8 @@ public class WindowsKeyboardTests : IClassFixture<KeyboardNotepadFixture>
         await FocusAndClearNotepad();
         // Generate text longer than ClipboardThreshold (512)
         var longText = new string('x', 600);
-        await _keyboard.TypeAsync(longText);
-        await Task.Delay(300);
+        await _keyboard.TypeAsync(longText, ct: TestContext.Current.CancellationToken);
+        await Task.Delay(300, TestContext.Current.CancellationToken);
 
         var text = await GetNotepadText();
         Assert.NotNull(text);
@@ -173,8 +173,8 @@ public class WindowsKeyboardTests : IClassFixture<KeyboardNotepadFixture>
     {
         await FocusAndClearNotepad();
         // Short text without delay uses batch SendInput
-        await _keyboard.TypeAsync("batch123");
-        await Task.Delay(200);
+        await _keyboard.TypeAsync("batch123", ct: TestContext.Current.CancellationToken);
+        await Task.Delay(200, TestContext.Current.CancellationToken);
 
         var text = await GetNotepadText();
         Assert.NotNull(text);
@@ -185,8 +185,8 @@ public class WindowsKeyboardTests : IClassFixture<KeyboardNotepadFixture>
     public async Task TypeAsync_EmptyString_DoesNotThrow()
     {
         await FocusAndClearNotepad();
-        await _keyboard.TypeAsync("");
-        await _keyboard.TypeAsync(string.Empty);
+        await _keyboard.TypeAsync("", ct: TestContext.Current.CancellationToken);
+        await _keyboard.TypeAsync(string.Empty, ct: TestContext.Current.CancellationToken);
         // No assert needed — just verify no exception
     }
 }

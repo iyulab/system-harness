@@ -12,39 +12,39 @@ public class MouseExtensionTests
     [Fact]
     public async Task MiddleClickAsync_DoesNotThrow()
     {
-        var (x, y) = await _mouse.GetPositionAsync();
-        await _mouse.MiddleClickAsync(x, y);
+        var (x, y) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
+        await _mouse.MiddleClickAsync(x, y, TestContext.Current.CancellationToken);
     }
 
     [Fact]
     public async Task ScrollHorizontalAsync_DoesNotThrow()
     {
-        var (x, y) = await _mouse.GetPositionAsync();
-        await _mouse.ScrollHorizontalAsync(x, y, 1);
-        await _mouse.ScrollHorizontalAsync(x, y, -1);
+        var (x, y) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
+        await _mouse.ScrollHorizontalAsync(x, y, 1, TestContext.Current.CancellationToken);
+        await _mouse.ScrollHorizontalAsync(x, y, -1, TestContext.Current.CancellationToken);
     }
 
     [Fact]
     public async Task ButtonDownUp_WorksCorrectly()
     {
-        var (x, y) = await _mouse.GetPositionAsync();
+        var (x, y) = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
 
         // Press and release should not throw
-        await _mouse.ButtonDownAsync(x, y, MouseButton.Left);
-        await Task.Delay(50);
-        await _mouse.ButtonUpAsync(x, y, MouseButton.Left);
+        await _mouse.ButtonDownAsync(x, y, MouseButton.Left, TestContext.Current.CancellationToken);
+        await Task.Delay(50, TestContext.Current.CancellationToken);
+        await _mouse.ButtonUpAsync(x, y, MouseButton.Left, TestContext.Current.CancellationToken);
     }
 
     [Fact]
     public async Task SmoothMoveAsync_MovesToTarget()
     {
-        var startPos = await _mouse.GetPositionAsync();
+        var startPos = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
         var targetX = startPos.X + 50;
         var targetY = startPos.Y + 50;
 
-        await _mouse.SmoothMoveAsync(targetX, targetY, TimeSpan.FromMilliseconds(200));
+        await _mouse.SmoothMoveAsync(targetX, targetY, TimeSpan.FromMilliseconds(200), TestContext.Current.CancellationToken);
 
-        var endPos = await _mouse.GetPositionAsync();
+        var endPos = await _mouse.GetPositionAsync(TestContext.Current.CancellationToken);
         // Allow ±2 pixel tolerance
         Assert.InRange(endPos.X, targetX - 2, targetX + 2);
         Assert.InRange(endPos.Y, targetY - 2, targetY + 2);

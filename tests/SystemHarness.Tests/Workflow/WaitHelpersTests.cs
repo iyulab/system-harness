@@ -32,17 +32,15 @@ public sealed class WaitHelpersTests : IAsyncLifetime, IDisposable
     public async Task WaitForWindowStateAsync_Normal_ReturnsImmediately()
     {
         // Notepad starts in Normal state — should return immediately
-        await WaitHelpers.WaitForWindowStateAsync(
-            _harness, "Notepad", WindowState.Normal, TimeSpan.FromSeconds(5));
+        await WaitHelpers.WaitForWindowStateAsync(_harness, "Notepad", WindowState.Normal, TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
     }
 
     [Fact]
     public async Task WaitForWindowStateAsync_Minimized_WaitsUntilMinimized()
     {
         // Minimize Notepad, then wait for it to reach Minimized state
-        await _harness.Window.MinimizeAsync("Notepad");
-        await WaitHelpers.WaitForWindowStateAsync(
-            _harness, "Notepad", WindowState.Minimized, TimeSpan.FromSeconds(5));
+        await _harness.Window.MinimizeAsync("Notepad", TestContext.Current.CancellationToken);
+        await WaitHelpers.WaitForWindowStateAsync(_harness, "Notepad", WindowState.Minimized, TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -50,8 +48,7 @@ public sealed class WaitHelpersTests : IAsyncLifetime, IDisposable
     {
         // Notepad is Normal — waiting for Maximized with very short timeout should throw
         await Assert.ThrowsAsync<TimeoutException>(() =>
-            WaitHelpers.WaitForWindowStateAsync(
-                _harness, "Notepad", WindowState.Maximized, TimeSpan.FromMilliseconds(500)));
+            WaitHelpers.WaitForWindowStateAsync(_harness, "Notepad", WindowState.Maximized, TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken));
     }
 
     [Fact]

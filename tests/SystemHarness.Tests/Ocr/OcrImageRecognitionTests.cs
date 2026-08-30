@@ -28,7 +28,7 @@ public class OcrImageRecognitionTests : IDisposable
     public async Task RecognizeImage_SimpleEnglishText_ReturnsCorrectText()
     {
         var png = RenderTextToPng("Hello World", 48);
-        var result = await _ocr.RecognizeImageAsync(png);
+        var result = await _ocr.RecognizeImageAsync(png, ct: TestContext.Current.CancellationToken);
 
         Assert.Contains("Hello", result.Text);
         Assert.Contains("World", result.Text);
@@ -38,7 +38,7 @@ public class OcrImageRecognitionTests : IDisposable
     public async Task RecognizeImage_MultipleLines_ReturnsMultipleLines()
     {
         var png = RenderTextToPng("First Line\nSecond Line\nThird Line", 36);
-        var result = await _ocr.RecognizeImageAsync(png);
+        var result = await _ocr.RecognizeImageAsync(png, ct: TestContext.Current.CancellationToken);
 
         Assert.True(result.Lines.Count >= 2, $"Expected >= 2 lines, got {result.Lines.Count}");
     }
@@ -47,7 +47,7 @@ public class OcrImageRecognitionTests : IDisposable
     public async Task RecognizeImage_Numbers_RecognizesDigits()
     {
         var png = RenderTextToPng("12345 67890", 48);
-        var result = await _ocr.RecognizeImageAsync(png);
+        var result = await _ocr.RecognizeImageAsync(png, ct: TestContext.Current.CancellationToken);
 
         Assert.Contains("12345", result.Text);
         Assert.Contains("67890", result.Text);
@@ -57,7 +57,7 @@ public class OcrImageRecognitionTests : IDisposable
     public async Task RecognizeImage_WordBoundingRects_AreNonZero()
     {
         var png = RenderTextToPng("Test Bounding Rects", 48);
-        var result = await _ocr.RecognizeImageAsync(png);
+        var result = await _ocr.RecognizeImageAsync(png, ct: TestContext.Current.CancellationToken);
 
         var words = result.Lines.SelectMany(l => l.Words).ToList();
         Assert.True(words.Count >= 2, $"Expected >= 2 words, got {words.Count}");
@@ -75,7 +75,7 @@ public class OcrImageRecognitionTests : IDisposable
     public async Task RecognizeImage_LineBoundingRects_AreNonZero()
     {
         var png = RenderTextToPng("Line Bounds Test", 48);
-        var result = await _ocr.RecognizeImageAsync(png);
+        var result = await _ocr.RecognizeImageAsync(png, ct: TestContext.Current.CancellationToken);
 
         Assert.True(result.Lines.Count >= 1);
         foreach (var line in result.Lines)
@@ -89,7 +89,7 @@ public class OcrImageRecognitionTests : IDisposable
     public async Task RecognizeImage_Language_DefaultsToEnUs()
     {
         var png = RenderTextToPng("Language Test", 48);
-        var result = await _ocr.RecognizeImageAsync(png);
+        var result = await _ocr.RecognizeImageAsync(png, ct: TestContext.Current.CancellationToken);
 
         Assert.Equal("en-US", result.Language);
     }
@@ -98,7 +98,7 @@ public class OcrImageRecognitionTests : IDisposable
     public async Task RecognizeImage_TextProperty_MatchesLinesConcatenation()
     {
         var png = RenderTextToPng("Consistency Check", 48);
-        var result = await _ocr.RecognizeImageAsync(png);
+        var result = await _ocr.RecognizeImageAsync(png, ct: TestContext.Current.CancellationToken);
 
         // result.Text should contain the text from all lines
         foreach (var line in result.Lines)
@@ -111,7 +111,7 @@ public class OcrImageRecognitionTests : IDisposable
     public async Task RecognizeImage_WordTexts_FormLineText()
     {
         var png = RenderTextToPng("Words Form Lines", 48);
-        var result = await _ocr.RecognizeImageAsync(png);
+        var result = await _ocr.RecognizeImageAsync(png, ct: TestContext.Current.CancellationToken);
 
         foreach (var line in result.Lines)
         {
@@ -129,14 +129,14 @@ public class OcrImageRecognitionTests : IDisposable
         var png = RenderTextToPng("Error Test", 48);
 
         await Assert.ThrowsAsync<HarnessException>(() =>
-            _ocr.RecognizeImageAsync(png, new OcrOptions { Language = "zz-ZZ" }));
+            _ocr.RecognizeImageAsync(png, new OcrOptions { Language = "zz-ZZ" }, TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task RecognizeImage_LargeText_RecognizesAccurately()
     {
         var png = RenderTextToPng("AUTOMATION", 72);
-        var result = await _ocr.RecognizeImageAsync(png);
+        var result = await _ocr.RecognizeImageAsync(png, ct: TestContext.Current.CancellationToken);
 
         Assert.Contains("AUTOMATION", result.Text, StringComparison.OrdinalIgnoreCase);
     }

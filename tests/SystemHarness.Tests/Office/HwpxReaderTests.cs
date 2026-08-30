@@ -40,8 +40,8 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
-        var result = await _reader.ReadHwpxAsync(path);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Single(result.Sections);
         Assert.Single(result.Sections[0].Paragraphs);
@@ -66,8 +66,8 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
-        var result = await _reader.ReadHwpxAsync(path);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Equal(3, result.Sections[0].Paragraphs.Count);
         Assert.Equal("First paragraph", result.Sections[0].Paragraphs[0].Text);
@@ -98,8 +98,8 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
-        var result = await _reader.ReadHwpxAsync(path);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
 
         var para = result.Sections[0].Paragraphs[0];
         Assert.Equal(2, para.Runs.Count);
@@ -152,8 +152,8 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
-        var result = await _reader.ReadHwpxAsync(path);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
 
         var runs = result.Sections[0].Paragraphs[0].Runs;
         Assert.Equal(3, runs.Count);
@@ -191,8 +191,8 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
-        var result = await _reader.ReadHwpxAsync(path);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Equal(5, result.Sections[0].Paragraphs[0].ParaShapeId);
     }
@@ -221,8 +221,8 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
-        var result = await _reader.ReadHwpxAsync(path);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Single(result.Sections[0].Tables);
         var table = result.Sections[0].Tables[0];
@@ -257,8 +257,8 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
-        var result = await _reader.ReadHwpxAsync(path);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Single(result.Sections[0].Images);
         var img = result.Sections[0].Images[0];
@@ -285,8 +285,8 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
-        var result = await _reader.ReadHwpxAsync(path);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Equal(2, result.Sections.Count);
         Assert.Equal("Section 1", result.Sections[0].Paragraphs[0].Text);
@@ -328,8 +328,8 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
-        var result = await _reader.ReadHwpxAsync(path);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
 
         var section = result.Sections[0];
         Assert.Equal(2, section.Paragraphs.Count);
@@ -347,8 +347,8 @@ public class HwpxReaderTests : IDisposable
             Sections = [new HwpSection()],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
-        var result = await _reader.ReadHwpxAsync(path);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Single(result.Sections);
         Assert.Empty(result.Sections[0].Paragraphs);
@@ -373,8 +373,8 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
-        var result = await _reader.ReadHwpxAsync(path);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
 
         Assert.Equal("한글 워드프로세서 테스트입니다.", result.Sections[0].Paragraphs[0].Text);
         Assert.Equal("가나다라마바사아자차카타파하", result.Sections[0].Paragraphs[1].Text);
@@ -396,7 +396,7 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
 
         // Verify ZIP structure
         using var zip = System.IO.Compression.ZipFile.OpenRead(path);
@@ -418,7 +418,7 @@ public class HwpxReaderTests : IDisposable
             Sections = [new HwpSection()],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
 
         using var zip = System.IO.Compression.ZipFile.OpenRead(path);
         var mimetypeEntry = zip.GetEntry("mimetype");
@@ -444,7 +444,7 @@ public class HwpxReaderTests : IDisposable
                 },
             ],
         };
-        await _reader.WriteHwpxAsync(path, content1);
+        await _reader.WriteHwpxAsync(path, content1, TestContext.Current.CancellationToken);
 
         // Write second version
         var content2 = new HwpContent
@@ -456,9 +456,9 @@ public class HwpxReaderTests : IDisposable
                 },
             ],
         };
-        await _reader.WriteHwpxAsync(path, content2);
+        await _reader.WriteHwpxAsync(path, content2, TestContext.Current.CancellationToken);
 
-        var result = await _reader.ReadHwpxAsync(path);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
         Assert.Equal("Version 2", result.Sections[0].Paragraphs[0].Text);
     }
 
@@ -485,7 +485,7 @@ public class HwpxReaderTests : IDisposable
             ],
         };
 
-        await _reader.WriteHwpxAsync(path, content);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
 
         using var zip = System.IO.Compression.ZipFile.OpenRead(path);
         var binEntries = zip.Entries.Where(e => e.FullName.StartsWith("BinData/", StringComparison.Ordinal)).ToList();
@@ -510,12 +510,12 @@ public class HwpxReaderTests : IDisposable
                 },
             ],
         };
-        await _reader.WriteHwpxAsync(path, content);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
 
-        int count = await _reader.FindReplaceAsync(path, "Hello", "Hi");
+        int count = await _reader.FindReplaceAsync(path, "Hello", "Hi", TestContext.Current.CancellationToken);
 
         Assert.Equal(2, count);
-        var result = await _reader.ReadHwpxAsync(path);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
         Assert.Contains("Hi", result.Sections[0].Paragraphs[0].Text);
         Assert.DoesNotContain("Hello", result.Sections[0].Paragraphs[0].Text);
     }
@@ -542,12 +542,12 @@ public class HwpxReaderTests : IDisposable
                 },
             ],
         };
-        await _reader.WriteHwpxAsync(path, content);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
 
-        int count = await _reader.FindReplaceAsync(path, "text", "value");
+        int count = await _reader.FindReplaceAsync(path, "text", "value", TestContext.Current.CancellationToken);
 
         Assert.Equal(1, count);
-        var result = await _reader.ReadHwpxAsync(path);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
         // Bold run should be preserved
         Assert.True(result.Sections[0].Paragraphs[0].Runs[0].Bold);
         Assert.Contains("value", result.Sections[0].Paragraphs[0].Text);
@@ -572,12 +572,12 @@ public class HwpxReaderTests : IDisposable
                 },
             ],
         };
-        await _reader.WriteHwpxAsync(path, content);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
 
-        int count = await _reader.FindReplaceAsync(path, "OLD", "NEW");
+        int count = await _reader.FindReplaceAsync(path, "OLD", "NEW", TestContext.Current.CancellationToken);
 
         Assert.Equal(1, count);
-        var result = await _reader.ReadHwpxAsync(path);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
         Assert.Equal("NEW value", result.Sections[0].Tables[0].Rows[0][0]);
         Assert.Equal("keep", result.Sections[0].Tables[0].Rows[0][1]);
     }
@@ -595,9 +595,9 @@ public class HwpxReaderTests : IDisposable
                 },
             ],
         };
-        await _reader.WriteHwpxAsync(path, content);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
 
-        int count = await _reader.FindReplaceAsync(path, "Goodbye", "Hi");
+        int count = await _reader.FindReplaceAsync(path, "Goodbye", "Hi", TestContext.Current.CancellationToken);
 
         Assert.Equal(0, count);
     }
@@ -617,12 +617,12 @@ public class HwpxReaderTests : IDisposable
                 },
             ],
         };
-        await _reader.WriteHwpxAsync(path, content);
+        await _reader.WriteHwpxAsync(path, content, TestContext.Current.CancellationToken);
 
-        int count = await _reader.FindReplaceAsync(path, "한글", "한컴");
+        int count = await _reader.FindReplaceAsync(path, "한글", "한컴", TestContext.Current.CancellationToken);
 
         Assert.Equal(1, count);
-        var result = await _reader.ReadHwpxAsync(path);
+        var result = await _reader.ReadHwpxAsync(path, TestContext.Current.CancellationToken);
         Assert.Equal("한컴 문서를 작성합니다", result.Sections[0].Paragraphs[0].Text);
     }
 }

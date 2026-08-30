@@ -13,10 +13,10 @@ public class ClipboardExtensionTests
     public async Task GetAvailableFormatsAsync_ReturnsFormats()
     {
         // Set some text first to ensure clipboard has content
-        await _clipboard.SetTextAsync("test content");
-        await Task.Delay(100);
+        await _clipboard.SetTextAsync("test content", TestContext.Current.CancellationToken);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
 
-        var formats = await _clipboard.GetAvailableFormatsAsync();
+        var formats = await _clipboard.GetAvailableFormatsAsync(TestContext.Current.CancellationToken);
 
         Assert.NotEmpty(formats);
         Assert.Contains(formats, f => f.Contains("UNICODETEXT") || f.Contains("TEXT"));
@@ -27,10 +27,10 @@ public class ClipboardExtensionTests
     {
         var html = "<b>Hello</b> World";
 
-        await _clipboard.SetHtmlAsync(html);
-        await Task.Delay(100);
+        await _clipboard.SetHtmlAsync(html, TestContext.Current.CancellationToken);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
 
-        var result = await _clipboard.GetHtmlAsync();
+        var result = await _clipboard.GetHtmlAsync(TestContext.Current.CancellationToken);
 
         Assert.NotNull(result);
         Assert.Contains("Hello", result);
@@ -41,10 +41,10 @@ public class ClipboardExtensionTests
     public async Task GetHtmlAsync_ReturnsNull_WhenNoHtml()
     {
         // Set plain text only
-        await _clipboard.SetTextAsync("plain text only");
-        await Task.Delay(100);
+        await _clipboard.SetTextAsync("plain text only", TestContext.Current.CancellationToken);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
 
-        var result = await _clipboard.GetHtmlAsync();
+        var result = await _clipboard.GetHtmlAsync(TestContext.Current.CancellationToken);
 
         // May or may not be null depending on clipboard state
         // Just verify no exception
@@ -58,10 +58,10 @@ public class ClipboardExtensionTests
         {
             var paths = new List<string> { tempFile };
 
-            await _clipboard.SetFileDropListAsync(paths);
-            await Task.Delay(100);
+            await _clipboard.SetFileDropListAsync(paths, TestContext.Current.CancellationToken);
+            await Task.Delay(100, TestContext.Current.CancellationToken);
 
-            var result = await _clipboard.GetFileDropListAsync();
+            var result = await _clipboard.GetFileDropListAsync(TestContext.Current.CancellationToken);
 
             Assert.NotNull(result);
             Assert.Single(result);
@@ -83,10 +83,10 @@ public class ClipboardExtensionTests
         {
             var paths = new List<string> { tempFile1, tempFile2 };
 
-            await _clipboard.SetFileDropListAsync(paths);
-            await Task.Delay(100);
+            await _clipboard.SetFileDropListAsync(paths, TestContext.Current.CancellationToken);
+            await Task.Delay(100, TestContext.Current.CancellationToken);
 
-            var result = await _clipboard.GetFileDropListAsync();
+            var result = await _clipboard.GetFileDropListAsync(TestContext.Current.CancellationToken);
 
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
@@ -102,10 +102,10 @@ public class ClipboardExtensionTests
     public async Task GetFileDropListAsync_ReturnsNull_WhenNoFiles()
     {
         // Set text only
-        await _clipboard.SetTextAsync("no files here");
-        await Task.Delay(100);
+        await _clipboard.SetTextAsync("no files here", TestContext.Current.CancellationToken);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
 
-        var result = await _clipboard.GetFileDropListAsync();
+        var result = await _clipboard.GetFileDropListAsync(TestContext.Current.CancellationToken);
 
         Assert.Null(result);
     }

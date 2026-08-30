@@ -12,7 +12,7 @@ public class KeyboardExtensionTests
     [Fact]
     public async Task IsKeyPressedAsync_ReturnsFalseForUnpressedKey()
     {
-        var isPressed = await _keyboard.IsKeyPressedAsync(Key.F12);
+        var isPressed = await _keyboard.IsKeyPressedAsync(Key.F12, TestContext.Current.CancellationToken);
 
         // F12 should not be pressed during tests
         Assert.False(isPressed);
@@ -22,9 +22,9 @@ public class KeyboardExtensionTests
     public async Task IsKeyPressedAsync_DoesNotThrowForModifierKeys()
     {
         // These should not throw regardless of state
-        await _keyboard.IsKeyPressedAsync(Key.Ctrl);
-        await _keyboard.IsKeyPressedAsync(Key.Alt);
-        await _keyboard.IsKeyPressedAsync(Key.Shift);
+        await _keyboard.IsKeyPressedAsync(Key.Ctrl, TestContext.Current.CancellationToken);
+        await _keyboard.IsKeyPressedAsync(Key.Alt, TestContext.Current.CancellationToken);
+        await _keyboard.IsKeyPressedAsync(Key.Shift, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public class KeyboardExtensionTests
     {
         await Assert.ThrowsAsync<HarnessException>(async () =>
         {
-            await _keyboard.ToggleKeyAsync(Key.A, true);
+            await _keyboard.ToggleKeyAsync(Key.A, true, TestContext.Current.CancellationToken);
         });
     }
 
@@ -45,13 +45,13 @@ public class KeyboardExtensionTests
         try
         {
             // Toggle to opposite
-            await _keyboard.ToggleKeyAsync(Key.CapsLock, !initialState);
-            await Task.Delay(100);
+            await _keyboard.ToggleKeyAsync(Key.CapsLock, !initialState, TestContext.Current.CancellationToken);
+            await Task.Delay(100, TestContext.Current.CancellationToken);
         }
         finally
         {
             // Restore original state
-            await _keyboard.ToggleKeyAsync(Key.CapsLock, initialState);
+            await _keyboard.ToggleKeyAsync(Key.CapsLock, initialState, TestContext.Current.CancellationToken);
         }
     }
 }
