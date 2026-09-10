@@ -28,8 +28,13 @@ public class AssemblyConventionTests
             .Distinct()
             .ToList();
 
+        // The convention is that the assemblies agree with each other. Asserting a literal here
+        // instead pinned the test to one release: every version bump failed it, and the failure
+        // said nothing about consistency. Assert the shape, not the number.
         Assert.Single(versions);
-        Assert.Equal("0.28.5", versions[0]);
+        Assert.True(
+            System.Version.TryParse(versions[0]!.Split('-')[0], out _),
+            $"Assembly informational version is not a parseable version: '{versions[0]}'");
     }
 
     [Fact]
