@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.28.6]
+
+### Changed
+- Moved SourceLink off the line carrying a vulnerable `Microsoft.Build.Tasks.Git`
+  (CVE-2026-62900) onto a patched one. Build-time tooling only — no package dependency or public
+  API change. Before the move the warning was promoted to an error and the build failed outright.
+
 ## [0.28.5]
 
 ### Changed
