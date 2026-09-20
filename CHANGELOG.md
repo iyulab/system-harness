@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.28.7]
+
+### Fixed
+- **Stopping a monitor now returns only after it has stopped writing.** `MonitorManager.Stop` and `Dispose`
+  cancelled the monitor and returned at once, so a write that was in flight landed in the output file after the
+  caller had been told the monitor was stopped - deleting or moving the file right after a stop could fail or lose
+  the last event. Both now wait for the monitor to end (up to 5 seconds for one that ignores cancellation).
+
 ## [0.28.6]
 
 ### Changed

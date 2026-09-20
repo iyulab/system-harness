@@ -22,6 +22,9 @@ public sealed class MonitorManager : IDisposable
     private readonly ConcurrentDictionary<string, MonitorEntry> _monitors = new();
     private int _nextId;
 
+    /// <summary>How long <see cref="Stop"/> and <see cref="Dispose"/> wait for one monitor to end.</summary>
+    private static readonly TimeSpan StopTimeout = TimeSpan.FromSeconds(5);
+
     public string Start(string type, string outputPath, Func<string, CancellationToken, Task> monitorFunc)
     {
         var id = $"{type}-{Interlocked.Increment(ref _nextId)}";
@@ -61,9 +64,29 @@ public sealed class MonitorManager : IDisposable
         if (!_monitors.TryRemove(monitorId, out var entry))
             return false;
 
-        entry.Cts.Cancel();
-        entry.Cts.Dispose();
+        Quiesce(entry);
         return true;
+    }
+
+    /// <summary>
+    /// Cancels a monitor and waits for it to finish before releasing its token source. Returning earlier would let
+    /// the monitor write to its output file after the caller was told it had stopped - a caller that then deletes or
+    /// moves the file races that write. The wait is bounded: a monitor function that ignores its token is abandoned
+    /// after <see cref="StopTimeout"/>.
+    /// </summary>
+    private static void Quiesce(MonitorEntry entry)
+    {
+        entry.Cts.Cancel();
+        try
+        {
+            entry.Task.Wait(StopTimeout);
+        }
+        catch (AggregateException)
+        {
+            // The monitor ended with an error or as cancelled; either way it has ended.
+        }
+
+        entry.Cts.Dispose();
     }
 
     public IReadOnlyList<MonitorInfo> ListActive()
@@ -117,8 +140,7 @@ public sealed class MonitorManager : IDisposable
     {
         foreach (var entry in _monitors.Values)
         {
-            entry.Cts.Cancel();
-            entry.Cts.Dispose();
+            Quiesce(entry);
         }
         _monitors.Clear();
     }

@@ -149,6 +149,68 @@ public class MonitorManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task Stop_ReturnsOnlyAfterTheMonitorHasStoppedWriting()
+    {
+        // A monitor that is mid-write when it is cancelled: it finishes that write shortly after.
+        var outputPath = Path.Combine(_tempDir, "late.jsonl");
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var id = _manager.Start("test", outputPath, async (path, ct) =>
+        {
+            started.SetResult();
+            try
+            {
+                await Task.Delay(Timeout.Infinite, ct);
+            }
+            catch (OperationCanceledException)
+            {
+                await Task.Delay(200, CancellationToken.None);
+                await File.AppendAllTextAsync(path, "late" + Environment.NewLine, CancellationToken.None);
+            }
+        });
+
+        // A monitor cancelled before it ever ran writes nothing; wait until it is running.
+        await started.Task.WaitAsync(TestContext.Current.CancellationToken);
+
+        _manager.Stop(id);
+        var lengthWhenStopReturned = File.Exists(outputPath) ? new FileInfo(outputPath).Length : 0;
+        await Task.Delay(600, TestContext.Current.CancellationToken);
+        var lengthLater = File.Exists(outputPath) ? new FileInfo(outputPath).Length : 0;
+
+        // Once Stop has returned the caller may delete or move the file: nothing may be written after that.
+        Assert.Equal(lengthWhenStopReturned, lengthLater);
+        Assert.True(lengthLater > 0, "the in-flight write should have completed before Stop returned");
+    }
+
+    [Fact]
+    public async Task Dispose_ReturnsOnlyAfterEveryMonitorHasStoppedWriting()
+    {
+        var outputPath = Path.Combine(_tempDir, "late-dispose.jsonl");
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        _manager.Start("test", outputPath, async (path, ct) =>
+        {
+            started.SetResult();
+            try
+            {
+                await Task.Delay(Timeout.Infinite, ct);
+            }
+            catch (OperationCanceledException)
+            {
+                await Task.Delay(200, CancellationToken.None);
+                await File.AppendAllTextAsync(path, "late" + Environment.NewLine, CancellationToken.None);
+            }
+        });
+
+        await started.Task.WaitAsync(TestContext.Current.CancellationToken);
+
+        _manager.Dispose();
+        var lengthWhenDisposeReturned = File.Exists(outputPath) ? new FileInfo(outputPath).Length : 0;
+        await Task.Delay(600, TestContext.Current.CancellationToken);
+
+        Assert.Equal(lengthWhenDisposeReturned, File.Exists(outputPath) ? new FileInfo(outputPath).Length : 0);
+        Assert.True(lengthWhenDisposeReturned > 0);
+    }
+
+    [Fact]
     public void Stop_SameIdTwice_ReturnsFalseSecondTime()
     {
         var id = _manager.Start("test", Path.Combine(_tempDir, "e.jsonl"), async (_, ct) =>
