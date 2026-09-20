@@ -14,6 +14,8 @@
     <ProjectReference Include="..\..\src\SystemHarness.Windows\SystemHarness.Windows.csproj" />
     <ProjectReference Include="..\..\src\SystemHarness.Apps.Office\SystemHarness.Apps.Office.csproj" />
     <ProjectReference Include="..\..\src\SystemHarness.Mcp\SystemHarness.Mcp.csproj" />
+    <ProjectReference Include="..\..\src\SystemHarness.Apps.Browser\SystemHarness.Apps.Browser.csproj" />
+    <ProjectReference Include="..\..\src\SystemHarness.Apps.Email\SystemHarness.Apps.Email.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +24,7 @@
     <PackageReference Include="Microsoft.Testing.Extensions.HangDump" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="ChildProcessGuard" />
+    <PackageReference Include="Iyu.Conventions.Testing" />
   </ItemGroup>
 
   <ItemGroup>
