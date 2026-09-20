@@ -9,6 +9,7 @@ namespace SystemHarness.Tests;
 /// a caller sets it, and nothing changes and nothing is reported. The roster fails both ways - a new unread option,
 /// and a listed one that has since been wired - so each change is recorded on purpose.
 /// </summary>
+[Trait("Category", "CI")]
 public class OptionsReachabilityRosterTests
 {
     // Every assembly this repository ships: an option declared in one and read in another only counts as read
