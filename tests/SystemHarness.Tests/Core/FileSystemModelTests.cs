@@ -20,7 +20,7 @@ public class FileSystemModelTests
         var modified = DateTimeOffset.UtcNow;
         var entry = new FileEntry
         {
-            Path = @"C:\data\report.pdf",
+            Path = @"C:\files\report.pdf",
             Name = "report.pdf",
             IsDirectory = false,
             Size = 1_048_576,
@@ -37,7 +37,7 @@ public class FileSystemModelTests
     {
         var entry = new FileEntry
         {
-            Path = @"C:\data\subdir",
+            Path = @"C:\files\subdir",
             Name = "subdir",
             IsDirectory = true,
             Size = 0,

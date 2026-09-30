@@ -38,8 +38,7 @@ jobs:
       - name: Test (CI only)
         # `dotnet test` (MTP server-pipe mode) discovers zero tests on this project's
         # net10.0-windows10.0.19041.0 TFM -- reproduced both locally and on this exact
-        # windows-latest runner (see claudedocs/tools-system-harness/issues/ISSUE-system-harness-
-        # 20260829-220500-mtp-windows-tfm-dotnet-test-crash.md). The built .exe's in-process xUnit
+        # windows-latest runner. The built .exe's in-process xUnit
         # v3 console runner discovers and runs tests normally, so invoke it directly instead.
         # `-longRunning 300` reports (not kills) tests running past 5m -- the closest equivalent
         # this runner exposes to `--blame-hang-timeout`, which is an MTP/`dotnet test` concept.
