@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.28.9]
+
+### Changed
+- **`HarnessFactory.Create()` on Linux or macOS says «Windows only»** with a `PlatformNotSupportedException`, instead
+  of failing to load a `SystemHarness.Linux`/`SystemHarness.Mac` assembly that never existed. A Windows app that does
+  not reference `SystemHarness.Windows` now gets a `PlatformNotSupportedException` naming the package (it was a
+  `FileNotFoundException`).
+- README: Linux and macOS implementations are no longer listed as planned — SystemHarness is Windows only.
+
 ## [0.28.8]
 
 ### Changed

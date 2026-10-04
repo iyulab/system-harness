@@ -5,22 +5,35 @@ namespace SystemHarness;
 
 /// <summary>
 /// Creates an <see cref="IHarness"/> for the current platform at runtime.
-/// Loads the platform-specific assembly by convention (e.g. SystemHarness.Windows).
+/// Loads the platform assembly by convention — <c>SystemHarness.Windows</c>, the only implementation.
 /// </summary>
 public static class HarnessFactory
 {
     /// <summary>
     /// Creates an <see cref="IHarness"/> appropriate for the current operating system.
     /// </summary>
-    /// <exception cref="PlatformNotSupportedException">No platform implementation found.</exception>
+    /// <exception cref="PlatformNotSupportedException">
+    /// The OS is not Windows, or the <c>SystemHarness.Windows</c> package is not referenced.
+    /// </exception>
     public static IHarness Create(HarnessOptions? options = null)
     {
-        var (assemblyName, typeName) = GetPlatformType();
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            throw new PlatformNotSupportedException(
+                $"SystemHarness supports Windows only; there is no implementation for {RuntimeInformation.OSDescription}.");
 
-        var assembly = Assembly.Load(assemblyName)
-            ?? throw new PlatformNotSupportedException(
-                $"Could not load platform assembly '{assemblyName}'. " +
-                $"Ensure the NuGet package is referenced.");
+        const string assemblyName = "SystemHarness.Windows";
+        const string typeName = "SystemHarness.Windows.WindowsHarness";
+
+        Assembly assembly;
+        try
+        {
+            assembly = Assembly.Load(assemblyName);
+        }
+        catch (FileNotFoundException ex)
+        {
+            throw new PlatformNotSupportedException(
+                $"Could not load platform assembly '{assemblyName}'. Reference the {assemblyName} package.", ex);
+        }
 
         var type = assembly.GetType(typeName)
             ?? throw new PlatformNotSupportedException(
@@ -37,20 +50,5 @@ public static class HarnessFactory
         return (IHarness)(Activator.CreateInstance(type)
             ?? throw new PlatformNotSupportedException(
                 $"Could not create instance of '{typeName}'."));
-    }
-
-    private static (string AssemblyName, string TypeName) GetPlatformType()
-    {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            return ("SystemHarness.Windows", "SystemHarness.Windows.WindowsHarness");
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            return ("SystemHarness.Linux", "SystemHarness.Linux.LinuxHarness");
-
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            return ("SystemHarness.Mac", "SystemHarness.Mac.MacHarness");
-
-        throw new PlatformNotSupportedException(
-            $"Unsupported platform: {RuntimeInformation.OSDescription}");
     }
 }

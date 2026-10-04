@@ -265,14 +265,16 @@ public class MyService(IShell shell, IScreen screen, IOcr ocr) { }
 using var harness = HarnessFactory.Create();
 ```
 
+**Windows only.** `SystemHarness.Windows` is the one platform implementation; there is no Linux or macOS
+implementation and none is planned. On another OS `HarnessFactory.Create()` throws `PlatformNotSupportedException`
+saying so. The platform-independent packages (`SystemHarness.Core` models, `SystemHarness.Apps.*`) still work there.
+
 ## Architecture
 
 ```
 SystemHarness.Core              Interfaces + models (zero platform dependencies)
   |
   +-- SystemHarness.Windows     Win32/DXGI/SendInput/FlaUI (Windows implementation)
-  +-- SystemHarness.Linux       X11/Wayland (planned)
-  +-- SystemHarness.Mac         AppKit/AppleScript (planned)
   |
   +-- SystemHarness.Apps.Office OpenXML/OWPML document processing
   +-- SystemHarness.Apps.Email  IMAP/SMTP via MailKit
@@ -344,8 +346,6 @@ SystemHarness.Core              Interfaces + models (zero platform dependencies)
 - [x] Office document processing (Word, Excel, PowerPoint, HWP)
 - [x] DPI-aware coordinates, Unicode support, cursor overlay
 - [x] NuGet packaging with SourceLink
-- [ ] Linux implementation (X11/Wayland)
-- [ ] macOS implementation (AppKit/AppleScript)
 
 ## License
 
