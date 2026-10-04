@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.28.8]
+
+### Changed
+- **The packages now carry the LICENSE text**, so an application that redistributes them can ship the MIT notice
+  from the package itself.
+
+### Dependencies
+- Microsoft.Extensions.AI 10.10.0, Microsoft.Extensions.AI.OpenAI 10.10.1, OpenAI 2.14.0; Microsoft.Extensions.* 10.0.12 servicing.
+
 ## [0.28.7]
 
 ### Fixed
