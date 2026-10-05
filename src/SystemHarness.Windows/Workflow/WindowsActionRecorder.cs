@@ -88,7 +88,7 @@ public sealed class WindowsActionRecorder : IActionRecorder, IDisposable
             if (hookTaskToAwait is not null)
             {
                 try { await hookTaskToAwait; }
-                catch { /* Hook task may throw on disposal */ }
+                catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested) { /* Hook task may throw on disposal */ }
             }
         }
     }

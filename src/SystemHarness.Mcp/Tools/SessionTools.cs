@@ -114,7 +114,7 @@ public sealed class SessionTools(IHarness harness)
 
         string? clipboardText = null;
         try { clipboardText = await harness.Clipboard.GetTextAsync(ct); }
-        catch { /* clipboard may be locked */ }
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested) { /* clipboard may be locked */ }
 
         await Task.WhenAll(windowsTask, foregroundTask, mouseTask);
 

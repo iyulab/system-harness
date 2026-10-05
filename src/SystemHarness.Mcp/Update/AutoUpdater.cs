@@ -84,7 +84,7 @@ public sealed class AutoUpdater : IDisposable
             if (release is not null)
                 await DownloadUpdateAsync(release, ct);
         }
-        catch { /* silent — never crash the server */ }
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested) { /* silent — never crash the server */ }
     }
 
     /// <summary>
@@ -143,7 +143,7 @@ public sealed class AutoUpdater : IDisposable
             entry.ExtractToFile(UpdatePath, overwrite: true);
             return true;
         }
-        catch { return false; }
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested) { return false; }
         finally
         {
             try { File.Delete(tempZip); } catch { }

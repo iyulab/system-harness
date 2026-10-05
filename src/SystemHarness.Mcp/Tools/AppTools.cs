@@ -109,10 +109,10 @@ public sealed class AppTools(IHarness harness)
                     {
                         // Try "Don't Save" first, then "No"
                         try { await harness.DialogHandler.ClickDialogButtonAsync("Don't Save", ct); }
-                        catch { await harness.DialogHandler.ClickDialogButtonAsync("No", ct); }
+                        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested) { await harness.DialogHandler.ClickDialogButtonAsync("No", ct); }
                     }
                 }
-                catch { /* Dialog handling is best-effort */ }
+                catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested) { /* Dialog handling is best-effort */ }
             }
         }
 
@@ -204,10 +204,10 @@ public sealed class AppTools(IHarness harness)
         {
             // Try common dismiss buttons
             try { await harness.DialogHandler.DismissMessageBoxAsync(null, ct); }
-            catch
+            catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
             {
                 try { await harness.DialogHandler.ClickDialogButtonAsync("OK", ct); }
-                catch { await harness.DialogHandler.ClickDialogButtonAsync("Close", ct); }
+                catch (Exception retryEx) when (retryEx is not OperationCanceledException || !ct.IsCancellationRequested) { await harness.DialogHandler.ClickDialogButtonAsync("Close", ct); }
             }
         }
 

@@ -126,7 +126,7 @@ public sealed class WindowsKeyboard : IKeyboard
                 if (savedText is not null)
                     await _clipboard.SetTextAsync(savedText, ct);
             }
-            catch
+            catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
             {
                 // Clipboard restore failure is non-critical
             }

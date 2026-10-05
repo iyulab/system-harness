@@ -240,7 +240,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
             var fg = await harness.Window.GetForegroundAsync(ct);
             lastForeground = fg?.Handle;
         }
-        catch { /* GetForegroundAsync may not be available */ }
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested) { /* GetForegroundAsync may not be available */ }
 
         await MonitorManager.WriteEventAsync(outputPath, new
         {
@@ -322,7 +322,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                     lastForeground = fg.Handle;
                 }
             }
-            catch { /* best effort */ }
+            catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested) { /* best effort */ }
 
             // Update known state
             knownWindows.Clear();
@@ -344,7 +344,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                 lastTextHash = Convert.ToHexString(SHA256.HashData(
                     System.Text.Encoding.UTF8.GetBytes(text)));
         }
-        catch { /* clipboard may be locked */ }
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested) { /* clipboard may be locked */ }
 
         await MonitorManager.WriteEventAsync(outputPath, new
         {
@@ -382,7 +382,7 @@ public sealed class MonitorTools(IHarness harness, MonitorManager monitors)
                     lastTextHash = currentHash;
                 }
             }
-            catch { /* clipboard access may fail temporarily */ }
+            catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested) { /* clipboard access may fail temporarily */ }
         }
     }
 
