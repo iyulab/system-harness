@@ -5,10 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [0.28.10]
 
 ### Fixed
-- **Cancelling a call now cancels it.** 13 method(s) that take a `CancellationToken` caught every exception to
+- **Breaking** (released as a patch) — **cancelling a call now cancels it.** 13 method(s) that take a `CancellationToken` caught every exception to
   return a fallback (`null`, an empty result, a failure value) or to log and continue, and treated the caller's own
   cancellation the same way. They now let the caller's `OperationCanceledException` through; other failures behave
   as before. Affected: app, monitor and session tools, the auto-updater, keyboard input and the action recorder.
+  Migration: code that relied on a cancelled call returning `null`, an empty result or a failure value now
+  receives `OperationCanceledException` — catch it where a cancellation is expected.
 
 ## [0.28.9]
 
