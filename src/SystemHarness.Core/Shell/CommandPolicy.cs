@@ -87,11 +87,12 @@ public sealed class CommandPolicy
                     return $"Command matches blocked pattern: {pattern}";
             }
 
-            // A shell host runs its arguments as further commands ("cmd /c dir & shutdown /s"),
-            // so every program-like token it would run is checked too.
-            if (ShellHosts.Contains(programName))
+            // A shell host runs part of its arguments as further commands ("cmd /c dir & shutdown /s"), so every
+            // program-like token of that part is checked too. Only that part: the arguments a host hands to a script
+            // ("pwsh -File run.ps1 format", "bash run.sh shutdown") are the script's data, never run as commands.
+            if (CommandPayload(programName, arguments) is { } payload)
             {
-                foreach (var token in arguments.Split(CommandSeparators, StringSplitOptions.RemoveEmptyEntries))
+                foreach (var token in payload.Split(CommandSeparators, StringSplitOptions.RemoveEmptyEntries))
                 {
                     if (token[0] is '/' or '-')
                         continue;
@@ -105,6 +106,146 @@ public sealed class CommandPolicy
 
         return null;
     }
+
+    /// <summary>
+    /// The part of a shell host's arguments the host runs as commands, or null when the program is not a shell host or
+    /// runs a script file (whose following arguments are data). Unknown shapes return the whole argument string, so an
+    /// argument the parser does not understand is still checked.
+    /// </summary>
+    internal static string? CommandPayload(string programName, string arguments)
+    {
+        if (programName.Equals("pwsh", StringComparison.OrdinalIgnoreCase) ||
+            programName.Equals("powershell", StringComparison.OrdinalIgnoreCase))
+        {
+            return PowerShellPayload(arguments, bareArgumentIsFile: programName.Equals("pwsh", StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (programName.Equals("bash", StringComparison.OrdinalIgnoreCase) ||
+            programName.Equals("sh", StringComparison.OrdinalIgnoreCase))
+        {
+            return PosixShellPayload(arguments);
+        }
+
+        // cmd re-parses everything after /c or /k (& | && ||), and wsl runs its arguments as a Linux command line
+        return ShellHosts.Contains(programName) ? arguments : null;
+    }
+
+    // pwsh/powershell: -Command (-c) and -EncodedCommand (-e/-ec) carry commands; -File (-f) names a script and what
+    // follows is its arguments. A first bare argument is a script for pwsh (its default parameter is -File) and a
+    // command for Windows PowerShell (default -Command), unless it names a .ps1 file.
+    private static string? PowerShellPayload(string arguments, bool bareArgumentIsFile)
+    {
+        var tokens = Tokenize(arguments);
+        for (var i = 0; i < tokens.Count; i++)
+        {
+            var (text, start) = tokens[i];
+            if (text.Length > 1 && text[0] is '-' or '/')
+            {
+                var name = text[1..].TrimEnd(':');
+                if (IsAbbreviation(name, "File", 1))
+                    return null;
+
+                if (IsAbbreviation(name, "EncodedCommand", 1) || name.Equals("ec", StringComparison.OrdinalIgnoreCase))
+                    return i + 1 < tokens.Count ? DecodeOrRaw(tokens[i + 1].Text) : string.Empty;
+
+                if (IsAbbreviation(name, "Command", 1))
+                    return arguments[Math.Min(arguments.Length, start + text.Length)..];
+
+                if (PowerShellValueOptions.Any(option => IsAbbreviation(name, option, 2)))
+                    i++; // skip the option's value
+
+                continue;
+            }
+
+            var isScript = text.EndsWith(".ps1", StringComparison.OrdinalIgnoreCase);
+            return isScript || bareArgumentIsFile ? null : arguments[start..];
+        }
+
+        return null;
+    }
+
+    // bash/sh: -c carries the command string; otherwise the first non-option argument is a script and the rest its data
+    private static string? PosixShellPayload(string arguments)
+    {
+        var tokens = Tokenize(arguments);
+        for (var i = 0; i < tokens.Count; i++)
+        {
+            var (text, start) = tokens[i];
+            if (text.StartsWith('-') || text.StartsWith('+'))
+            {
+                if (text.Length > 1 && text[0] == '-' && text[1] != '-' && text.Contains('c', StringComparison.Ordinal))
+                    return arguments[Math.Min(arguments.Length, start + text.Length)..];
+
+                // -o / +o take an option name ("-o pipefail"), which is not a script
+                if (text is "-o" or "+o" or "-O" or "+O")
+                    i++;
+
+                continue;
+            }
+
+            return null;
+        }
+
+        return null;
+    }
+
+    private static bool IsAbbreviation(string name, string parameter, int minimumLength) =>
+        name.Length >= minimumLength && name.Length <= parameter.Length &&
+        parameter.StartsWith(name, StringComparison.OrdinalIgnoreCase);
+
+    private static string DecodeOrRaw(string value)
+    {
+        try
+        {
+            return System.Text.Encoding.Unicode.GetString(Convert.FromBase64String(value));
+        }
+        catch (FormatException)
+        {
+            return value;
+        }
+    }
+
+    // Splits on whitespace outside double or single quotes; each token keeps its start offset, quotes stripped
+    private static List<(string Text, int Start)> Tokenize(string arguments)
+    {
+        var tokens = new List<(string, int)>();
+        var i = 0;
+        while (i < arguments.Length)
+        {
+            while (i < arguments.Length && char.IsWhiteSpace(arguments[i]))
+                i++;
+            if (i >= arguments.Length)
+                break;
+
+            var start = i;
+            var text = new System.Text.StringBuilder();
+            char? quote = null;
+            for (; i < arguments.Length; i++)
+            {
+                var c = arguments[i];
+                if (quote is null && char.IsWhiteSpace(c))
+                    break;
+                if (c is '"' or '\'' && (quote is null || quote == c))
+                {
+                    quote = quote is null ? c : null;
+                    continue;
+                }
+
+                text.Append(c);
+            }
+
+            tokens.Add((text.ToString(), start));
+        }
+
+        return tokens;
+    }
+
+    // Options that take a value (the token after them is not a script or a command)
+    private static readonly string[] PowerShellValueOptions =
+    [
+        "ExecutionPolicy", "WorkingDirectory", "ConfigurationName", "ConfigurationFile", "OutputFormat", "InputFormat",
+        "WindowStyle", "Version", "SettingsFile", "CustomPipeName", "PSConsoleFile", "WorkingDir",
+    ];
 
     private static readonly HashSet<string> ShellHosts = new(StringComparer.OrdinalIgnoreCase)
     {

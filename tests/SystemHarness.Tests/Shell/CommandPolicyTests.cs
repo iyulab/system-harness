@@ -404,6 +404,72 @@ public class CommandPolicyTests
         public Task<bool> IsRunningAsync(string name, CancellationToken ct = default) => Task.FromResult(false);
     }
 
+    // A shell host's command part is checked; what it hands to a script is the script's data
+    [Theory]
+    [InlineData("pwsh", "-File \"/plugins/p/run.ps1\" format shutdown")]
+    [InlineData("pwsh", "-NoProfile -ExecutionPolicy Bypass -File run.ps1 format")]
+    [InlineData("pwsh", "-f run.ps1 shutdown")]
+    [InlineData("pwsh", "run.ps1 format")]
+    [InlineData("powershell", "-File C:\\plugins\\run.ps1 shutdown")]
+    [InlineData("powershell", "run.ps1 format")]
+    [InlineData("bash", "run.sh format shutdown")]
+    [InlineData("sh", "-e ./run.sh shutdown")]
+    [InlineData("bash", "-o pipefail run.sh format")]
+    public void ShellHost_ScriptArguments_AreData(string host, string arguments) =>
+        Assert.Null(CheckViolation(CommandPolicy.CreateDefault(), host, arguments));
+
+    [Theory]
+    [InlineData("pwsh", "-Command \"format\"")]
+    [InlineData("pwsh", "-NoProfile -c \"Get-Date; shutdown /s\"")]
+    [InlineData("powershell", "Get-ChildItem; shutdown /s")]
+    [InlineData("pwsh", "-ExecutionPolicy Bypass -Command shutdown")]
+    [InlineData("cmd", "/c echo hi & format C:")]
+    [InlineData("cmd", "/C run.cmd shutdown")]
+    [InlineData("bash", "-c \"ls; shutdown now\"")]
+    [InlineData("bash", "-o pipefail -c \"shutdown now\"")]
+    [InlineData("sh", "-lc reboot")]
+    [InlineData("wsl", "shutdown now")]
+    public void ShellHost_CommandPart_IsChecked(string host, string arguments) =>
+        Assert.NotNull(CheckViolation(CommandPolicy.CreateDefault(), host, arguments));
+
+    [Fact]
+    public void ShellHost_EncodedCommand_IsDecodedAndChecked()
+    {
+        var encoded = Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes("Get-Date; shutdown /s"));
+
+        Assert.NotNull(CheckViolation(CommandPolicy.CreateDefault(), "pwsh", $"-NoProfile -EncodedCommand {encoded}"));
+        Assert.NotNull(CheckViolation(CommandPolicy.CreateDefault(), "powershell", $"-ec {encoded}"));
+    }
+
+    // The reporter's repro through the enforcing shell: the script run reaches the inner shell, the command run does not
+    [Fact]
+    public async Task PolicyShell_RunsAScriptWithDataArguments_AndRefusesTheSameWordAsACommand()
+    {
+        var inner = new RecordingShell();
+        var shell = new PolicyEnforcingShell(inner, CommandPolicy.CreateDefault());
+        var ct = TestContext.Current.CancellationToken;
+
+        await shell.RunAsync("pwsh", "-File run.ps1 format", ct: ct);
+        await Assert.ThrowsAsync<CommandPolicyException>(() => shell.RunAsync("pwsh", "-Command \"format\"", ct: ct));
+        await Assert.ThrowsAsync<CommandPolicyException>(() => shell.RunAsync("cmd", "/c echo hi & format", ct: ct));
+
+        Assert.Equal(1, inner.Runs);
+    }
+
+    private sealed class RecordingShell : IShell
+    {
+        public int Runs { get; private set; }
+
+        public Task<ShellResult> RunAsync(string command, ShellOptions? options = null, CancellationToken ct = default) =>
+            throw new NotSupportedException("the facts here run a program with arguments");
+
+        public Task<ShellResult> RunAsync(string program, string arguments, ShellOptions? options = null, CancellationToken ct = default)
+        {
+            Runs++;
+            return Task.FromResult(new ShellResult { ExitCode = 0, StdOut = string.Empty, StdErr = string.Empty, Elapsed = TimeSpan.Zero });
+        }
+    }
+
     private static string? CheckViolation(CommandPolicy policy, string program, string arguments)
     {
         return (string?)typeof(CommandPolicy)
