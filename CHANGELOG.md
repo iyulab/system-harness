@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.29.1] - Unreleased
+
+### Fixed
+- **A script's arguments are no longer refused as commands.** 0.29.0 scanned every argument of a shell host for blocked
+  programs, so `pwsh -File run.ps1 format shutdown` was refused although PowerShell hands everything after the script path
+  to the script. The scan now covers only the part a host runs as commands: `cmd /c` / `/k` and `wsl` arguments,
+  `pwsh`/`powershell` `-Command` and `-EncodedCommand` (decoded) payloads and Windows PowerShell's bare command line,
+  and `bash`/`sh` `-c` payloads. Arguments after `-File <script>`, a pwsh script path or a bash script path are data.
+  Blocked patterns (`rm -rf`, `del /s`, …) still apply to the whole line.
+
 ## [0.29.0]
 
 ### Changed
