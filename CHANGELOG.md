@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.29.1] - Unreleased
+## [0.29.1] - 2026-10-08
 
 ### Fixed
 - **A script's arguments are no longer refused as commands.** 0.29.0 scanned every argument of a shell host for blocked
