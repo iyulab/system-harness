@@ -82,6 +82,6 @@ public class TestConventionTests
         // Guard: catches untracked additions of test classes
         // Update this count when adding new test classes
         var count = AllTestClasses().Count();
-        Assert.Equal(73, count); // 66 existing + 1 for this class + 3 new (CommandRegistry, RateLimiter, SafeZone) + 1 (OptionsReachabilityRoster) + 1 (OperationalLanguageConvention) + 1 (PublicApiConvention)
+        Assert.Equal(74, count); // 66 existing + 1 for this class + 3 new (CommandRegistry, RateLimiter, SafeZone) + 1 (OptionsReachabilityRoster) + 1 (OperationalLanguageConvention) + 1 (PublicApiConvention) + 1 (SafetyGate)
     }
 }

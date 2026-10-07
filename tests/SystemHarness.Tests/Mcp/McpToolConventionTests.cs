@@ -119,7 +119,7 @@ public class McpToolConventionTests
         // Exact guard: tracks total command count across all tool types.
         // If you add or remove a tool, update this count AND classify in ReadOnlyTools/MutationTools.
         var count = AllTools().Count();
-        Assert.Equal(174, count);
+        Assert.Equal(172, count);
     }
 
     [Fact]
@@ -413,7 +413,7 @@ public class McpToolConventionTests
             [typeof(OfficeTools)] = 10,
             [typeof(ProcessTools)] = 14,
             [typeof(ReportTools)] = 3,
-            [typeof(SafetyTools)] = 12,
+            [typeof(SafetyTools)] = 10,
             [typeof(ScreenTools)] = 5,
             [typeof(SessionTools)] = 5,
             [typeof(ShellTools)] = 1,
@@ -525,7 +525,7 @@ public class McpToolConventionTests
         "session_save", "session_bookmark",
         // Safety mutations
         "safety_emergency_stop", "safety_resume", "safety_set_zone", "safety_set_rate_limit",
-        "safety_confirm_before", "safety_approve", "safety_deny", "safety_clear_history",
+        "safety_confirm_before", "safety_clear_history",
         // Office writes
         "office_write_word", "office_write_excel", "office_write_pptx", "office_write_hwpx",
         "office_replace_word", "office_replace_hwpx",
@@ -746,7 +746,7 @@ public class McpToolConventionTests
             }
         }
 
-        Assert.Equal(132, requiredStrings.Count);
+        Assert.Equal(130, requiredStrings.Count);
     }
 
     [Fact]
@@ -761,6 +761,9 @@ public class McpToolConventionTests
             "menu_item_not_found", "missing_window", "monitor_not_found",
             "not_found", "not_set", "occurrence_out_of_range", "process_not_found",
             "text_not_found", "update_failed", "window_not_found", "wrong_verb",
+            // Safety refusals: the command was not run
+            "emergency_stopped", "rate_limited", "outside_safe_zone", "policy_blocked",
+            "operator_stop", "operator_locked", "updates_disabled",
         };
 
         var toolsDir = FindToolsDirectory();
@@ -782,9 +785,10 @@ public class McpToolConventionTests
             }
         }
 
-        // Also check Dispatch directory for error codes
+        // Also check the Dispatch directory and the server root (SafetyGate) for error codes
         var dispatchDir = FindDispatchDirectory();
-        foreach (var file in Directory.GetFiles(dispatchDir, "*.cs"))
+        var serverDir = Path.GetDirectoryName(toolsDir)!;
+        foreach (var file in Directory.GetFiles(dispatchDir, "*.cs").Concat(Directory.GetFiles(serverDir, "*.cs")))
         {
             var fileName = Path.GetFileName(file);
             foreach (var line in File.ReadAllLines(file))
@@ -802,7 +806,7 @@ public class McpToolConventionTests
 
         Assert.True(unknownCodes.Count == 0,
             $"Unknown error codes (add to knownCodes or use existing ones):\n{string.Join("\n", unknownCodes)}");
-        Assert.Equal(23, knownCodes.Count);
+        Assert.Equal(30, knownCodes.Count);
     }
 
     [Fact]

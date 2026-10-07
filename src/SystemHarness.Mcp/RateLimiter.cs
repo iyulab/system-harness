@@ -1,32 +1,59 @@
 namespace SystemHarness.Mcp;
 
 /// <summary>
-/// Thread-safe action rate limiter.
-/// When enabled, tracks action timestamps and can report whether the rate is exceeded.
-/// Advisory: tools can query it but enforcement is at the caller's discretion.
+/// Thread-safe action rate limiter, enforced by <see cref="SafetyGate"/> on every mutation command.
+/// A limit set by the operator at startup is a ceiling: the agent can tighten it but not loosen or disable it.
 /// </summary>
-public static class RateLimiter
+public sealed class RateLimiter
 {
-    private static readonly object Lock = new();
-    private static int _maxPerSecond;
-    private static readonly Queue<DateTime> _timestamps = new();
+    private readonly object _lock = new();
+    private readonly Queue<DateTime> _timestamps = new();
+    private int _maxPerSecond;
+    private int _operatorMax;
 
     /// <summary>
     /// Gets the current max actions per second limit, or 0 if disabled.
     /// </summary>
-    public static int MaxPerSecond
+    public int MaxPerSecond
     {
-        get { lock (Lock) return _maxPerSecond; }
+        get { lock (_lock) return _maxPerSecond; }
+    }
+
+    /// <summary>
+    /// The operator's ceiling, or 0 when the operator set none.
+    /// </summary>
+    public int OperatorMaxPerSecond
+    {
+        get { lock (_lock) return _operatorMax; }
+    }
+
+    /// <summary>
+    /// Sets the operator's ceiling and the current limit to it. Pass 0 for no ceiling.
+    /// </summary>
+    public void SetOperatorLimit(int maxPerSecond)
+    {
+        lock (_lock)
+        {
+            _operatorMax = Math.Max(0, maxPerSecond);
+            _maxPerSecond = _operatorMax;
+            _timestamps.Clear();
+        }
     }
 
     /// <summary>
     /// Sets the max actions per second. Pass 0 to disable.
     /// </summary>
-    public static void SetLimit(int maxPerSecond)
+    /// <exception cref="HarnessException">The value would loosen or disable the operator's ceiling.</exception>
+    public void SetLimit(int maxPerSecond)
     {
-        lock (Lock)
+        maxPerSecond = Math.Max(0, maxPerSecond);
+        lock (_lock)
         {
-            _maxPerSecond = Math.Max(0, maxPerSecond);
+            if (_operatorMax > 0 && (maxPerSecond == 0 || maxPerSecond > _operatorMax))
+                throw new HarnessException(
+                    $"The operator limited actions to {_operatorMax} per second; a limit can only be lowered.");
+
+            _maxPerSecond = maxPerSecond;
             _timestamps.Clear();
         }
     }
@@ -34,38 +61,42 @@ public static class RateLimiter
     /// <summary>
     /// Records an action and returns whether the rate limit is exceeded.
     /// </summary>
-    public static bool RecordAndCheck()
+    public bool RecordAndCheck()
     {
-        lock (Lock)
+        lock (_lock)
         {
             if (_maxPerSecond <= 0) return false;
 
             var now = DateTime.UtcNow;
-            var cutoff = now.AddSeconds(-1);
+            Trim(now);
 
-            // Remove old timestamps
-            while (_timestamps.Count > 0 && _timestamps.Peek() < cutoff)
-                _timestamps.Dequeue();
+            if (_timestamps.Count >= _maxPerSecond)
+                return true;
 
             _timestamps.Enqueue(now);
-            return _timestamps.Count > _maxPerSecond;
+            return false;
         }
     }
 
     /// <summary>
     /// Gets the current action count in the last second.
     /// </summary>
-    public static int CurrentRate
+    public int CurrentRate
     {
         get
         {
-            lock (Lock)
+            lock (_lock)
             {
-                var cutoff = DateTime.UtcNow.AddSeconds(-1);
-                while (_timestamps.Count > 0 && _timestamps.Peek() < cutoff)
-                    _timestamps.Dequeue();
+                Trim(DateTime.UtcNow);
                 return _timestamps.Count;
             }
         }
+    }
+
+    private void Trim(DateTime now)
+    {
+        var cutoff = now.AddSeconds(-1);
+        while (_timestamps.Count > 0 && _timestamps.Peek() < cutoff)
+            _timestamps.Dequeue();
     }
 }

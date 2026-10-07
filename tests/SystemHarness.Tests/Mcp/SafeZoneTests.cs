@@ -7,11 +7,13 @@ namespace SystemHarness.Tests.Mcp;
 [Trait("Category", "CI")]
 public class SafeZoneTests : IDisposable
 {
-    public SafeZoneTests() => SafeZone.Clear();
+    private readonly SafeZone _zone = new();
+
+    public SafeZoneTests() => _zone.Clear();
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        SafeZone.Clear();
+        _zone.Clear();
     }
 
     // --- Current ---
@@ -19,7 +21,7 @@ public class SafeZoneTests : IDisposable
     [Fact]
     public void Current_Default_IsNull()
     {
-        Assert.Null(SafeZone.Current);
+        Assert.Null(_zone.Current);
     }
 
     // --- Set ---
@@ -27,9 +29,9 @@ public class SafeZoneTests : IDisposable
     [Fact]
     public void Set_WindowOnly_SetsCurrent()
     {
-        SafeZone.Set("Notepad");
+        _zone.Set("Notepad");
 
-        var current = SafeZone.Current;
+        var current = _zone.Current;
         Assert.NotNull(current);
         Assert.Equal("Notepad", current.Window);
         Assert.Null(current.Region);
@@ -39,9 +41,9 @@ public class SafeZoneTests : IDisposable
     public void Set_WithRegion_SetsBoth()
     {
         var region = new Rectangle(10, 20, 300, 400);
-        SafeZone.Set("Calculator", region);
+        _zone.Set("Calculator", region);
 
-        var current = SafeZone.Current;
+        var current = _zone.Current;
         Assert.NotNull(current);
         Assert.Equal("Calculator", current.Window);
         Assert.NotNull(current.Region);
@@ -54,10 +56,10 @@ public class SafeZoneTests : IDisposable
     [Fact]
     public void Set_OverwritesPrevious()
     {
-        SafeZone.Set("Notepad");
-        SafeZone.Set("Calculator");
+        _zone.Set("Notepad");
+        _zone.Set("Calculator");
 
-        Assert.Equal("Calculator", SafeZone.Current!.Window);
+        Assert.Equal("Calculator", _zone.Current!.Window);
     }
 
     // --- Clear ---
@@ -65,19 +67,19 @@ public class SafeZoneTests : IDisposable
     [Fact]
     public void Clear_RemovesSafeZone()
     {
-        SafeZone.Set("Notepad");
-        Assert.NotNull(SafeZone.Current);
+        _zone.Set("Notepad");
+        Assert.NotNull(_zone.Current);
 
-        SafeZone.Clear();
-        Assert.Null(SafeZone.Current);
+        _zone.Clear();
+        Assert.Null(_zone.Current);
     }
 
     [Fact]
     public void Clear_WhenAlreadyNull_NoError()
     {
-        SafeZone.Clear();
-        SafeZone.Clear();
-        Assert.Null(SafeZone.Current);
+        _zone.Clear();
+        _zone.Clear();
+        Assert.Null(_zone.Current);
     }
 
     // --- SafeZoneConfig record ---

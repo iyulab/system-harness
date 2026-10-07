@@ -35,7 +35,11 @@ public sealed class WindowsHarness : IHarness
             shell = new AuditingShell(shell, options.AuditLog);
 
         Shell = shell;
-        Process = new WindowsProcessManager();
+        // Starting a program directly is the same act as running it from a shell — same policy
+        IProcessManager process = new WindowsProcessManager();
+        if (options.CommandPolicy is not null)
+            process = new PolicyEnforcingProcessManager(process, options.CommandPolicy);
+        Process = process;
         FileSystem = new WindowsFileSystem();
         Window = new WindowsWindow();
         Clipboard = new WindowsClipboard();

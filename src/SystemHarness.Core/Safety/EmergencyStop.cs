@@ -41,6 +41,23 @@ public sealed class EmergencyStop : IDisposable
     }
 
     /// <summary>
+    /// Who triggered the current stop, or null when not triggered.
+    /// An <see cref="EmergencyStopSource.Operator"/> stop outranks an agent's own stop.
+    /// </summary>
+    public EmergencyStopSource? TriggeredBy
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _cts.IsCancellationRequested ? _source : null;
+            }
+        }
+    }
+
+    private EmergencyStopSource _source;
+
+    /// <summary>
     /// Raised when emergency stop is triggered. Handlers run synchronously on the triggering thread.
     /// </summary>
     public event Action? Triggered;
@@ -48,13 +65,21 @@ public sealed class EmergencyStop : IDisposable
     /// <summary>
     /// Cancels the token, signaling all operations to stop.
     /// </summary>
-    public void Trigger()
+    /// <param name="source">Who stops. Defaults to the operator (a hotkey or the hosting application).</param>
+    public void Trigger(EmergencyStopSource source = EmergencyStopSource.Operator)
     {
         lock (_lock)
         {
             if (_disposed) return;
             if (!_cts.IsCancellationRequested)
+            {
+                _source = source;
                 _cts.Cancel();
+            }
+            else if (source == EmergencyStopSource.Operator)
+            {
+                _source = source;
+            }
         }
 
         Triggered?.Invoke();
@@ -83,4 +108,16 @@ public sealed class EmergencyStop : IDisposable
             _cts.Dispose();
         }
     }
+}
+
+/// <summary>
+/// Who triggered an <see cref="EmergencyStop"/>.
+/// </summary>
+public enum EmergencyStopSource
+{
+    /// <summary>The person operating the machine (hotkey) or the hosting application.</summary>
+    Operator = 0,
+
+    /// <summary>The automation itself, stopping its own work.</summary>
+    Agent = 1,
 }

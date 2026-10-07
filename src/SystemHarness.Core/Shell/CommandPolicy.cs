@@ -69,8 +69,9 @@ public sealed class CommandPolicy
     /// Checks whether the given command and program are allowed by this policy.
     /// </summary>
     /// <returns>Null if allowed; violation message if blocked.</returns>
-    internal string? CheckViolation(string program, string arguments)
+    internal string? CheckViolation(string program, string? arguments)
     {
+        arguments ??= string.Empty;
         var programName = Path.GetFileNameWithoutExtension(program);
 
         lock (_lock)
@@ -85,8 +86,30 @@ public sealed class CommandPolicy
                 if (pattern.IsMatch(fullCommand))
                     return $"Command matches blocked pattern: {pattern}";
             }
+
+            // A shell host runs its arguments as further commands ("cmd /c dir & shutdown /s"),
+            // so every program-like token it would run is checked too.
+            if (ShellHosts.Contains(programName))
+            {
+                foreach (var token in arguments.Split(CommandSeparators, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    if (token[0] is '/' or '-')
+                        continue;
+
+                    var nested = Path.GetFileNameWithoutExtension(token);
+                    if (_blockedPrograms.Contains(nested))
+                        return $"Program '{nested}' is blocked by command policy.";
+                }
+            }
         }
 
         return null;
     }
+
+    private static readonly HashSet<string> ShellHosts = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "cmd", "powershell", "pwsh", "bash", "sh", "wsl",
+    };
+
+    private static readonly char[] CommandSeparators = [' ', '\t', '&', '|', ';', '(', ')', '"', '\''];
 }

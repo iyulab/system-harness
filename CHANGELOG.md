@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.29.0]
+
+### Changed
+- **Breaking** — **the MCP server's safety settings now stop actions instead of only reporting them.** Every command
+  passes one gate before it runs: an active emergency stop refuses mutations (`emergency_stopped`) and cancels the
+  command that is running, the rate limit refuses actions over it (`rate_limited`), and a safe zone refuses input
+  actions that target anything outside the zone window (`outside_safe_zone`) — coordinates outside it, a window
+  argument naming another window, keyboard input while another window is in front. A zone window that cannot be
+  found refuses the action. Refusals are recorded in the action history.
+  Migration: an agent that set a zone or a rate limit and kept acting outside them now gets refusals.
+- **Breaking** — **the MCP server applies the default command policy**: shell commands and process starts of
+  destructive programs (format, shutdown, diskpart, `rm -rf`, `del /s`, ...) are refused (`policy_blocked`).
+  Migration: start the server with `--command-policy=none` to run without a policy.
+- **Breaking** — **automatic updates are off by default.** The server no longer contacts GitHub or replaces its own
+  binary unless started with `--auto-update=true`; without it `update.check` and `update.apply` are refused
+  (`updates_disabled`). Migration: add `--auto-update=true` to keep updating automatically.
+- **Breaking** — **`safety.approve` and `safety.deny` are removed**: the agent that asks for confirmation can no
+  longer answer it. The user approves or denies by setting `status` in the request's JSON file; the agent polls
+  with `safety.check_confirmation`. `ConfirmationManager.Approve`/`Deny` are removed too.
+- **`CommandPolicy` also guards process starts.** `WindowsHarness` built with a policy wraps its process manager in
+  the new `PolicyEnforcingProcessManager`, and a shell host's arguments (`cmd /c dir & shutdown /s`) are checked
+  for blocked programs as well.
+- `SafeZone` and `RateLimiter` are services instead of static classes.
+
+### Added
+- **Operator settings for the MCP server**: `--rate-limit=N` (the agent can lower it but not raise or disable it),
+  `--safe-zone=<window>` (the agent cannot change it), `--stop-hotkey=false`, `--command-policy`, `--auto-update`.
+- **Emergency stop hotkey**: Ctrl+Shift+Escape stops the session until the server restarts; `safety.resume`
+  resets only a stop the agent triggered itself. `EmergencyStop.Trigger(EmergencyStopSource)` and
+  `EmergencyStop.TriggeredBy` say who stopped.
+
+### Fixed
+- The MCP server reports its real version (it always said 0.27.0).
+
 ## [0.28.10]
 
 ### Fixed

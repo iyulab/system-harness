@@ -22,34 +22,6 @@ public class ConfirmationManagerTests
     }
 
     [Fact]
-    public void Approve_ChangesStatusToApproved()
-    {
-        var request = ConfirmationManager.Create("format_disk", "Dangerous operation");
-        var resolved = ConfirmationManager.Approve(request.Id);
-
-        Assert.Equal(ConfirmationStatus.Approved, resolved.Status);
-        Assert.NotNull(resolved.ResolvedAt);
-
-        // Verify file updated
-        var fileContent = File.ReadAllText(resolved.FilePath);
-        Assert.Contains("approved", fileContent);
-
-        File.Delete(resolved.FilePath);
-    }
-
-    [Fact]
-    public void Deny_ChangesStatusToDenied()
-    {
-        var request = ConfirmationManager.Create("drop_table", "Irreversible");
-        var resolved = ConfirmationManager.Deny(request.Id);
-
-        Assert.Equal(ConfirmationStatus.Denied, resolved.Status);
-        Assert.NotNull(resolved.ResolvedAt);
-
-        File.Delete(resolved.FilePath);
-    }
-
-    [Fact]
     public void Check_ReturnsPendingForNewRequest()
     {
         var request = ConfirmationManager.Create("test_action", "test_reason");
@@ -72,7 +44,8 @@ public class ConfirmationManagerTests
     {
         var r1 = ConfirmationManager.Create("action_1", "reason_1");
         var r2 = ConfirmationManager.Create("action_2", "reason_2");
-        ConfirmationManager.Approve(r1.Id);
+        AnswerAsUser(r1.FilePath, "approved");
+        ConfirmationManager.Check(r1.Id);
 
         var pending = ConfirmationManager.ListPending();
 
@@ -81,20 +54,6 @@ public class ConfirmationManagerTests
 
         File.Delete(r1.FilePath);
         File.Delete(r2.FilePath);
-    }
-
-    [Fact]
-    public void Approve_InvalidId_ThrowsHarnessException()
-    {
-        Assert.Throws<HarnessException>(() =>
-            ConfirmationManager.Approve("nonexistent"));
-    }
-
-    [Fact]
-    public void Deny_InvalidId_ThrowsHarnessException()
-    {
-        Assert.Throws<HarnessException>(() =>
-            ConfirmationManager.Deny("nonexistent"));
     }
 
     [Fact]
@@ -139,27 +98,35 @@ public class ConfirmationManagerTests
         File.Delete(request.FilePath);
     }
 
-    [Fact]
-    public void Approve_ThenCheck_ReturnsApproved()
+    [Theory]
+    [InlineData("approved", ConfirmationStatus.Approved)]
+    [InlineData("denied", ConfirmationStatus.Denied)]
+    public void UserEditsFile_ThenCheck_ReturnsTheAnswer(string written, ConfirmationStatus expected)
     {
-        var request = ConfirmationManager.Create("approve_check", "verify");
-        ConfirmationManager.Approve(request.Id);
+        var request = ConfirmationManager.Create("answer_check", "verify");
+        AnswerAsUser(request.FilePath, written);
+
         var checked_ = ConfirmationManager.Check(request.Id);
 
-        Assert.Equal(ConfirmationStatus.Approved, checked_.Status);
+        Assert.Equal(expected, checked_.Status);
+        Assert.NotNull(checked_.ResolvedAt);
 
         File.Delete(request.FilePath);
     }
 
     [Fact]
-    public void Deny_ThenCheck_ReturnsDenied()
+    public void ConfirmationManager_HasNoProgrammaticAnswer()
     {
-        var request = ConfirmationManager.Create("deny_check", "verify");
-        ConfirmationManager.Deny(request.Id);
-        var checked_ = ConfirmationManager.Check(request.Id);
+        // The agent that asks must not be able to answer: approval is the user's edit of the file.
+        var methods = typeof(ConfirmationManager).GetMethods().Select(m => m.Name).ToList();
 
-        Assert.Equal(ConfirmationStatus.Denied, checked_.Status);
+        Assert.DoesNotContain("Approve", methods);
+        Assert.DoesNotContain("Deny", methods);
+    }
 
-        File.Delete(request.FilePath);
+    private static void AnswerAsUser(string path, string status)
+    {
+        var json = File.ReadAllText(path).Replace("\"pending\"", $"\"{status}\"", StringComparison.Ordinal);
+        File.WriteAllText(path, json);
     }
 }

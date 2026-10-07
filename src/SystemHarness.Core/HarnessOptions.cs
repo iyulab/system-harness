@@ -7,7 +7,7 @@ namespace SystemHarness;
 public sealed class HarnessOptions
 {
     /// <summary>
-    /// Command policy for shell command filtering.
+    /// Command policy applied to shell commands and to process starts.
     /// Null means no policy (all commands allowed).
     /// Use <see cref="CommandPolicy.CreateDefault()"/> for standard safety.
     /// </summary>

@@ -90,7 +90,7 @@ await harness.UIAutomation.TypeIntoAsync("Notepad", "Edit", "Hello from automati
 
 ## MCP Server (AI Tool Integration)
 
-system-harness includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server with **174 commands** across 25 categories, accessed through 3 MCP tools using a command dispatch pattern.
+system-harness includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server with **172 commands** across 25 categories, accessed through 3 MCP tools using a command dispatch pattern.
 
 ### Installation
 
@@ -110,6 +110,16 @@ Download the latest release from [GitHub Releases](https://github.com/iyulab/sys
 }
 ```
 
+**Operator settings** — pass as arguments (`"args": ["--rate-limit=5"]`). The agent can tighten them but not loosen them:
+
+| Argument | Default | Effect |
+|----------|---------|--------|
+| `--command-policy=default\|none` | `default` | `default` blocks destructive programs (format, shutdown, diskpart, `rm -rf`, `del /s`, ...) in shell commands **and** process starts |
+| `--rate-limit=N` | off | At most N actions per second; the agent can lower it but not raise or disable it |
+| `--safe-zone=<window>` | off | Input actions only reach this window (title substring or handle); the agent cannot change it |
+| `--stop-hotkey=false` | on | Ctrl+Shift+Escape stops the session (running commands are cancelled, every later action is refused) until the server restarts |
+| `--auto-update=true` | off | Check GitHub Releases daily, stage updates, and allow `update.check`/`update.apply` |
+
 **From source** (development):
 
 ```json
@@ -125,7 +135,7 @@ Download the latest release from [GitHub Releases](https://github.com/iyulab/sys
 
 ### 3 MCP Tools
 
-Instead of 174 individual tool definitions (which consume ~12,000 tokens per API call), commands are accessed through 3 dispatch tools:
+Instead of 172 individual tool definitions (which consume ~12,000 tokens per API call), commands are accessed through 3 dispatch tools:
 
 | Tool | Purpose | Example |
 |------|---------|---------|
@@ -154,13 +164,13 @@ Instead of 174 individual tool definitions (which consume ~12,000 tokens per API
 | **desktop** | 4 | `desktop.count`, `desktop.current`, `desktop.switch` |
 | **system** | 4 | `system.get_info`, `system.get_env`, `system.set_env` |
 | **office** | 10 | `office.read_word`, `office.write_excel`, `office.read_hwpx` |
-| **safety** | 12 | `safety.emergency_stop`, `safety.set_zone`, `safety.confirm_before` |
+| **safety** | 10 | `safety.emergency_stop`, `safety.set_zone`, `safety.confirm_before` |
 | **monitor** | 4 | `monitor.start`, `monitor.stop`, `monitor.read`, `monitor.list` |
 | **report** | 3 | `report.get_desktop`, `report.get_screen`, `report.get_window` |
 | **session** | 5 | `session.save`, `session.compare`, `session.bookmark` |
 | **observe** | 1 | `observe.window` (hybrid screenshot + accessibility + OCR) |
 | **record** | 4 | `record.start`, `record.stop`, `record.get_actions`, `record.replay` |
-| **update** | 2 | `update.check`, `update.apply` (auto-update from GitHub Releases) |
+| **update** | 2 | `update.check`, `update.apply` (GitHub Releases; only with `--auto-update=true`) |
 
 ### Compound Facades (reduce multiple tool calls to one)
 
@@ -222,14 +232,16 @@ var stop = new EmergencyStop();
 // Call stop.Trigger() to cancel all operations at once
 ```
 
-### Safe Zones, Rate Limiting, and Confirmation
+### MCP Server Safety
 
-Available through MCP tools or programmatically:
+Every MCP command passes one gate before it runs. A refused command is not run, and the refusal is recorded in the action history:
 
-- **Safe zones** — restrict mouse/keyboard to a window or screen region
-- **Rate limiting** — cap actions per second to prevent runaway automation
-- **Confirmation gates** — require user approval before destructive actions
-- **Action history** — full audit trail of all tool invocations
+- **Emergency stop** — `safety.emergency_stop` or the operator hotkey (Ctrl+Shift+Escape) cancels running commands and refuses every later action (`emergency_stopped`). The agent can resume its own stop with `safety.resume`; a hotkey stop holds until the server restarts.
+- **Command policy** — blocked programs in shell commands and process starts are refused (`policy_blocked`), including programs chained inside `cmd /c` or `powershell`.
+- **Rate limiting** — actions over the limit are refused (`rate_limited`).
+- **Safe zones** — with a zone set, input actions (mouse, keyboard, UI automation, vision clicks, dialogs, window changes) must target the zone window: coordinates inside it (or inside its region), window arguments naming it, keyboard input only while it is in the foreground (`outside_safe_zone`). A zone window that cannot be found refuses the action; commands whose target is only known after they run (`vision.click_text`, `record.replay`) are refused while a zone is set.
+- **Confirmation** — `safety.confirm_before` writes a JSON request the user approves or denies by editing its `status`; the agent polls with `safety.check_confirmation` and has no command to answer its own request.
+- **Action history** — full audit trail of tool invocations, including refusals
 
 ## Monitoring
 
@@ -280,7 +292,7 @@ SystemHarness.Core              Interfaces + models (zero platform dependencies)
   +-- SystemHarness.Apps.Email  IMAP/SMTP via MailKit
   +-- SystemHarness.Apps.Browser Playwright-based web automation
   |
-  +-- SystemHarness.Mcp         MCP server (3 tools, 174 commands)
+  +-- SystemHarness.Mcp         MCP server (3 tools, 172 commands)
 ```
 
 ### IHarness Services (15 interfaces)
@@ -342,7 +354,7 @@ SystemHarness.Core              Interfaces + models (zero platform dependencies)
 - [x] Background monitors: file, process, window, clipboard, screen, dialog
 - [x] Safety: EmergencyStop, safe zones, rate limiting, confirmation gates
 - [x] Session management: save, compare, bookmark
-- [x] MCP server with 174 commands (3-tool dispatch architecture)
+- [x] MCP server with 172 commands (3-tool dispatch architecture)
 - [x] Office document processing (Word, Excel, PowerPoint, HWP)
 - [x] DPI-aware coordinates, Unicode support, cursor overlay
 - [x] NuGet packaging with SourceLink

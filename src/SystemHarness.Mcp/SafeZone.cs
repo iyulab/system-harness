@@ -4,41 +4,80 @@ namespace SystemHarness.Mcp;
 
 /// <summary>
 /// Thread-safe safe zone configuration.
-/// When set, mouse/keyboard actions should be restricted to the specified window/region.
+/// When set, input actions (mouse, keyboard, UI automation, vision clicks, dialogs, window changes) are
+/// refused unless they target the zone window — see <see cref="SafetyGate"/>.
+/// A zone set by the operator at startup is locked: the agent can neither move nor clear it.
 /// </summary>
-public static class SafeZone
+public sealed class SafeZone
 {
-    private static readonly object Lock = new();
-    private static SafeZoneConfig? _current;
+    private readonly object _lock = new();
+    private SafeZoneConfig? _current;
+    private bool _operatorLocked;
 
     /// <summary>
     /// Gets the current safe zone, or null if no restriction is active.
     /// </summary>
-    public static SafeZoneConfig? Current
+    public SafeZoneConfig? Current
     {
-        get { lock (Lock) return _current; }
+        get { lock (_lock) return _current; }
+    }
+
+    /// <summary>
+    /// Whether the zone was set by the operator and cannot be changed through <see cref="Set"/> or <see cref="Clear"/>.
+    /// </summary>
+    public bool IsOperatorLocked
+    {
+        get { lock (_lock) return _operatorLocked; }
+    }
+
+    /// <summary>
+    /// Sets the zone on behalf of the operator and locks it.
+    /// </summary>
+    public void SetByOperator(string window, Rectangle? region = null)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(window);
+        lock (_lock)
+        {
+            _current = new SafeZoneConfig(window, region);
+            _operatorLocked = true;
+        }
     }
 
     /// <summary>
     /// Sets the safe zone to restrict actions to a window and optional region.
     /// </summary>
-    public static void Set(string window, Rectangle? region = null)
+    /// <exception cref="HarnessException">The operator locked the zone.</exception>
+    public void Set(string window, Rectangle? region = null)
     {
-        lock (Lock)
+        ArgumentException.ThrowIfNullOrWhiteSpace(window);
+        lock (_lock)
+        {
+            ThrowIfLocked();
             _current = new SafeZoneConfig(window, region);
+        }
     }
 
     /// <summary>
     /// Clears the safe zone, allowing unrestricted actions.
     /// </summary>
-    public static void Clear()
+    /// <exception cref="HarnessException">The operator locked the zone.</exception>
+    public void Clear()
     {
-        lock (Lock)
+        lock (_lock)
+        {
+            ThrowIfLocked();
             _current = null;
+        }
+    }
+
+    private void ThrowIfLocked()
+    {
+        if (_operatorLocked)
+            throw new HarnessException("The safe zone was set by the operator and cannot be changed.");
     }
 }
 
 /// <summary>
-/// Safe zone configuration.
+/// Safe zone configuration. <see cref="Region"/> is relative to the window's top-left corner.
 /// </summary>
 public sealed record SafeZoneConfig(string Window, Rectangle? Region);

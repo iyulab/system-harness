@@ -6,7 +6,8 @@ namespace SystemHarness.Mcp;
 
 /// <summary>
 /// File-based confirmation system for dangerous actions.
-/// Creates a JSON confirmation request file that can be approved/denied externally.
+/// Creates a JSON confirmation request file that the user approves or denies by editing it —
+/// the agent that asked has no command to answer its own request.
 /// Since MCP has no push mechanism, this uses file-based polling.
 /// </summary>
 public static class ConfirmationManager
@@ -70,43 +71,11 @@ public static class ConfirmationManager
     }
 
     /// <summary>
-    /// Approve a confirmation request programmatically.
-    /// </summary>
-    public static ConfirmationRequest Approve(string id)
-    {
-        return Resolve(id, ConfirmationStatus.Approved);
-    }
-
-    /// <summary>
-    /// Deny a confirmation request programmatically.
-    /// </summary>
-    public static ConfirmationRequest Deny(string id)
-    {
-        return Resolve(id, ConfirmationStatus.Denied);
-    }
-
-    /// <summary>
     /// List all pending confirmation requests.
     /// </summary>
     public static IReadOnlyList<ConfirmationRequest> ListPending()
     {
         return Pending.Values.Where(r => r.Status == ConfirmationStatus.Pending).ToArray();
-    }
-
-    private static ConfirmationRequest Resolve(string id, ConfirmationStatus status)
-    {
-        if (!Pending.TryGetValue(id, out var original))
-            throw new HarnessException($"Confirmation request '{id}' not found.");
-
-        var resolved = original with
-        {
-            Status = status,
-            ResolvedAt = DateTime.UtcNow,
-        };
-
-        File.WriteAllText(resolved.FilePath, JsonSerializer.Serialize(resolved, JsonOpts));
-        Pending[id] = resolved;
-        return resolved;
     }
 }
 

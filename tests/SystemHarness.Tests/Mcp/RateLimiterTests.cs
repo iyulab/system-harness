@@ -6,11 +6,13 @@ namespace SystemHarness.Tests.Mcp;
 [Trait("Category", "CI")]
 public class RateLimiterTests : IDisposable
 {
-    public RateLimiterTests() => RateLimiter.SetLimit(0);
+    private readonly RateLimiter _rate = new();
+
+    public RateLimiterTests() => _rate.SetLimit(0);
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-        RateLimiter.SetLimit(0);
+        _rate.SetLimit(0);
     }
 
     // --- SetLimit / MaxPerSecond ---
@@ -18,41 +20,41 @@ public class RateLimiterTests : IDisposable
     [Fact]
     public void MaxPerSecond_DefaultIsZero()
     {
-        Assert.Equal(0, RateLimiter.MaxPerSecond);
+        Assert.Equal(0, _rate.MaxPerSecond);
     }
 
     [Fact]
     public void SetLimit_PositiveValue_UpdatesMaxPerSecond()
     {
-        RateLimiter.SetLimit(10);
-        Assert.Equal(10, RateLimiter.MaxPerSecond);
+        _rate.SetLimit(10);
+        Assert.Equal(10, _rate.MaxPerSecond);
     }
 
     [Fact]
     public void SetLimit_Zero_Disables()
     {
-        RateLimiter.SetLimit(10);
-        RateLimiter.SetLimit(0);
-        Assert.Equal(0, RateLimiter.MaxPerSecond);
+        _rate.SetLimit(10);
+        _rate.SetLimit(0);
+        Assert.Equal(0, _rate.MaxPerSecond);
     }
 
     [Fact]
     public void SetLimit_Negative_ClampsToZero()
     {
-        RateLimiter.SetLimit(-5);
-        Assert.Equal(0, RateLimiter.MaxPerSecond);
+        _rate.SetLimit(-5);
+        Assert.Equal(0, _rate.MaxPerSecond);
     }
 
     [Fact]
     public void SetLimit_ClearsTimestamps()
     {
-        RateLimiter.SetLimit(100);
-        RateLimiter.RecordAndCheck();
-        RateLimiter.RecordAndCheck();
-        Assert.True(RateLimiter.CurrentRate > 0);
+        _rate.SetLimit(100);
+        _rate.RecordAndCheck();
+        _rate.RecordAndCheck();
+        Assert.True(_rate.CurrentRate > 0);
 
-        RateLimiter.SetLimit(100);
-        Assert.Equal(0, RateLimiter.CurrentRate);
+        _rate.SetLimit(100);
+        Assert.Equal(0, _rate.CurrentRate);
     }
 
     // --- RecordAndCheck ---
@@ -61,40 +63,40 @@ public class RateLimiterTests : IDisposable
     public void RecordAndCheck_Disabled_ReturnsFalse()
     {
         // Limit is 0 (disabled)
-        Assert.False(RateLimiter.RecordAndCheck());
+        Assert.False(_rate.RecordAndCheck());
     }
 
     [Fact]
     public void RecordAndCheck_WithinLimit_ReturnsFalse()
     {
-        RateLimiter.SetLimit(10);
+        _rate.SetLimit(10);
 
-        Assert.False(RateLimiter.RecordAndCheck());
-        Assert.False(RateLimiter.RecordAndCheck());
+        Assert.False(_rate.RecordAndCheck());
+        Assert.False(_rate.RecordAndCheck());
     }
 
     [Fact]
     public void RecordAndCheck_ExceedsLimit_ReturnsTrue()
     {
-        RateLimiter.SetLimit(3);
+        _rate.SetLimit(3);
 
         // First 3 are within limit
-        RateLimiter.RecordAndCheck();
-        RateLimiter.RecordAndCheck();
-        RateLimiter.RecordAndCheck();
+        _rate.RecordAndCheck();
+        _rate.RecordAndCheck();
+        _rate.RecordAndCheck();
 
         // 4th exceeds limit
-        Assert.True(RateLimiter.RecordAndCheck());
+        Assert.True(_rate.RecordAndCheck());
     }
 
     [Fact]
     public void RecordAndCheck_AtExactLimit_ReturnsFalse()
     {
-        RateLimiter.SetLimit(3);
+        _rate.SetLimit(3);
 
-        Assert.False(RateLimiter.RecordAndCheck());
-        Assert.False(RateLimiter.RecordAndCheck());
-        Assert.False(RateLimiter.RecordAndCheck());
+        Assert.False(_rate.RecordAndCheck());
+        Assert.False(_rate.RecordAndCheck());
+        Assert.False(_rate.RecordAndCheck());
     }
 
     // --- CurrentRate ---
@@ -102,19 +104,19 @@ public class RateLimiterTests : IDisposable
     [Fact]
     public void CurrentRate_NoRecords_IsZero()
     {
-        RateLimiter.SetLimit(10);
-        Assert.Equal(0, RateLimiter.CurrentRate);
+        _rate.SetLimit(10);
+        Assert.Equal(0, _rate.CurrentRate);
     }
 
     [Fact]
     public void CurrentRate_AfterRecords_ReflectsCount()
     {
-        RateLimiter.SetLimit(100);
-        RateLimiter.RecordAndCheck();
-        RateLimiter.RecordAndCheck();
-        RateLimiter.RecordAndCheck();
+        _rate.SetLimit(100);
+        _rate.RecordAndCheck();
+        _rate.RecordAndCheck();
+        _rate.RecordAndCheck();
 
-        Assert.Equal(3, RateLimiter.CurrentRate);
+        Assert.Equal(3, _rate.CurrentRate);
     }
 
     [Fact]
@@ -123,9 +125,9 @@ public class RateLimiterTests : IDisposable
         // When disabled, RecordAndCheck still adds timestamps but returns false
         // Actually, let's check: disabled means _maxPerSecond <= 0, so RecordAndCheck
         // returns false early without enqueuing
-        RateLimiter.RecordAndCheck();
-        RateLimiter.RecordAndCheck();
+        _rate.RecordAndCheck();
+        _rate.RecordAndCheck();
 
-        Assert.Equal(0, RateLimiter.CurrentRate);
+        Assert.Equal(0, _rate.CurrentRate);
     }
 }

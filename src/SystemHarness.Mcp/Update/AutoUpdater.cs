@@ -8,6 +8,8 @@ namespace SystemHarness.Mcp.Update;
 /// <summary>
 /// Shadow-copy auto-updater for the MCP server.
 /// Downloads updates from GitHub Releases and stages them for next launch.
+/// Off unless the server is started with <c>--auto-update=true</c>: replacing its own binary and calling out to
+/// the network are things a managed or offline installation must opt into.
 /// </summary>
 public sealed class AutoUpdater : IDisposable
 {
@@ -21,8 +23,14 @@ public sealed class AutoUpdater : IDisposable
 
     public string CurrentVersion { get; }
 
-    public AutoUpdater()
+    /// <summary>
+    /// Whether updates are enabled for this server. When false, nothing is checked, downloaded, or applied.
+    /// </summary>
+    public bool Enabled { get; }
+
+    public AutoUpdater(bool enabled)
     {
+        Enabled = enabled;
         _http = new HttpClient();
         _http.DefaultRequestHeaders.UserAgent.ParseAdd("system-harness-mcp");
         _http.Timeout = TimeSpan.FromMinutes(5);

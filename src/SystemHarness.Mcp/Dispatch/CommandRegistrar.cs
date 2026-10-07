@@ -51,7 +51,7 @@ public static class CommandRegistrar
         "session_save", "session_bookmark",
         // Safety mutations
         "safety_emergency_stop", "safety_resume", "safety_set_zone", "safety_set_rate_limit",
-        "safety_confirm_before", "safety_approve", "safety_deny", "safety_clear_history",
+        "safety_confirm_before", "safety_clear_history",
         // Office writes
         "office_write_word", "office_write_excel", "office_write_pptx", "office_write_hwpx",
         "office_replace_word", "office_replace_hwpx",

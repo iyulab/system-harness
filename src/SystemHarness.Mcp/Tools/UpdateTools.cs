@@ -9,10 +9,13 @@ public sealed class UpdateTools(AutoUpdater updater)
 {
     [McpServerTool(Name = "update_check"), Description(
         "Check for available MCP server updates from GitHub Releases. " +
-        "Returns current version and latest available version if an update exists.")]
+        "Returns current version and latest available version if an update exists. " +
+        "Refused unless the server was started with --auto-update=true.")]
     public async Task<string> CheckAsync(CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
+        if (!updater.Enabled)
+            return Disabled(sw);
         var release = await updater.CheckForUpdateAsync(ct);
 
         if (release is null)
@@ -35,10 +38,16 @@ public sealed class UpdateTools(AutoUpdater updater)
 
     [McpServerTool(Name = "update_apply"), Description(
         "Download and stage the latest update. " +
-        "The update will be applied automatically on next MCP server restart.")]
+        "The update will be applied automatically on next MCP server restart. " +
+        "Refused unless the server was started with --auto-update=true.")]
     public async Task<string> ApplyAsync(CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
+        if (!updater.Enabled)
+        {
+            ActionLog.Record("update_apply", "refused: updates disabled", sw.ElapsedMilliseconds, false);
+            return Disabled(sw);
+        }
 
         if (updater.HasPendingUpdate)
             return McpResponse.Ok(new
@@ -66,4 +75,9 @@ public sealed class UpdateTools(AutoUpdater updater)
             $"Update v{release.Version} staged. Will apply on next restart.",
             sw.ElapsedMilliseconds);
     }
+
+    private string Disabled(Stopwatch sw)
+        => McpResponse.Error("updates_disabled",
+            $"Updates are off for this server (v{updater.CurrentVersion}); start it with --auto-update=true to enable them.",
+            sw.ElapsedMilliseconds);
 }

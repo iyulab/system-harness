@@ -336,6 +336,74 @@ public class CommandPolicyTests
         Assert.Contains("pattern", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public void DefaultPolicy_BlocksAProgramChainedAfterAnAllowedOne()
+    {
+        var shell = new PolicyEnforcingShell(new WindowsShell(), CommandPolicy.CreateDefault());
+
+        Assert.Throws<CommandPolicyException>(
+            () => shell.RunAsync("dir & shutdown /s /t 0", ct: TestContext.Current.CancellationToken).GetAwaiter().GetResult());
+    }
+
+    [Theory]
+    [InlineData("shutdown", "/s /t 0")]
+    [InlineData(@"C:\Windows\System32\shutdown.exe", "/r")]
+    [InlineData("cmd.exe", "/c shutdown /s")]
+    [InlineData("powershell", "-Command \"format D:\"")]
+    public async Task ProcessStart_BlockedProgram_IsRefusedBeforeStarting(string path, string arguments)
+    {
+        var inner = new RecordingProcessManager();
+        var processes = new PolicyEnforcingProcessManager(inner, CommandPolicy.CreateDefault());
+
+        await Assert.ThrowsAsync<CommandPolicyException>(
+            () => processes.StartAsync(path, arguments, TestContext.Current.CancellationToken));
+        await Assert.ThrowsAsync<CommandPolicyException>(
+            () => processes.StartAsync(path, new ProcessStartOptions { Arguments = arguments }, TestContext.Current.CancellationToken));
+        Assert.Equal(0, inner.Starts);
+    }
+
+    [Theory]
+    [InlineData("notepad.exe", "notes.txt")]
+    [InlineData("cmd.exe", "/c dir /s")]
+    [InlineData("git", "log --format=%H")]
+    public async Task ProcessStart_AllowedProgram_Starts(string path, string arguments)
+    {
+        var inner = new RecordingProcessManager();
+        var processes = new PolicyEnforcingProcessManager(inner, CommandPolicy.CreateDefault());
+
+        await processes.StartAsync(path, arguments, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, inner.Starts);
+    }
+
+    [Fact]
+    public void WindowsHarness_WithPolicy_GuardsProcessStarts()
+    {
+        using var harness = new WindowsHarness(new HarnessOptions { CommandPolicy = CommandPolicy.CreateDefault() });
+
+        Assert.IsType<PolicyEnforcingProcessManager>(harness.Process);
+    }
+
+    private sealed class RecordingProcessManager : IProcessManager
+    {
+        public int Starts { get; private set; }
+
+        public Task<ProcessInfo> StartAsync(string path, string? arguments = null, CancellationToken ct = default)
+        {
+            Starts++;
+            return Task.FromResult(new ProcessInfo { Pid = 1, Name = path });
+        }
+
+        public Task<ProcessInfo> StartAsync(string path, ProcessStartOptions options, CancellationToken ct = default)
+            => StartAsync(path, options.Arguments, ct);
+
+        public Task KillAsync(int pid, CancellationToken ct = default) => Task.CompletedTask;
+        public Task KillByNameAsync(string name, CancellationToken ct = default) => Task.CompletedTask;
+        public Task<IReadOnlyList<ProcessInfo>> ListAsync(string? filter = null, CancellationToken ct = default)
+            => Task.FromResult<IReadOnlyList<ProcessInfo>>([]);
+        public Task<bool> IsRunningAsync(string name, CancellationToken ct = default) => Task.FromResult(false);
+    }
+
     private static string? CheckViolation(CommandPolicy policy, string program, string arguments)
     {
         return (string?)typeof(CommandPolicy)

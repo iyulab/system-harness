@@ -6,7 +6,7 @@ using SystemHarness.Mcp.Dispatch;
 namespace SystemHarness.Mcp.Tools;
 
 [McpServerToolType]
-public sealed class DispatchTools(CommandRegistry registry)
+public sealed class DispatchTools(CommandRegistry registry, SafetyGate gate, EmergencyStop emergencyStop)
 {
     [McpServerTool(Name = "help"), Description(
         "Discover available commands. " +
@@ -77,7 +77,7 @@ public sealed class DispatchTools(CommandRegistry registry)
         return await ExecuteAsync(cmd, @params, ct);
     }
 
-    private static async Task<string> ExecuteAsync(CommandDescriptor cmd, string? paramsJson, CancellationToken ct)
+    private async Task<string> ExecuteAsync(CommandDescriptor cmd, string? paramsJson, CancellationToken ct)
     {
         JsonElement? args = null;
         if (!string.IsNullOrWhiteSpace(paramsJson))
@@ -93,6 +93,28 @@ public sealed class DispatchTools(CommandRegistry registry)
             }
         }
 
-        return await cmd.Handler(args, ct);
+        var refusal = await gate.CheckAsync(cmd, args, ct);
+        if (refusal is not null)
+        {
+            ActionLog.Record(cmd.Name, "refused", 0, false);
+            return refusal;
+        }
+
+        // An emergency stop cancels the command that is running, not only the ones after it.
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct, emergencyStop.Token);
+        try
+        {
+            return await cmd.Handler(args, linked.Token);
+        }
+        catch (CommandPolicyException ex)
+        {
+            ActionLog.Record(cmd.Name, "refused by command policy", 0, false);
+            return McpResponse.Error("policy_blocked", ex.Message);
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested && emergencyStop.IsTriggered)
+        {
+            ActionLog.Record(cmd.Name, "cancelled by emergency stop", 0, false);
+            return McpResponse.Error("emergency_stopped", $"Emergency stop cancelled '{cmd.Name}'.");
+        }
     }
 }

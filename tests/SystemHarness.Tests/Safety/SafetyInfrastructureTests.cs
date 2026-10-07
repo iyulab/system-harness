@@ -6,13 +6,16 @@ namespace SystemHarness.Tests.Safety;
 [Trait("Category", "CI")]
 public class SafetyInfrastructureTests
 {
+    private readonly SafeZone _zone = new();
+    private readonly RateLimiter _rate = new();
+
     // --- SafeZone Tests ---
 
     [Fact]
     public void SafeZone_InitiallyNull()
     {
-        SafeZone.Clear(); // reset
-        Assert.Null(SafeZone.Current);
+        _zone.Clear(); // reset
+        Assert.Null(_zone.Current);
     }
 
     [Fact]
@@ -20,8 +23,8 @@ public class SafetyInfrastructureTests
     {
         try
         {
-            SafeZone.Set("Notepad", new Rectangle(10, 20, 100, 200));
-            var zone = SafeZone.Current;
+            _zone.Set("Notepad", new Rectangle(10, 20, 100, 200));
+            var zone = _zone.Current;
 
             Assert.NotNull(zone);
             Assert.Equal("Notepad", zone.Window);
@@ -33,7 +36,7 @@ public class SafetyInfrastructureTests
         }
         finally
         {
-            SafeZone.Clear();
+            _zone.Clear();
         }
     }
 
@@ -42,8 +45,8 @@ public class SafetyInfrastructureTests
     {
         try
         {
-            SafeZone.Set("Calculator");
-            var zone = SafeZone.Current;
+            _zone.Set("Calculator");
+            var zone = _zone.Current;
 
             Assert.NotNull(zone);
             Assert.Equal("Calculator", zone.Window);
@@ -51,16 +54,16 @@ public class SafetyInfrastructureTests
         }
         finally
         {
-            SafeZone.Clear();
+            _zone.Clear();
         }
     }
 
     [Fact]
     public void SafeZone_Clear_SetsToNull()
     {
-        SafeZone.Set("Test");
-        SafeZone.Clear();
-        Assert.Null(SafeZone.Current);
+        _zone.Set("Test");
+        _zone.Clear();
+        Assert.Null(_zone.Current);
     }
 
     // --- RateLimiter Tests ---
@@ -68,11 +71,11 @@ public class SafetyInfrastructureTests
     [Fact]
     public void RateLimiter_Disabled_NeverExceeds()
     {
-        RateLimiter.SetLimit(0);
-        Assert.Equal(0, RateLimiter.MaxPerSecond);
+        _rate.SetLimit(0);
+        Assert.Equal(0, _rate.MaxPerSecond);
 
         for (var i = 0; i < 100; i++)
-            Assert.False(RateLimiter.RecordAndCheck());
+            Assert.False(_rate.RecordAndCheck());
     }
 
     [Fact]
@@ -80,19 +83,19 @@ public class SafetyInfrastructureTests
     {
         try
         {
-            RateLimiter.SetLimit(5);
-            Assert.Equal(5, RateLimiter.MaxPerSecond);
+            _rate.SetLimit(5);
+            Assert.Equal(5, _rate.MaxPerSecond);
 
             // First 5 should not exceed
             for (var i = 0; i < 5; i++)
-                Assert.False(RateLimiter.RecordAndCheck());
+                Assert.False(_rate.RecordAndCheck());
 
             // 6th should exceed
-            Assert.True(RateLimiter.RecordAndCheck());
+            Assert.True(_rate.RecordAndCheck());
         }
         finally
         {
-            RateLimiter.SetLimit(0);
+            _rate.SetLimit(0);
         }
     }
 
@@ -101,18 +104,18 @@ public class SafetyInfrastructureTests
     {
         try
         {
-            RateLimiter.SetLimit(2);
-            RateLimiter.RecordAndCheck();
-            RateLimiter.RecordAndCheck();
+            _rate.SetLimit(2);
+            _rate.RecordAndCheck();
+            _rate.RecordAndCheck();
 
             // Reset clears history
-            RateLimiter.SetLimit(2);
-            Assert.Equal(0, RateLimiter.CurrentRate);
-            Assert.False(RateLimiter.RecordAndCheck()); // 1st after reset
+            _rate.SetLimit(2);
+            Assert.Equal(0, _rate.CurrentRate);
+            Assert.False(_rate.RecordAndCheck()); // 1st after reset
         }
         finally
         {
-            RateLimiter.SetLimit(0);
+            _rate.SetLimit(0);
         }
     }
 

@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace SystemHarness.Mcp.Tools;
 
-public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager monitors)
+public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager monitors, SafeZone safeZone, RateLimiter rateLimiter)
 {
     [McpServerTool(Name = "safety_action_history"), Description(
         "Get the history of recent tool actions. " +
@@ -38,20 +38,16 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
     }
 
     [McpServerTool(Name = "safety_emergency_stop"), Description(
-        "Trigger an emergency stop — cancels the global cancellation token, " +
-        "stops all running monitors, and sets the stopped flag. " +
-        "Use safety_resume to reset and resume operations.")]
+        "Trigger an emergency stop — cancels running commands, stops all running monitors, " +
+        "and refuses every further action until safety_resume. " +
+        "The operator can also stop the session with Ctrl+Shift+Escape; that stop holds until the server restarts.")]
     public Task<string> EmergencyStopAsync(CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
 
-        // Stop all monitors
+        // Monitors are stopped by the server's EmergencyStop.Triggered handler
         var active = monitors.ListActive();
-        foreach (var m in active)
-            monitors.Stop(m.Id);
-
-        // Trigger the global emergency stop
-        emergencyStop.Trigger();
+        emergencyStop.Trigger(EmergencyStopSource.Agent);
 
         ActionLog.Record("safety_emergency_stop", $"stopped_monitors={active.Count}", sw.ElapsedMilliseconds, true);
         return Task.FromResult(McpResponse.Confirm(
@@ -59,11 +55,18 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
     }
 
     [McpServerTool(Name = "safety_resume"), Description(
-        "Reset the emergency stop and resume normal operations. " +
-        "Creates a new cancellation token for subsequent operations.")]
+        "Reset an emergency stop triggered with safety_emergency_stop and resume normal operations. " +
+        "A stop the operator triggered with the hotkey cannot be reset here; it holds until the server restarts.")]
     public Task<string> ResumeAsync(CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
+        if (emergencyStop.TriggeredBy == EmergencyStopSource.Operator)
+        {
+            ActionLog.Record("safety_resume", "refused: operator stop", sw.ElapsedMilliseconds, false);
+            return Task.FromResult(McpResponse.Error("operator_stop",
+                "The operator stopped this session; restart the server to resume.", sw.ElapsedMilliseconds));
+        }
+
         var wasTriggered = emergencyStop.IsTriggered;
         emergencyStop.Reset();
 
@@ -76,11 +79,11 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
     }
 
     [McpServerTool(Name = "safety_set_zone"), Description(
-        "Restrict mouse/keyboard actions to a specific window or screen region. " +
-        "Set titleOrHandle to limit actions to that window. " +
-        "Optionally set region coordinates (x, y, width, height) for finer control. " +
-        "Pass titleOrHandle as null/empty to clear the safe zone.")]
-    public static Task<string> SetZoneAsync(
+        "Restrict input actions (mouse, keyboard, UI automation, vision clicks, dialogs, window changes) " +
+        "to one window, optionally a region inside it (regionX/regionY relative to the window). " +
+        "Actions outside the zone are refused; keyboard actions need the zone window in the foreground. " +
+        "Pass titleOrHandle as null/empty to clear the safe zone. A zone the operator set at startup cannot be changed.")]
+    public Task<string> SetZoneAsync(
         [Description("Window to restrict actions to (title substring or handle). Pass null/empty to clear.")] string? titleOrHandle = null,
         [Description("Optional region X within the window.")] int? regionX = null,
         [Description("Optional region Y within the window.")] int? regionY = null,
@@ -90,15 +93,19 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
     {
         var sw = Stopwatch.StartNew();
 
+        if (safeZone.IsOperatorLocked)
+            return Task.FromResult(McpResponse.Error("operator_locked",
+                "The operator set the safe zone; it cannot be changed.", sw.ElapsedMilliseconds));
+
         if (string.IsNullOrWhiteSpace(titleOrHandle))
         {
-            SafeZone.Clear();
+            safeZone.Clear();
             ActionLog.Record("safety_set_zone", "cleared", sw.ElapsedMilliseconds, true);
             return Task.FromResult(McpResponse.Confirm("Safe zone cleared. Actions unrestricted.", sw.ElapsedMilliseconds));
         }
 
         var hasRegion = regionX.HasValue && regionY.HasValue && regionW.HasValue && regionH.HasValue;
-        SafeZone.Set(titleOrHandle, hasRegion
+        safeZone.Set(titleOrHandle, hasRegion
             ? new Rectangle(regionX!.Value, regionY!.Value, regionW!.Value, regionH!.Value)
             : null);
 
@@ -113,13 +120,14 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
 
     [McpServerTool(Name = "safety_get_zone"), Description(
         "Get the current safe zone restriction (if any).")]
-    public static Task<string> GetZoneAsync(CancellationToken ct = default)
+    public Task<string> GetZoneAsync(CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
-        var zone = SafeZone.Current;
+        var zone = safeZone.Current;
         return Task.FromResult(McpResponse.Ok(new
         {
             isSet = zone is not null,
+            operatorLocked = safeZone.IsOperatorLocked,
             window = zone?.Window,
             region = zone?.Region is { } r ? new { r.X, r.Y, r.Width, r.Height } : null,
         }, sw.ElapsedMilliseconds));
@@ -127,13 +135,18 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
 
     [McpServerTool(Name = "safety_set_rate_limit"), Description(
         "Set the maximum number of actions per second (rate limit). " +
-        "Pass 0 to disable rate limiting. " +
-        "When active, actions exceeding the rate will be flagged in safety_status.")]
-    public static Task<string> SetRateLimitAsync(
+        "Pass 0 to disable rate limiting. Actions over the limit are refused. " +
+        "A limit the operator set at startup can be lowered but not raised or disabled.")]
+    public Task<string> SetRateLimitAsync(
         [Description("Maximum actions per second. Pass 0 to disable.")] int maxPerSecond, CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
-        RateLimiter.SetLimit(maxPerSecond);
+        var ceiling = rateLimiter.OperatorMaxPerSecond;
+        if (ceiling > 0 && (maxPerSecond <= 0 || maxPerSecond > ceiling))
+            return Task.FromResult(McpResponse.Error("operator_locked",
+                $"The operator limited actions to {ceiling} per second; a limit can only be lowered.", sw.ElapsedMilliseconds));
+
+        rateLimiter.SetLimit(maxPerSecond);
         ActionLog.Record("safety_set_rate_limit", $"max={maxPerSecond}", sw.ElapsedMilliseconds, true);
         return Task.FromResult(maxPerSecond > 0
             ? McpResponse.Confirm($"Rate limit set to {maxPerSecond} actions/second.", sw.ElapsedMilliseconds)
@@ -147,12 +160,18 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
     {
         var sw = Stopwatch.StartNew();
         var activeMonitors = monitors.ListActive();
-        var zone = SafeZone.Current;
+        var zone = safeZone.Current;
         return Task.FromResult(McpResponse.Ok(new
         {
             emergencyStopped = emergencyStop.IsTriggered,
-            safeZone = zone is not null ? new { zone.Window, region = zone.Region?.ToString() } : null,
-            rateLimit = new { maxPerSecond = RateLimiter.MaxPerSecond, currentRate = RateLimiter.CurrentRate },
+            stoppedBy = emergencyStop.TriggeredBy?.ToString().ToLowerInvariant(),
+            safeZone = zone is not null ? new { zone.Window, region = zone.Region?.ToString(), operatorLocked = safeZone.IsOperatorLocked } : null,
+            rateLimit = new
+            {
+                maxPerSecond = rateLimiter.MaxPerSecond,
+                operatorMaxPerSecond = rateLimiter.OperatorMaxPerSecond,
+                currentRate = rateLimiter.CurrentRate,
+            },
             activeMonitors = activeMonitors.Count,
             actionHistoryCount = ActionLog.Count,
             pendingConfirmations = ConfirmationManager.ListPending().Count,
@@ -161,10 +180,9 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
 
     [McpServerTool(Name = "safety_confirm_before"), Description(
         "Request user confirmation before performing a dangerous action. " +
-        "Creates a JSON confirmation file that can be approved/denied externally. " +
+        "Creates a JSON confirmation file for the user to approve or deny by setting its status. " +
         "Returns the confirmation ID and file path. " +
-        "Use safety_check_confirmation to poll for the response, " +
-        "or safety_approve / safety_deny to resolve programmatically.")]
+        "Use safety_check_confirmation to poll for the user's answer; the agent cannot answer its own request.")]
     public static Task<string> ConfirmBeforeAsync(
         [Description("Description of the action requiring confirmation.")] string action,
         [Description("Reason why confirmation is needed.")] string reason,
@@ -187,8 +205,8 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
             request.Reason,
             status = request.Status.ToString().ToLowerInvariant(),
             request.FilePath,
-            instructions = "Edit the JSON file to change status to 'approved' or 'denied', " +
-                           "or use safety_approve / safety_deny tools.",
+            instructions = "Ask the user to edit the JSON file and set status to 'approved' or 'denied', " +
+                           "then poll with safety_check_confirmation.",
         }, sw.ElapsedMilliseconds));
     }
 
@@ -214,50 +232,6 @@ public sealed class SafetyTools(EmergencyStop emergencyStop, MonitorManager moni
             request.FilePath,
             createdAt = request.CreatedAt.ToString("O"),
             resolvedAt = request.ResolvedAt?.ToString("O"),
-        }, sw.ElapsedMilliseconds));
-    }
-
-    [McpServerTool(Name = "safety_approve"), Description(
-        "Approve a pending confirmation request, allowing the action to proceed.")]
-    public static Task<string> ApproveAsync(
-        [Description("Confirmation request ID to approve.")] string confirmationId,
-        CancellationToken ct = default)
-    {
-        var sw = Stopwatch.StartNew();
-        if (string.IsNullOrWhiteSpace(confirmationId))
-            return Task.FromResult(McpResponse.Error("invalid_parameter", "confirmationId cannot be empty.", sw.ElapsedMilliseconds));
-        var request = ConfirmationManager.Approve(confirmationId);
-
-        ActionLog.Record("safety_approve", $"id={confirmationId}, action={request.Action}",
-            sw.ElapsedMilliseconds, true);
-
-        return Task.FromResult(McpResponse.Ok(new
-        {
-            request.Id,
-            request.Action,
-            status = request.Status.ToString().ToLowerInvariant(),
-        }, sw.ElapsedMilliseconds));
-    }
-
-    [McpServerTool(Name = "safety_deny"), Description(
-        "Deny a pending confirmation request, blocking the action.")]
-    public static Task<string> DenyAsync(
-        [Description("Confirmation request ID to deny.")] string confirmationId,
-        CancellationToken ct = default)
-    {
-        var sw = Stopwatch.StartNew();
-        if (string.IsNullOrWhiteSpace(confirmationId))
-            return Task.FromResult(McpResponse.Error("invalid_parameter", "confirmationId cannot be empty.", sw.ElapsedMilliseconds));
-        var request = ConfirmationManager.Deny(confirmationId);
-
-        ActionLog.Record("safety_deny", $"id={confirmationId}, action={request.Action}",
-            sw.ElapsedMilliseconds, true);
-
-        return Task.FromResult(McpResponse.Ok(new
-        {
-            request.Id,
-            request.Action,
-            status = request.Status.ToString().ToLowerInvariant(),
         }, sw.ElapsedMilliseconds));
     }
 }
