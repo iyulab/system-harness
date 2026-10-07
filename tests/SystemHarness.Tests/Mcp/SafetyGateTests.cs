@@ -9,6 +9,8 @@ namespace SystemHarness.Tests.Mcp;
 /// Drives <see cref="DispatchTools"/> end to end: a refused command must never reach its handler,
 /// an allowed one must. Each check is exercised in both directions.
 /// </summary>
+// ActionLog is process-wide (refusals are recorded there), so this class shares its collection.
+[Collection("StaticState")]
 [Trait("Category", "CI")]
 public class SafetyGateTests : IDisposable
 {
@@ -31,6 +33,7 @@ public class SafetyGateTests : IDisposable
         Register("window.close", "window");
         Register("vision.click_text", "vision");
         Register("file.write", "file");
+        Register("file.move", "file");
         Register("safety.resume", "safety");
         Register("window.list", "window", mutation: false);
     }
@@ -212,6 +215,32 @@ public class SafetyGateTests : IDisposable
         Assert.Throws<HarnessException>(() => _zone.Set("Browser"));
         Assert.Throws<HarnessException>(() => _zone.Clear());
         Assert.Equal("Notepad", _zone.Current!.Window);
+    }
+
+    // --- The server's own files ---
+
+    [Fact]
+    public async Task FileCommand_IntoTheSessionDirectory_Refused()
+    {
+        var confirmation = ConfirmationManager.Create("delete_all", "check");
+        var json = JsonSerializer.Serialize(new { path = confirmation.FilePath, content = "{\"status\":\"approved\"}" });
+
+        AssertRefused(await Do("file.write", json), "protected_path");
+        AssertRefused(await Do("file.move", JsonSerializer.Serialize(new { source = confirmation.FilePath, destination = "x.json" })), "protected_path");
+        Assert.Equal(0, Calls("file.write"));
+        Assert.Equal(0, Calls("file.move"));
+        Assert.Equal(ConfirmationStatus.Pending, ConfirmationManager.Check(confirmation.Id).Status);
+
+        File.Delete(confirmation.FilePath);
+    }
+
+    [Fact]
+    public async Task FileCommand_Elsewhere_Runs()
+    {
+        var json = JsonSerializer.Serialize(new { path = Path.Combine(Path.GetTempPath(), "notes.txt"), content = "x" });
+
+        AssertOk(await Do("file.write", json));
+        Assert.Equal(1, Calls("file.write"));
     }
 
     // --- Command policy ---

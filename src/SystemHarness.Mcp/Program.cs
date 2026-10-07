@@ -162,8 +162,12 @@ if (autoUpdate)
     _ = updater.BackgroundCheckAsync(app.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping);
 }
 
+// The server's own files (screenshots, confirmation requests) live in a per-process directory
+SessionFiles.DeleteAbandoned();
+
 await app.RunAsync();
 hook?.Dispose();
+SessionFiles.DeleteCurrent();
 
 internal static partial class ServerLog
 {

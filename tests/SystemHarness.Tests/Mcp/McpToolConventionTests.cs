@@ -763,7 +763,7 @@ public class McpToolConventionTests
             "text_not_found", "update_failed", "window_not_found", "wrong_verb",
             // Safety refusals: the command was not run
             "emergency_stopped", "rate_limited", "outside_safe_zone", "policy_blocked",
-            "operator_stop", "operator_locked", "updates_disabled",
+            "operator_stop", "operator_locked", "updates_disabled", "protected_path",
         };
 
         var toolsDir = FindToolsDirectory();
@@ -806,7 +806,7 @@ public class McpToolConventionTests
 
         Assert.True(unknownCodes.Count == 0,
             $"Unknown error codes (add to knownCodes or use existing ones):\n{string.Join("\n", unknownCodes)}");
-        Assert.Equal(30, knownCodes.Count);
+        Assert.Equal(31, knownCodes.Count);
     }
 
     [Fact]

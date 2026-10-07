@@ -25,6 +25,11 @@ All notable changes to this project will be documented in this file.
   the new `PolicyEnforcingProcessManager`, and a shell host's arguments (`cmd /c dir & shutdown /s`) are checked
   for blocked programs as well.
 - `SafeZone` and `RateLimiter` are services instead of static classes.
+- **The MCP server keeps its own files in one private directory** (`%TEMP%\system-harness\<pid>`): screenshots,
+  clipboard images, bookmarks and confirmation requests. It is deleted when the server stops, and directories left
+  by a server that did not stop cleanly are deleted at the next start. File commands cannot write, move or delete
+  anything inside it (`protected_path`), so a confirmation request can only be answered by the user. Paths returned
+  by earlier versions pointed directly into `%TEMP%` and were never cleaned up.
 
 ### Added
 - **Operator settings for the MCP server**: `--rate-limit=N` (the agent can lower it but not raise or disable it),
@@ -34,6 +39,8 @@ All notable changes to this project will be documented in this file.
   `EmergencyStop.TriggeredBy` say who stopped.
 
 ### Fixed
+- A bookmark name containing path characters could place its snapshot outside the temp directory; caller-supplied
+  names are now reduced to letters, digits, `-` and `_`.
 - The MCP server reports its real version (it always said 0.27.0).
 
 ## [0.28.10]

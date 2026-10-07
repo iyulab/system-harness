@@ -166,8 +166,7 @@ public sealed class SessionTools(IHarness harness)
         var hash = Convert.ToHexString(
             System.Security.Cryptography.SHA256.HashData(screenshot.Bytes));
 
-        var snapshotPath = Path.Combine(
-            Path.GetTempPath(), $"harness-bookmark-{name}-{DateTime.Now:HHmmss}.png");
+        var snapshotPath = SessionFiles.NewPath($"bookmark-{name}", "png");
         await screenshot.SaveAsync(snapshotPath, ct);
 
         _bookmarks[name] = new BookmarkEntry(hash, snapshotPath, screenshot.Width, screenshot.Height, DateTime.UtcNow);

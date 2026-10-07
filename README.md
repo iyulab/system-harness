@@ -242,6 +242,7 @@ Every MCP command passes one gate before it runs. A refused command is not run, 
 - **Safe zones** — with a zone set, input actions (mouse, keyboard, UI automation, vision clicks, dialogs, window changes) must target the zone window: coordinates inside it (or inside its region), window arguments naming it, keyboard input only while it is in the foreground (`outside_safe_zone`). A zone window that cannot be found refuses the action; commands whose target is only known after they run (`vision.click_text`, `record.replay`) are refused while a zone is set.
 - **Confirmation** — `safety.confirm_before` writes a JSON request the user approves or denies by editing its `status`; the agent polls with `safety.check_confirmation` and has no command to answer its own request.
 - **Action history** — full audit trail of tool invocations, including refusals
+- **Server files** — screenshots, clipboard images and confirmation requests are written to a private per-process directory (`%TEMP%\system-harness\<pid>`) that is deleted when the server stops; file commands cannot write, move or delete anything inside it (`protected_path`)
 
 ## Monitoring
 

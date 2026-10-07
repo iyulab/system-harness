@@ -27,7 +27,7 @@ public static class ConfirmationManager
     public static ConfirmationRequest Create(string action, string reason)
     {
         var id = Guid.NewGuid().ToString("N")[..8];
-        var path = Path.Combine(Path.GetTempPath(), $"harness-confirm-{id}.json");
+        var path = SessionFiles.NewPath($"confirm-{id}", "json");
 
         var request = new ConfirmationRequest
         {

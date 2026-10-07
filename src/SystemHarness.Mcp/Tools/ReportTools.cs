@@ -91,7 +91,7 @@ public sealed class ReportTools(IHarness harness)
         var ocrResult = await harness.Ocr.RecognizeImageAsync(screenshot.Bytes, opts, ct);
 
         // Save screenshot to temp
-        var path = Path.Combine(Path.GetTempPath(), $"harness-screen-{DateTime.Now:HHmmss}.png");
+        var path = SessionFiles.NewPath("screen", "png");
         await screenshot.SaveAsync(path, ct);
 
         // Flatten UI tree → extract clickables and inputs

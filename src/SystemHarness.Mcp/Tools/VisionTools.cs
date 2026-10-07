@@ -290,9 +290,7 @@ public sealed class VisionTools(IHarness harness)
         using (screenshot)
         {
             var hash = Convert.ToHexString(SHA256.HashData(screenshot.Bytes));
-            var safeName = new string(label.Where(c => char.IsLetterOrDigit(c) || c == '-' || c == '_').ToArray());
-            if (safeName.Length == 0) safeName = "snapshot";
-            var path = Path.Combine(Path.GetTempPath(), $"harness-{safeName}-{DateTime.Now:HHmmss}.png");
+            var path = SessionFiles.NewPath(label.Length == 0 ? "snapshot" : label, "png");
             await File.WriteAllBytesAsync(path, screenshot.Bytes, ct);
 
             return McpResponse.Ok(new

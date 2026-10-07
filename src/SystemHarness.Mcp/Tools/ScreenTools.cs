@@ -74,7 +74,7 @@ public sealed class ScreenTools(IHarness harness)
     private static async Task<string> SaveAndDescribe(Screenshot screenshot, string prefix, Stopwatch sw, CancellationToken ct)
     {
         var ext = screenshot.MimeType == "image/png" ? "png" : "jpg";
-        var path = Path.Combine(Path.GetTempPath(), $"harness-{prefix}-{DateTime.Now:HHmmss}.{ext}");
+        var path = SessionFiles.NewPath(prefix, ext);
         await screenshot.SaveAsync(path, ct);
 
         return McpResponse.Ok(new

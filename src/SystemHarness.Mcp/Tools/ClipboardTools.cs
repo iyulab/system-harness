@@ -46,7 +46,7 @@ public sealed class ClipboardTools(IHarness harness)
         if (imageData is null || imageData.Length == 0)
             return McpResponse.Ok(new { hasImage = false }, sw.ElapsedMilliseconds);
 
-        var path = Path.Combine(Path.GetTempPath(), $"harness-clipboard-{DateTime.Now:HHmmss}.png");
+        var path = SessionFiles.NewPath("clipboard", "png");
         await File.WriteAllBytesAsync(path, imageData, ct);
 
         return McpResponse.Ok(new

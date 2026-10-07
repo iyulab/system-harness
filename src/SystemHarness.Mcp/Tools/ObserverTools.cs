@@ -41,7 +41,7 @@ public sealed class ObserverTools(IObserver observer)
         int? screenshotHeight = null;
         if (observation.Screenshot is not null)
         {
-            screenshotPath = Path.Combine(Path.GetTempPath(), $"harness-observe-{DateTime.Now:HHmmss}.png");
+            screenshotPath = SessionFiles.NewPath("observe", "png");
             await observation.Screenshot.SaveAsync(screenshotPath, ct);
             screenshotWidth = observation.Screenshot.Width;
             screenshotHeight = observation.Screenshot.Height;

@@ -7,7 +7,7 @@ namespace SystemHarness.Mcp;
 /// <summary>
 /// The one place where the safety settings are enforced. Every dispatched command passes through
 /// <see cref="CheckAsync"/> before its handler runs; a non-null result is the refusal returned instead.
-/// Checks, in order: emergency stop, rate limit, safe zone. Command policy is enforced by the shell and
+/// Checks, in order: emergency stop, rate limit, the server's own files, safe zone. Command policy is enforced by the shell and
 /// process decorators the harness is built with. Every check fails closed — a zone window that cannot be
 /// found refuses the command rather than letting it through.
 /// </summary>
@@ -31,6 +31,16 @@ public sealed class SafetyGate(EmergencyStop emergencyStop, RateLimiter rateLimi
     {
         "vision.find_image",
     };
+
+    // Commands that write, move, or delete files, and the parameters naming those files.
+    private static readonly HashSet<string> FileWriteCategories = new(StringComparer.Ordinal) { "file", "office" };
+
+    private static readonly HashSet<string> FileWriteCommands = new(StringComparer.Ordinal)
+    {
+        "monitor.start", "session.save", "dialog.fill_file",
+    };
+
+    private static readonly string[] FileParams = ["path", "source", "destination", "filePath", "outputPath"];
 
     private static readonly string[] WindowParams = ["titleOrHandle", "parentTitleOrHandle"];
 
@@ -56,6 +66,16 @@ public sealed class SafetyGate(EmergencyStop emergencyStop, RateLimiter rateLimi
         if (rateLimiter.RecordAndCheck())
             return McpResponse.Error("rate_limited",
                 $"Rate limit of {rateLimiter.MaxPerSecond} actions per second reached; '{command.Name}' was not run.");
+
+        if (FileWriteCategories.Contains(command.Category) || FileWriteCommands.Contains(command.Name))
+        {
+            foreach (var name in FileParams)
+            {
+                if (GetString(args, name) is { } path && SessionFiles.Contains(path))
+                    return McpResponse.Error("protected_path",
+                        $"'{command.Name}' was not run: '{path}' is inside the server's own directory (screenshots, confirmation requests).");
+            }
+        }
 
         var zone = safeZone.Current;
         if (zone is not null && IsZoneScoped(command))
