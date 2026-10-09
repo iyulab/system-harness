@@ -208,6 +208,23 @@ await documentReader.WriteExcelAsync("output.xlsx", spreadsheetContent);
 await documentReader.FindReplaceWordAsync("template.docx", new() { { "{{name}}", "John" } });
 ```
 
+## Browser Automation
+
+`SystemHarness.Apps.Browser` drives Chromium, Firefox or WebKit through Playwright. `PlaywrightBrowser` is the `IBrowser`
+implementation; construct it yourself (it is not registered in DI). Playwright's browser binaries must be installed once
+(`pwsh bin/<Configuration>/net10.0/playwright.ps1 install` from your project's output directory).
+
+```csharp
+using SystemHarness.Apps.Browser;
+
+await using IBrowser browser = new PlaywrightBrowser();
+await browser.LaunchAsync(new BrowserOptions { BrowserType = BrowserType.Chromium, Headless = true });
+
+await browser.NavigateAsync("https://example.com");
+var title = await browser.GetTitleAsync();
+var png = await browser.ScreenshotAsync();
+```
+
 ## Safety Features
 
 ```csharp
