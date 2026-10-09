@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Documentation
+- **README: Browser Automation.** Names `PlaywrightBrowser`, the `IBrowser` implementation in `SystemHarness.Apps.Browser`,
+  with a usage snippet and the Playwright browser-install step.
+
 ## [0.29.1] - 2026-10-08
 
 ### Fixed
