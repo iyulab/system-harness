@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- **The packages from this repository depend on each other at exactly the same version** (`[x.y.z]`), not a floor.
+  A consumer that moves one of them while another resolves at an older version now gets restore warning NU1608 naming
+  the pair (an error where warnings are errors) — before, the mixed versions restored silently and could fail at run time.
+
 ### Documentation
 - **README: Browser Automation.** Names `PlaywrightBrowser`, the `IBrowser` implementation in `SystemHarness.Apps.Browser`,
   with a usage snippet and the Playwright browser-install step.
