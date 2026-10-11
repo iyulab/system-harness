@@ -6,8 +6,9 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - **The packages from this repository depend on each other at exactly the same version** (`[x.y.z]`), not a floor.
-  A consumer that moves one of them while another resolves at an older version now gets restore warning NU1608 naming
+  A consumer that moves one of them while a family member it depends on resolves at an older version now gets restore warning NU1608 naming
   the pair (an error where warnings are errors) — before, the mixed versions restored silently and could fail at run time.
+  A member that reaches you only through another package's floor is not covered: pin every member you load and move them together.
 
 ### Documentation
 - **README: Browser Automation.** Names `PlaywrightBrowser`, the `IBrowser` implementation in `SystemHarness.Apps.Browser`,
