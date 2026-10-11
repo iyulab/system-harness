@@ -73,9 +73,12 @@ await harness.Keyboard.HotkeyAsync(default, Key.Ctrl, Key.S);
 var ocrResult = await harness.Ocr.RecognizeScreenAsync();
 Console.WriteLine(ocrResult.Text);
 
-// UI Automation — interact with elements by name
-var tree = await harness.UIAutomation.GetTreeAsync("Notepad");
-await harness.UIAutomation.TypeIntoAsync("Notepad", "Edit", "Hello from automation");
+// UI Automation — interact with elements through the accessibility tree
+var tree = await harness.UIAutomation.GetAccessibilityTreeAsync("Notepad");
+var editor = await harness.UIAutomation.FindFirstAsync("Notepad",
+    new UIElementCondition { ControlType = UIControlType.Edit });
+if (editor is not null)
+    await harness.UIAutomation.SetValueAsync(editor, "Hello from automation");
 ```
 
 ## NuGet Packages
@@ -87,6 +90,30 @@ await harness.UIAutomation.TypeIntoAsync("Notepad", "Edit", "Hello from automati
 | [SystemHarness.Apps.Office](https://www.nuget.org/packages/SystemHarness.Apps.Office) | Office/HWP document processing (OpenXML, OWPML) |
 | [SystemHarness.Apps.Email](https://www.nuget.org/packages/SystemHarness.Apps.Email) | Email automation (IMAP/SMTP via MailKit) |
 | [SystemHarness.Apps.Browser](https://www.nuget.org/packages/SystemHarness.Apps.Browser) | Browser automation (Playwright) |
+
+The MCP server (`SystemHarness.Mcp`) is not a NuGet package; it ships as an executable on [GitHub Releases](https://github.com/iyulab/system-harness/releases) (see below).
+
+## Features
+
+**Windows only** — the one platform implementation is `SystemHarness.Windows`.
+
+| Feature | Entry point | How to turn it on |
+|---|---|---|
+| Shell, process, filesystem, window, clipboard, display, system info, virtual desktops | `IHarness.Shell` / `.Process` / `.FileSystem` / `.Window` / `.Clipboard` / `.Display` / `.SystemInfo` / `.VirtualDesktop` | `new WindowsHarness()`, `HarnessFactory.Create()`, or `services.AddSystemHarness()` (also registers each interface) |
+| Screen capture, mouse, keyboard | `IHarness.Screen` (`CaptureAsync` → `Screenshot.Base64`), `.Mouse`, `.Keyboard` | Same harness — no extra setup |
+| OCR (Windows built-in engine) | `IHarness.Ocr` (`RecognizeScreenAsync`, …) | Same harness |
+| UI Automation (accessibility tree) | `IHarness.UIAutomation` (`GetAccessibilityTreeAsync`, `FindFirstAsync`, `ClickElementAsync`, `SetValueAsync`, `InvokeAsync`, …) | Same harness |
+| Template matching, dialog handling | `IHarness.TemplateMatcher`, `IHarness.DialogHandler` | Same harness |
+| Wait / OCR-click helpers | `WaitHelpers.WaitForTextAsync(harness, …)`, `WaitForElementAsync`, `ConvenienceHelpers.ClickTextOnScreenAsync(harness, …)`, `CaptureAndRecognizeAsync` | Static helpers; pass the harness |
+| Observe a window (screenshot + accessibility + OCR), record/replay input | `IObserver` (`HarnessObserver`), `IActionRecorder` (`WindowsActionRecorder`) | Registered by `AddSystemHarness()`; or construct directly |
+| Command policy (blocks destructive commands) | `HarnessOptions.CommandPolicy = CommandPolicy.CreateDefault()` → `CommandPolicyException` | Opt-in via `HarnessOptions` (constructor or `AddSystemHarness(options)`) |
+| Audit log | `HarnessOptions.AuditLog` (`InMemoryAuditLog`, or your `IAuditLog`) | Opt-in via `HarnessOptions` |
+| Emergency stop | `EmergencyStop` (`Token`, `Trigger()`), `EmergencyStopHook` (global hotkey, `SystemHarness.Windows`) | Construct yourself and pass `stop.Token` to calls |
+| Office documents without Office installed (Word, Excel, PowerPoint, HWPX) | `IDocumentReader`, `IHwpReader` (`SystemHarness.Apps.Office`) | `services.AddOfficeReaders()`; `AddOfficeServices()` also registers `IOfficeApp` (drives an installed Office through `IHarness`) |
+| Email (IMAP/SMTP) | `IEmail` / `MailKitEmail` — `ConnectAsync(EmailConnectionOptions)`, `GetMessagesAsync`, `SendAsync`, … (`SystemHarness.Apps.Email`) | Construct `MailKitEmail` yourself (not registered in DI) |
+| Browser automation | `IBrowser` / `PlaywrightBrowser` (`SystemHarness.Apps.Browser`) | Construct yourself; install Playwright browsers once (see below) |
+| MCP server — 172 commands behind `help` / `do` / `get` | `SystemHarness.Mcp.exe` | Download from GitHub Releases and add it to your MCP client config (see below) |
+| Monitors, safe zones, rate limiting, confirmations, sessions, auto-update | MCP commands `monitor.*`, `safety.*`, `session.*`, `update.*` | MCP server only (operator arguments below); not part of the library API |
 
 ## MCP Server (AI Tool Integration)
 
@@ -204,8 +231,9 @@ var hwpContent = await hwpReader.ReadHwpxAsync("document.hwpx");
 await documentReader.WriteWordAsync("output.docx", documentContent);
 await documentReader.WriteExcelAsync("output.xlsx", spreadsheetContent);
 
-// Find and replace
-await documentReader.FindReplaceWordAsync("template.docx", new() { { "{{name}}", "John" } });
+// Find and replace (returns the number of replacements)
+var replaced = await documentReader.FindReplaceWordAsync("template.docx", "{{name}}", "John");
+var hwpReplaced = await hwpReader.FindReplaceAsync("document.hwpx", "{{name}}", "John");
 ```
 
 ## Browser Automation
@@ -263,7 +291,7 @@ Every MCP command passes one gate before it runs. A refused command is not run, 
 
 ## Monitoring
 
-Background monitors track system changes in real-time, writing events to JSONL files:
+MCP server only (`monitor.start`, `monitor.read`, `monitor.list`, `monitor.stop`). Background monitors track system changes in real-time, writing events to JSONL files:
 
 | Monitor Type | Watches |
 |-------------|---------|
@@ -355,7 +383,7 @@ SystemHarness.Core              Interfaces + models (zero platform dependencies)
 - **Zero AI dependency** — no LLM SDKs, no model opinions, no agent loops
 - **AI-ready** — Screenshot returns `Base64` for vision APIs; ShellResult is structured
 - **Layer 1 first** — programmatic control is always preferred; vision+action is the fallback
-- **One interface, multiple backends** — same `IHarness` across all platforms
+- **Interface-first** — consumers code against `IHarness`; `SystemHarness.Windows` is the only backend today
 - **Async-first** — every operation is `Task`-based
 - **No magic** — thin wrappers over OS primitives, not a framework
 - **Safety built-in** — command policy, audit logging, emergency stop, safe zones
