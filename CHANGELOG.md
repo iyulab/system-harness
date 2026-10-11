@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
   A consumer that moves one of them while a family member it depends on resolves at an older version now gets restore warning NU1608 naming
   the pair (an error where warnings are errors) — before, the mixed versions restored silently and could fail at run time.
   A member that reaches you only through another package's floor is not covered: pin every member you load and move them together.
+- **The nuget.org «Release Notes» of every package link to the GitHub release of its version**, whose notes are this CHANGELOG's section for that version.
 
 ### Documentation
 - **README: Browser Automation.** Names `PlaywrightBrowser`, the `IBrowser` implementation in `SystemHarness.Apps.Browser`,
