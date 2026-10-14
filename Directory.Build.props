@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>0.29.1</Version>
+    <Version>0.29.2</Version>
     <!-- nuget.org «Release Notes»: the GitHub release of this version (its notes are the CHANGELOG section). -->
     <PackageReleaseNotes>https://github.com/iyulab/system-harness/releases/tag/v$(Version)</PackageReleaseNotes>
     <LangVersion>latest</LangVersion>

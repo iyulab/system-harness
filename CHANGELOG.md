@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Security
+- **`SystemHarness.Apps.Email` no longer restores a vulnerable `System.Security.Cryptography.Pkcs`.** MailKit/MimeKit depend on
+  `System.Security.Cryptography.Pkcs >= 10.0.0`, which resolved to 10.0.0 — affected by GHSA-846f-f764-76mx (high, denial of service,
+  10.0.0–10.0.12) and GHSA-2fmv-rv2c-59x7 (moderate). The package now depends on 10.0.13, so a consumer's restore no longer fails
+  with NU1903 where vulnerability warnings are errors.
+
+### Dependencies
+- MailKit 4.18.1 · Microsoft.Extensions.DependencyInjection(.Abstractions) / Hosting 10.0.13 · Microsoft.Extensions.AI /
+  .AI.OpenAI 10.11.0 · Microsoft.Playwright 1.63.0 · SkiaSharp 4.153.1 · Microsoft.Windows.CsWin32 0.3.363.
+
 ### Changed
 - **The packages from this repository depend on each other at exactly the same version** (`[x.y.z]`), not a floor.
   A consumer that moves one of them while a family member it depends on resolves at an older version now gets restore warning NU1608 naming
