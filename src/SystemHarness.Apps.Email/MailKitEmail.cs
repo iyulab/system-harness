@@ -10,7 +10,7 @@ namespace SystemHarness.Apps.Email;
 /// <summary>
 /// MailKit-based implementation of <see cref="IEmail"/>.
 /// </summary>
-public sealed class MailKitEmail : IEmail
+public sealed class MailKitEmail : IEmail, IDisposable
 {
     private ImapClient? _imap;
     private EmailConnectionOptions? _options;
@@ -221,6 +221,9 @@ public sealed class MailKitEmail : IEmail
             await attachment.Content.DecodeToAsync(ms, ct);
         return ms.ToArray();
     }
+
+    /// <summary>Disposes synchronously, for a container disposed with <c>Dispose()</c> (it throws on a service that is only <see cref="IAsyncDisposable"/>).</summary>
+    public void Dispose() => DisposeAsync().AsTask().GetAwaiter().GetResult();
 
     public async ValueTask DisposeAsync()
     {

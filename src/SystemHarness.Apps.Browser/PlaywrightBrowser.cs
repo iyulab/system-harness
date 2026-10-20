@@ -5,7 +5,7 @@ namespace SystemHarness.Apps.Browser;
 /// <summary>
 /// Playwright-based implementation of <see cref="IBrowser"/>.
 /// </summary>
-public sealed class PlaywrightBrowser : IBrowser
+public sealed class PlaywrightBrowser : IBrowser, IDisposable
 {
     private IPlaywright? _playwright;
     private Microsoft.Playwright.IBrowser? _browser;
@@ -179,6 +179,9 @@ public sealed class PlaywrightBrowser : IBrowser
         var result = await _currentPage!.EvaluateAsync(expression);
         return result?.ToString() ?? string.Empty;
     }
+
+    /// <summary>Disposes synchronously, for a container disposed with <c>Dispose()</c> (it throws on a service that is only <see cref="IAsyncDisposable"/>).</summary>
+    public void Dispose() => DisposeAsync().AsTask().GetAwaiter().GetResult();
 
     public async ValueTask DisposeAsync()
     {
