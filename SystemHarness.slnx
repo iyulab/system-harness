@@ -4,8 +4,6 @@
     <Project Path="src/SystemHarness.Windows/SystemHarness.Windows.csproj" />
     <Project Path="src/SystemHarness.Mcp/SystemHarness.Mcp.csproj" />
     <Project Path="src/SystemHarness.Apps.Office/SystemHarness.Apps.Office.csproj" />
-    <Project Path="src/SystemHarness.Apps.Browser/SystemHarness.Apps.Browser.csproj" />
-    <Project Path="src/SystemHarness.Apps.Email/SystemHarness.Apps.Email.csproj" />
   </Folder>
   <Folder Name="/demo/">
     <Project Path="demo/SystemHarness.Demo.csproj" />

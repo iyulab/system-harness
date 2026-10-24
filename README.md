@@ -88,8 +88,6 @@ if (editor is not null)
 | [SystemHarness.Core](https://www.nuget.org/packages/SystemHarness.Core) | Interfaces + models (zero platform dependencies) |
 | [SystemHarness.Windows](https://www.nuget.org/packages/SystemHarness.Windows) | Windows implementation (Win32, DXGI, SendInput, FlaUI) |
 | [SystemHarness.Apps.Office](https://www.nuget.org/packages/SystemHarness.Apps.Office) | Office/HWP document processing (OpenXML, OWPML) |
-| [SystemHarness.Apps.Email](https://www.nuget.org/packages/SystemHarness.Apps.Email) | Email automation (IMAP/SMTP via MailKit) |
-| [SystemHarness.Apps.Browser](https://www.nuget.org/packages/SystemHarness.Apps.Browser) | Browser automation (Playwright) |
 
 The MCP server (`SystemHarness.Mcp`) is not a NuGet package; it ships as an executable on [GitHub Releases](https://github.com/iyulab/system-harness/releases) (see below).
 
@@ -110,8 +108,6 @@ The MCP server (`SystemHarness.Mcp`) is not a NuGet package; it ships as an exec
 | Audit log | `HarnessOptions.AuditLog` (`InMemoryAuditLog`, or your `IAuditLog`) | Opt-in via `HarnessOptions` |
 | Emergency stop | `EmergencyStop` (`Token`, `Trigger()`), `EmergencyStopHook` (global hotkey, `SystemHarness.Windows`) | Construct yourself and pass `stop.Token` to calls |
 | Office documents without Office installed (Word, Excel, PowerPoint, HWPX) | `IDocumentReader`, `IHwpReader` (`SystemHarness.Apps.Office`) | `services.AddOfficeReaders()`; `AddOfficeServices()` also registers `IOfficeApp` (drives an installed Office through `IHarness`) |
-| Email (IMAP/SMTP) | `IEmail` / `MailKitEmail` — `ConnectAsync(EmailConnectionOptions)`, `GetMessagesAsync`, `SendAsync`, … (`SystemHarness.Apps.Email`) | Construct `MailKitEmail` yourself (not registered in DI) |
-| Browser automation | `IBrowser` / `PlaywrightBrowser` (`SystemHarness.Apps.Browser`) | Construct yourself; install Playwright browsers once (see below) |
 | MCP server — 172 commands behind `help` / `do` / `get` | `SystemHarness.Mcp.exe` | Download from GitHub Releases and add it to your MCP client config (see below) |
 | Monitors, safe zones, rate limiting, confirmations, sessions, auto-update | MCP commands `monitor.*`, `safety.*`, `session.*`, `update.*` | MCP server only (operator arguments below); not part of the library API |
 
@@ -236,23 +232,6 @@ var replaced = await documentReader.FindReplaceWordAsync("template.docx", "{{nam
 var hwpReplaced = await hwpReader.FindReplaceAsync("document.hwpx", "{{name}}", "John");
 ```
 
-## Browser Automation
-
-`SystemHarness.Apps.Browser` drives Chromium, Firefox or WebKit through Playwright. `PlaywrightBrowser` is the `IBrowser`
-implementation; construct it yourself (it is not registered in DI). Playwright's browser binaries must be installed once
-(`pwsh bin/<Configuration>/net10.0/playwright.ps1 install` from your project's output directory).
-
-```csharp
-using SystemHarness.Apps.Browser;
-
-await using IBrowser browser = new PlaywrightBrowser();
-await browser.LaunchAsync(new BrowserOptions { BrowserType = BrowserType.Chromium, Headless = true });
-
-await browser.NavigateAsync("https://example.com");
-var title = await browser.GetTitleAsync();
-var png = await browser.ScreenshotAsync();
-```
-
 ## Safety Features
 
 ```csharp
@@ -335,8 +314,6 @@ SystemHarness.Core              Interfaces + models (zero platform dependencies)
   +-- SystemHarness.Windows     Win32/DXGI/SendInput/FlaUI (Windows implementation)
   |
   +-- SystemHarness.Apps.Office OpenXML/OWPML document processing
-  +-- SystemHarness.Apps.Email  IMAP/SMTP via MailKit
-  +-- SystemHarness.Apps.Browser Playwright-based web automation
   |
   +-- SystemHarness.Mcp         MCP server (3 tools, 172 commands)
 ```

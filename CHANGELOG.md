@@ -4,8 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Fixed
-- **`PlaywrightBrowser` and `MailKitEmail` implement `IDisposable` as well** — a container disposed with `Dispose()` (a `using` provider or scope) no longer throws «only implements IAsyncDisposable» when it created one.
+### Removed
+- **Breaking: `SystemHarness.Apps.Browser` and `SystemHarness.Apps.Email` are no longer published.** Neither is part of the MCP server's
+  command surface; they were standalone wrappers over Playwright and MailKit. Their last versions stay on nuget.org, marked deprecated.
+  Migration: use `Microsoft.Playwright` / `MailKit` directly where you constructed `PlaywrightBrowser` / `MailKitEmail`.
 
 ## [0.29.2] - 2026-10-15
 

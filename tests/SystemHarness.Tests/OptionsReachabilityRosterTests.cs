@@ -19,8 +19,6 @@ public class OptionsReachabilityRosterTests
         Assembly.Load("SystemHarness.Core"),
         Assembly.Load("SystemHarness.Windows"),
         Assembly.Load("SystemHarness.Apps.Office"),
-        Assembly.Load("SystemHarness.Apps.Browser"),
-        Assembly.Load("SystemHarness.Apps.Email"),
         Assembly.Load("SystemHarness.Mcp"),
     ];
 
