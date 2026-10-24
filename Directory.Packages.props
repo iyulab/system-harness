@@ -5,14 +5,14 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Windows P/Invoke (source generator) -->
-    <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.363" />
+    <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.367" />
     <!-- DXGI / Direct3D11 -->
     <PackageVersion Include="Vortice.Direct3D11" Version="3.8.3" />
     <PackageVersion Include="Vortice.DXGI" Version="3.8.3" />
     <!-- Image processing -->
     <PackageVersion Include="SkiaSharp" Version="4.153.1" />
     <!-- Input hooks (cross-platform) -->
-    <PackageVersion Include="SharpHook" Version="8.0.0" />
+    <PackageVersion Include="SharpHook" Version="8.0.1" />
     <!-- DI -->
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.13" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
@@ -27,7 +27,7 @@
     <!-- Office -->
     <PackageVersion Include="DocumentFormat.OpenXml" Version="3.5.1" />
     <!-- MCP -->
-    <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
+    <PackageVersion Include="ModelContextProtocol" Version="2.3.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
     <!-- AI Integration (demo) -->
     <PackageVersion Include="Microsoft.Extensions.AI" Version="10.11.0" />

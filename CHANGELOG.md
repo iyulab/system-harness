@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
   command surface; they were standalone wrappers over Playwright and MailKit. Their last versions stay on nuget.org, marked deprecated.
   Migration: use `Microsoft.Playwright` / `MailKit` directly where you constructed `PlaywrightBrowser` / `MailKitEmail`.
 
+### Dependencies
+- `ModelContextProtocol` 2.2.0 -> 2.3.0, `SharpHook` 8.0.0 -> 8.0.1, `Microsoft.Windows.CsWin32` 0.3.363 -> 0.3.367 (build-time).
+
 ## [0.29.2] - 2026-10-15
 
 ### Security
