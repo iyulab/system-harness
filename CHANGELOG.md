@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 
 ### Dependencies
 - `ModelContextProtocol` 2.2.0 -> 2.3.0, `SharpHook` 8.0.0 -> 8.0.1, `Microsoft.Windows.CsWin32` 0.3.363 -> 0.3.367 (build-time).
+- Re-pinned third-party packages: 3 .NET servicing pins (Microsoft.Extensions) 10.0.13 -> 10.0.14 (the 10.0.14 security servicing release); `Microsoft.SourceLink.GitHub` 10.0.402 -> 10.0.403.
 
 ## [0.29.2] - 2026-10-15
 
