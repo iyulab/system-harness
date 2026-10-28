@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
+using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
 using SystemHarness.Mcp;
@@ -49,6 +50,25 @@ public class McpToolConventionTests
     }
 
     // ── Dispatch Architecture Tests ──
+
+    [Fact]
+    public void McpTools_DeclareTheirSafetyHints()
+    {
+        // A client's approval policy reads these instead of guessing from a name: `help` and `get` only read (the dispatcher
+        // refuses a mutation on `get`), `do` may destroy and reaches the machine.
+        var hints = typeof(DispatchTools)
+            .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+            .Where(m => m.GetCustomAttribute<McpServerToolAttribute>() is not null)
+            .ToDictionary(
+                m => m.GetCustomAttribute<McpServerToolAttribute>()!.Name!,
+                m => McpServerTool.Create(m, (Func<RequestContext<CallToolRequestParams>, object>)(_ => throw new InvalidOperationException("hints only")))
+                    .ProtocolTool.Annotations);
+
+        Assert.Equal(3, hints.Count);
+        Assert.True(hints["help"] is { ReadOnlyHint: true, OpenWorldHint: false });
+        Assert.True(hints["get"] is { ReadOnlyHint: true, OpenWorldHint: true });
+        Assert.True(hints["do"] is { ReadOnlyHint: false, DestructiveHint: true, IdempotentHint: false, OpenWorldHint: true });
+    }
 
     [Fact]
     public void McpToolCount_IsExact()

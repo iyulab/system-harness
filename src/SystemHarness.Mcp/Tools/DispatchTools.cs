@@ -8,7 +8,11 @@ namespace SystemHarness.Mcp.Tools;
 [McpServerToolType]
 public sealed class DispatchTools(CommandRegistry registry, SafetyGate gate, EmergencyStop emergencyStop)
 {
-    [McpServerTool(Name = "help"), Description(
+    // Safety hints for a client's approval policy. The split is the server's own: `get` refuses a mutation and `do` refuses a
+    // read ("wrong_verb"), so a policy that lets read-only tools through without asking is safe for `help` and `get` by construction.
+    // Both read the machine (screen, windows, files), whose content is outside data, so `get` is open-world; `do` may delete files,
+    // end processes and run shell commands, and a repeat acts again. Finer, per-command gating stays in the server (SafetyGate).
+    [McpServerTool(Name = "help", ReadOnly = true, OpenWorld = false), Description(
         "Discover available commands. " +
         "No arguments: list categories. " +
         "Category name (e.g. 'mouse'): list commands. " +
@@ -35,7 +39,7 @@ public sealed class DispatchTools(CommandRegistry registry, SafetyGate gate, Eme
         return Task.FromResult(registry.FormatCommand(topic));
     }
 
-    [McpServerTool(Name = "do"), Description(
+    [McpServerTool(Name = "do", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = true), Description(
         "Execute a mutation command (mouse/keyboard actions, file writes, process control, etc.)")]
     public async Task<string> DoAsync(
         [Description("Command in dot notation (e.g. 'mouse.click').")] string command,
@@ -56,7 +60,7 @@ public sealed class DispatchTools(CommandRegistry registry, SafetyGate gate, Eme
         return await ExecuteAsync(cmd, @params, ct);
     }
 
-    [McpServerTool(Name = "get"), Description(
+    [McpServerTool(Name = "get", ReadOnly = true, OpenWorld = true), Description(
         "Execute a read-only query (window list, file read, screen capture, etc.)")]
     public async Task<string> GetAsync(
         [Description("Command in dot notation (e.g. 'window.list').")] string command,

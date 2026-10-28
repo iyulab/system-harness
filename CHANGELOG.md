@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- **The MCP server's three tools declare safety hints** in `tools/list`: `help` is read-only and closed-world, `get` is read-only
+  and open-world (it reads the screen, windows and files), `do` is not read-only, may be destructive, is not idempotent and is
+  open-world. A client's approval policy can let `help` and `get` through without asking and ask for `do`; the server already
+  refuses a mutation on `get` (`wrong_verb`), so the split holds. Finer, per-command gating stays in the server's safety gate.
+
 ### Removed
 - **Breaking: `SystemHarness.Apps.Browser` and `SystemHarness.Apps.Email` are no longer published.** Neither is part of the MCP server's
   command surface; they were standalone wrappers over Playwright and MailKit. Their last versions stay on nuget.org, marked deprecated.
