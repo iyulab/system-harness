@@ -10,7 +10,7 @@
     <PackageVersion Include="Vortice.Direct3D11" Version="3.8.3" />
     <PackageVersion Include="Vortice.DXGI" Version="3.8.3" />
     <!-- Image processing -->
-    <PackageVersion Include="SkiaSharp" Version="4.153.1" />
+    <PackageVersion Include="SkiaSharp" Version="4.154.0" />
     <!-- Input hooks (cross-platform) -->
     <PackageVersion Include="SharpHook" Version="8.0.1" />
     <!-- DI -->
@@ -36,7 +36,7 @@
     <!-- Testing (xUnit v3 / Microsoft.Testing.Platform) -->
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
-    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.5.1" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.HangDump" Version="2.5.2" />
     <PackageVersion Include="ChildProcessGuard" Version="1.4.0" />
     <PackageVersion Include="Iyu.Conventions.Testing" Version="0.13.0" />
   </ItemGroup>
