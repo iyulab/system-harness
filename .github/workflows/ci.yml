@@ -16,10 +16,19 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Nothing by default; every job below asks for what it needs.
+permissions: {}
+
+# The push to nuget.org is not made here. The `pack` job builds and packs, uploads the packages as an artifact and the `publish` job asks the
+# organization's central publisher (iyulab/nuget-publish) to push them; that repository holds the only trusted-publishing policy
+# and checks this repository, this workflow file and the package ids against an allowlist. No NuGet credential lives here.
+# The pack, publish and release jobs never run on a pull request (the central publisher refuses such a run).
 jobs:
   build-and-test:
     runs-on: windows-latest
     timeout-minutes: 20
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
 
@@ -46,14 +55,16 @@ jobs:
           & "tests/SystemHarness.Tests/bin/Debug/net10.0-windows10.0.19041.0/SystemHarness.Tests.exe" -trait "Category=CI" -result-trx results.trx -longRunning 300
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-
-  release:
+  pack:
     needs: build-and-test
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event.inputs.release == 'true')
     runs-on: windows-latest
     timeout-minutes: 20
     permissions:
-      contents: write
+      contents: read
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      publish: ${{ steps.check.outputs.changed }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -98,12 +109,17 @@ jobs:
         if: steps.check.outputs.changed == 'true'
         run: Get-ChildItem nupkgs/ -Recurse
 
-      - name: Push to NuGet.org
+      # Only .nupkg and .snupkg files: the central publisher refuses an artifact that holds anything else.
+      - name: Upload packages
         if: steps.check.outputs.changed == 'true'
-        run: |
-          foreach ($pkg in Get-ChildItem nupkgs/*.nupkg) {
-            dotnet nuget push $pkg.FullName --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
-          }
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuget-packages
+          path: |
+            nupkgs/*.nupkg
+            nupkgs/*.snupkg
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Publish MCP server
         if: steps.check.outputs.changed == 'true'
@@ -120,10 +136,44 @@ jobs:
         if: steps.check.outputs.changed == 'true'
         run: Compress-Archive -Path publish/* -DestinationPath system-harness-mcp-win-x64.zip
 
+      # The archive goes to the release job as its own artifact: the NuGet artifact above may hold packages only.
+      - name: Upload release archive
+        if: steps.check.outputs.changed == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: mcp-server-archive
+          path: system-harness-mcp-win-x64.zip
+          if-no-files-found: error
+          retention-days: 1
+
+  # Asks the central publisher to push the packages and waits for its answer: this job succeeds only when they are on nuget.org.
+  # Until the repository is on the publisher's allowlist the call is refused and the jobs after it do not run.
+  publish:
+    needs: pack
+    if: ${{ needs.pack.outputs.publish == 'true' }}
+    uses: iyulab/nuget-publish/.github/workflows/request.yml@2166748abf716fb58855228f65fc6b8f78c2780f # main
+    permissions: {}
+    secrets: inherit
+
+  # The tag and the GitHub release exist only for a version that reached nuget.org.
+  release:
+    needs: [pack, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download release archive
+        uses: actions/download-artifact@v8
+        with:
+          name: mcp-server-archive
+          path: .
+
       # Release notes = this version's CHANGELOG.md section. Every iyulab publish workflow carries this awk program
       # verbatim; change it in all of them or in none.
       - name: Release notes (this version's CHANGELOG section)
-        if: steps.check.outputs.changed == 'true'
         shell: bash
         run: |
           VERSION=$(grep -oP '<(Version|VersionPrefix)>\K[^<]+' Directory.Build.props | head -1)
@@ -131,10 +181,9 @@ jobs:
           if [ ! -s release-notes.md ]; then echo "::error::CHANGELOG.md has no section for $VERSION"; exit 1; fi
 
       - name: GitHub Release
-        if: steps.check.outputs.changed == 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.check.outputs.version }}
+          tag_name: v${{ needs.pack.outputs.version }}
           body_path: release-notes.md
-          name: v${{ steps.check.outputs.version }}
+          name: v${{ needs.pack.outputs.version }}
           files: system-harness-mcp-win-x64.zip
