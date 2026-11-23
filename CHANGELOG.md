@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.30.0] - 2026-11-23
 
 ### Added
 - **The MCP server's three tools declare safety hints** in `tools/list`: `help` is read-only and closed-world, `get` is read-only
